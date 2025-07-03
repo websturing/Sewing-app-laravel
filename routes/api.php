@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Request;
 
 
 Route::prefix('auth')
-    ->middleware('auth:sanctum')
+    ->middleware('web')
     ->name('auth.api.')
     ->group(
         function () {
