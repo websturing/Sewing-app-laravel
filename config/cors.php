@@ -24,21 +24,14 @@ return [
 
     // IZINKAN HANYA frontend Vue-mu
     'allowed_origins' => [
-        'http://vueapp-dev.localhost',
+        'https://vue.starter.localhost',
     ],
 
     // Tidak perlu pakai pattern, kecuali kamu pakai regex
     'allowed_origins_patterns' => [],
 
     // Header yang boleh dikirim dari frontend
-    'allowed_headers' => [
-        'Origin',
-        'Content-Type',
-        'Accept',
-        'Authorization',
-        'X-Requested-With',
-        'X-XSRF-TOKEN',
-    ],
+    'allowed_headers' => ['*'],
 
     // Header yang boleh diekspos ke frontend (opsional)
     'exposed_headers' => [],
