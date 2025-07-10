@@ -1,21 +1,30 @@
 #!/bin/bash
 
-read -p "Masukkan nama module (Contoh: Roles): " module
+read -p "Masukkan nama module (Contoh: RoleManagement, role management): " raw_module
 
-# Capitalize & lowercase
-ModuleName="$(tr '[:lower:]' '[:upper:]' <<< ${module:0:1})${module:1}"
-LowerName="$(tr '[:upper:]' '[:lower:]' <<< ${module:0:1})${module:1}"
+# =========== Normalisasi Nama ===========
+# 1. Hapus karakter non-alfanumerik, ubah ke lowercase dengan dash
+slug_name=$(echo "$raw_module" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/_/g')
 
-# Paths
-repo_path="app/Repositories/$ModuleName"
-service_path="app/Services/$ModuleName"
+# 2. PascalCase untuk class dan file
+ModuleName=$(echo "$slug_name" | sed -E 's/(^|_)([a-z])/\U\2/g')
+
+# 3. camelCase untuk variabel
+LowerName=$(echo "$ModuleName" | sed -E 's/^([A-Z])/\L\1/')
+
+# 4. lowercase folder
+folder_name="$slug_name"
+
+# === Paths ===
+repo_path="app/Repositories/$folder_name"
+service_path="app/Services/$folder_name"
 repo_provider="app/Providers/RepositoryServiceProvider.php"
 service_provider="app/Providers/ServiceServiceProvider.php"
 
 mkdir -p "$repo_path"
 mkdir -p "$service_path"
 
-# === Create Repository Files
+# === Repository Interface ===
 cat > "$repo_path/${ModuleName}RepositoryInterface.php" <<EOL
 <?php
 
@@ -27,6 +36,7 @@ interface ${ModuleName}RepositoryInterface
 }
 EOL
 
+# === Repository Implementation ===
 cat > "$repo_path/${ModuleName}Repository.php" <<EOL
 <?php
 
@@ -43,7 +53,7 @@ class ${ModuleName}Repository implements ${ModuleName}RepositoryInterface
 }
 EOL
 
-# === Create Service Files
+# === Service Interface ===
 cat > "$service_path/${ModuleName}ServiceInterface.php" <<EOL
 <?php
 
@@ -55,6 +65,7 @@ interface ${ModuleName}ServiceInterface
 }
 EOL
 
+# === Service Implementation ===
 cat > "$service_path/${ModuleName}Service.php" <<EOL
 <?php
 
@@ -65,11 +76,11 @@ use App\Repositories\\$ModuleName\\${ModuleName}RepositoryInterface;
 
 class ${ModuleName}Service implements ${ModuleName}ServiceInterface
 {
-    protected \${$LowerName}Repository;
+    protected \$$LowerName"Repository;
 
-    public function __construct(${ModuleName}RepositoryInterface \${$LowerName}Repository)
+    public function __construct(${ModuleName}RepositoryInterface \$$LowerName"Repository)
     {
-        \$this->{$LowerName}Repository = \${$LowerName}Repository;
+        \$this->{$LowerName}Repository = \$$LowerName"Repository;
     }
 
     public function getAll${ModuleName}()
@@ -79,7 +90,7 @@ class ${ModuleName}Service implements ${ModuleName}ServiceInterface
 }
 EOL
 
-# === Fungsi inject binding di bawah "// AUTO-BINDINGS BELOW"
+# === Helper: Inject Binding ===
 inject_binding_block() {
     local file="$1"
     local line="$2"
@@ -101,7 +112,7 @@ inject_binding_block() {
     fi
 }
 
-# === Tambahkan komentar jika belum ada
+# === Helper: Tambahkan AUTO-BINDINGS jika belum ada
 ensure_autobind_block() {
     local file="$1"
     if ! grep -q "// AUTO-BINDINGS BELOW" "$file"; then
@@ -126,4 +137,4 @@ inject_binding_block "$repo_provider" "// AUTO-BINDINGS BELOW" "        \$this->
 ensure_autobind_block "$service_provider"
 inject_binding_block "$service_provider" "// AUTO-BINDINGS BELOW" "        \$this->app->bind(\\App\\Services\\${ModuleName}\\${ModuleName}ServiceInterface::class, \\App\\Services\\${ModuleName}\\${ModuleName}Service::class);"
 
-echo "🎉 Module '$ModuleName' selesai dibuat!"
+echo "🎉 Modul '$ModuleName' berhasil dibuat di folder '$folder_name'!"

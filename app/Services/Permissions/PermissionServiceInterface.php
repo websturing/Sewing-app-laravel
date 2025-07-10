@@ -15,4 +15,6 @@ class PermisssionService implements PermissionServiceInterface
     {
         return $this->PermissionRepository->all();
     }
+
+    public function getPermission() {}
 }
