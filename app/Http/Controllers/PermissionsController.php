@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\Permissions\PermissionService;
 use Illuminate\Http\Request;
 use App\Models\Module;
+use App\Models\ModulePermission;
 
 class PermissionsController extends Controller
 {
@@ -18,18 +19,6 @@ class PermissionsController extends Controller
     function menu(Request $request)
     {
         $user = $request->user();
-
-        return $permissions = $user->getAllPermissions()->pluck('name');
-
-        return Module::with(['permissions' => function ($query) use ($permissions) {
-            $query->whereIn('permission_name', $permissions)
-                ->where('action', 'view');
-        }])
-            ->whereHas('permissions', function ($query) use ($permissions) {
-                $query->whereIn('permission_name', $permissions)
-                    ->where('action', 'view');
-            })
-            ->get();
 
         $menus = $this->permissionService->getStructuredMenuForUser($user);
         return response()->json($menus);
