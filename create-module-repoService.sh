@@ -76,19 +76,21 @@ use App\Repositories\\$ModuleName\\${ModuleName}RepositoryInterface;
 
 class ${ModuleName}Service implements ${ModuleName}ServiceInterface
 {
-    protected \$$LowerName"Repository;
+    protected \$${LowerName}Repository;
 
-    public function __construct(${ModuleName}RepositoryInterface \$$LowerName"Repository)
+    public function __construct(${ModuleName}RepositoryInterface \$${LowerName}Repository)
     {
-        \$this->{$LowerName}Repository = \$$LowerName"Repository;
+        \$this->${LowerName}Repository = \$${LowerName}Repository;
     }
 
     public function getAll${ModuleName}()
     {
-        return \$this->{$LowerName}Repository->all();
+        return \$this->${LowerName}Repository->all();
     }
 }
 EOL
+
+
 
 # === Helper: Inject Binding ===
 inject_binding_block() {
