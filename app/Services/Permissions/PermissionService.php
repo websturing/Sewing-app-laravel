@@ -5,7 +5,7 @@ namespace App\Services\Permissions;
 use App\Repositories\Permissions\PermissionRepositoryInterface;
 use App\Services\Permissions\PermissionServiceInterface;
 
-class PermisssionService implements PermissionServiceInterface
+class PermissionService implements PermissionServiceInterface
 {
     public function __construct(
         protected PermissionRepositoryInterface $permissionRepository

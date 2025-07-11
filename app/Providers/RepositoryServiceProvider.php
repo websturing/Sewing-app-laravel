@@ -12,7 +12,6 @@ class RepositoryServiceProvider extends ServiceProvider
     {
         // AUTO-BINDINGS BELOW (DO NOT REMOVE)
         $this->app->bind(\App\Repositories\Role\RoleRepositoryInterface::class, \App\Repositories\Role\RoleRepository::class);
-        $this->app->bind(\App\Repositories\Role\RoleRepositoryInterface::class, \App\Repositories\Role\RoleRepository::class);
 
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
     }
