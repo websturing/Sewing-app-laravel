@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Permissions\PermisssionService;
 use Illuminate\Http\Request;
 
 class PermissionsController extends Controller
 {
+    protected $permissionService;
+
+    public function __construct(PermisssionService $permissionService)
+    {
+        $this->permissionService = $permissionService;
+    }
+
     function menu(Request $request)
     {
-        // Get the authenticated user
         $user = $request->user();
 
-        // Get the user's permissions
-        $permissions = $user->getAllPermissions()->pluck('name');
-
-        // Return the permissions as a JSON response
-        return response()->json([
-            'status' => 200,
-            'message' => 'Permissions retrieved successfully',
-            'data' => $permissions,
-        ]);
+        $menus = $this->permissionService->getStructuredMenuForUser($user);
+        return response()->json($menus);
     }
 }
