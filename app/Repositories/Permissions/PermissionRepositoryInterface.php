@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Permissions;
 
+use Illuminate\Support\Collection;
+
 interface PermissionRepositoryInterface
 {
     public function all();
-    public function getUserModulesWithPermissions($user);
+    public function getAllModulesWithPermissions(): Collection;
 }
