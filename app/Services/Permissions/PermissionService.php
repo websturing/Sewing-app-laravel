@@ -55,4 +55,10 @@ class PermissionService implements PermissionServiceInterface
             ];
         })->filter()->values();
     }
+
+    /** MODULE PERMISSION */
+    public function getModulePermission(): Collection
+    {
+        return $this->permissionRepository->getModulePermission();
+    }
 }

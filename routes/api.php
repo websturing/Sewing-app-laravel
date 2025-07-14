@@ -19,6 +19,7 @@ Route::prefix('permissions')
     ->middleware(['web'])
     ->group(function () {
         Route::get('/menu', [PermissionsController::class, 'menu']);
+        Route::get('/', [PermissionsController::class, 'allPermissions']);
     });
 
 

@@ -19,4 +19,23 @@ class PermissionRepository implements PermissionRepositoryInterface
     {
         return Module::with('permissions')->get();
     }
+
+    public function getModulePermission(): Collection
+    {
+        return Module::with('permissions')
+            ->get()
+            ->map(function ($module) {
+                return [
+                    'id' => $module->id,
+                    'name' => $module->name,
+                    'slug' => $module->slug,
+                    'permissions' => $module->permissions->map(function ($permission) {
+                        return [
+                            'action' => $permission->action,
+                            'permission_name' => $permission->permission_name,
+                        ];
+                    }),
+                ];
+            });
+    }
 }

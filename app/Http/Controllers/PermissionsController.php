@@ -25,7 +25,7 @@ class PermissionsController extends Controller
 
     function allPermissions()
     {
-        $permissions = $this->permissionService->getAllPermissions();
+        $permissions = $this->permissionService->getModulePermission();
         return response()->json($permissions);
     }
 }
