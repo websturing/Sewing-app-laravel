@@ -12,7 +12,7 @@ class PermissionService implements PermissionServiceInterface
         protected PermissionRepositoryInterface $permissionRepository
     ) {}
 
-    public function getAllPermissions()
+    public function getAllPermissions(): Collection
     {
         return $this->permissionRepository->all();
     }

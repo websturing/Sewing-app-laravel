@@ -6,6 +6,6 @@ use Illuminate\Support\Collection;
 
 interface PermissionRepositoryInterface
 {
-    public function all();
+    public function all(): Collection;
     public function getAllModulesWithPermissions(): Collection;
 }

@@ -22,4 +22,10 @@ class PermissionsController extends Controller
         $menus = $this->permissionService->getStructuredMenuForUser($user);
         return response()->json($menus);
     }
+
+    function allPermissions()
+    {
+        $permissions = $this->permissionService->getAllPermissions();
+        return response()->json($permissions);
+    }
 }

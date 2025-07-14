@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 
 class PermissionRepository implements PermissionRepositoryInterface
 {
-    public function all()
+    public function all(): Collection
     {
         return Permission::all();
     }
