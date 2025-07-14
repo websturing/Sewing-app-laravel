@@ -19,15 +19,6 @@ class PermissionsController extends Controller
     function menu(Request $request)
     {
         $user = $request->user();
-        $permissions = $user->getAllPermissions()->pluck('name');
-        $modules = Module::with(['permissions' => function ($query) use ($permissions) {
-            $query->whereIn('permission_name', $permissions);
-        }])
-            ->whereHas('permissions', function ($query) use ($permissions) {
-                $query->whereIn('permission_name', $permissions);
-            })
-            ->get();
-
         $menus = $this->permissionService->getStructuredMenuForUser($user);
         return response()->json($menus);
     }
