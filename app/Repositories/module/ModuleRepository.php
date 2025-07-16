@@ -20,7 +20,7 @@ class ModuleRepository implements ModuleRepositoryInterface
     {
         $module = Module::findOrFail($id);
         $module->update($data);
-        return $data;
+        return $module;
     }
 
     public function updateOrCreate(array $data)

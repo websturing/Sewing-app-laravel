@@ -75,7 +75,7 @@ class ModuleController extends Controller
 
         try {
             // Gunakan service yang sudah di-inject via constructor
-            $module = $this->moduleService->updateModule($id, $validated);
+            $module = $this->moduleService->updateModuleWithPermissions($id, $validated);
 
             return response()->json([
                 'success' => true,

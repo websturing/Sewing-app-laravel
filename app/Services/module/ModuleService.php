@@ -50,9 +50,12 @@ class ModuleService implements ModuleServiceInterface
     }
 
     /** UPDATE DATA */
-    public function updateModule(int $id, array $data)
+    public function updateModuleWithPermissions(int $id, array $data)
     {
-        return $this->moduleRepository->update($id, $data);
+        $module =  $this->moduleRepository->update($id, $data);
+        $permissions = $this->generateDefaultPermissions($module->slug, $module);
+        $this->modulePermissionRepository->bulkUpdate($id, $permissions);
+        return $module;
     }
 
 
