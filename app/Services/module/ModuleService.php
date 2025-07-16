@@ -7,7 +7,6 @@ use App\Services\module\ModuleServiceInterface;
 use App\Repositories\module\ModuleRepositoryInterface;
 use App\Repositories\modulepermission\ModulepermissionRepositoryInterface;
 use App\Enums\PermissionType;
-use App\Http\Resources\ModuleResources;
 
 class ModuleService implements ModuleServiceInterface
 {
@@ -24,8 +23,7 @@ class ModuleService implements ModuleServiceInterface
 
     public function getAllModule()
     {
-        $data = $this->moduleRepository->all();
-        return ModuleResources::collection($data);
+        return $this->moduleRepository->all();
     }
 
     public function updateOrCreateModule(array $data)
@@ -33,11 +31,11 @@ class ModuleService implements ModuleServiceInterface
         return $this->moduleRepository->updateOrCreate($data);
     }
 
+    /** CREATE DATA */
     public function createModule(array $data)
     {
         return $this->moduleRepository->create($data);
     }
-
     public function createModuleWithPermissions(array $moduleData)
     {
         // 1. Buat Module
@@ -51,11 +49,18 @@ class ModuleService implements ModuleServiceInterface
         return $module;
     }
 
+    /** UPDATE DATA */
+    public function updateModule(int $id, array $data)
+    {
+        return $this->moduleRepository->update($id, $data);
+    }
+
+
+    /** DELETE DATA */
     public function deleteModule(int $id)
     {
         return $this->moduleRepository->delete($id);
     }
-
 
     private function generateDefaultPermissions(string $moduleSlug, Module $module): array
     {

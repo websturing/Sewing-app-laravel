@@ -16,6 +16,13 @@ class ModuleRepository implements ModuleRepositoryInterface
         return Module::create($data);
     }
 
+    public function update(int $id, array $data)
+    {
+        $module = Module::findOrFail($id);
+        $module->update($data);
+        return $data;
+    }
+
     public function updateOrCreate(array $data)
     {
         return Module::updateOrCreate(

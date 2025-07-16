@@ -22,6 +22,7 @@ Route::prefix('module')
         Route::get('/', [ModuleController::class, 'index']);
 
         Route::post('/', [ModuleController::class, 'store']);
+        Route::post('/{id}', [ModuleController::class, 'update']);
         Route::delete('/{id}', [ModuleController::class, 'delete']);
     });
 
