@@ -11,6 +11,8 @@ class ServiceServiceProvider extends ServiceProvider
     public function register()
     {
         // AUTO-BINDINGS BELOW
+        $this->app->bind(\App\Services\Modulepermission\ModulepermissionServiceInterface::class, \App\Services\Modulepermission\ModulepermissionService::class);
+        $this->app->bind(\App\Services\Module\ModuleServiceInterface::class, \App\Services\Module\ModuleService::class);
         $this->app->bind(\App\Services\Role\RoleServiceInterface::class, \App\Services\Role\RoleService::class);
 
         $this->app->bind(PermissionServiceInterface::class, PermissionService::class);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -13,6 +14,12 @@ Route::prefix('auth')
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
+    });
+
+Route::prefix('module')
+    ->middleware(['web'])
+    ->group(function () {
+        Route::post('/', [ModuleController::class, 'store']);
     });
 
 Route::prefix('permissions')
