@@ -49,6 +49,12 @@ class ModuleService implements ModuleServiceInterface
         return $module;
     }
 
+    public function deleteModule(int $id)
+    {
+        return $this->moduleRepository->delete($id);
+    }
+
+
     private function generateDefaultPermissions(string $moduleSlug, Module $module): array
     {
         return collect(PermissionType::defaultPermissions())

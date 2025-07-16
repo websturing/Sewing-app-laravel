@@ -44,4 +44,32 @@ class ModuleController extends Controller
             ], 500);
         }
     }
+
+    public function delete(Request $request, int $id)
+    {
+        try {
+            $deleted = $this->moduleService->deleteModule($id);
+
+            if ($deleted) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Module deleted successfully'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Module not found or could not be deleted'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('Module deletion failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' =>  $e->getMessage()
+            ], 500);
+        }
+    }
 }

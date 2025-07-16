@@ -20,6 +20,7 @@ Route::prefix('module')
     ->middleware(['web'])
     ->group(function () {
         Route::post('/', [ModuleController::class, 'store'])->middleware('auth:sanctum');
+        Route::delete('/{id}', [ModuleController::class, 'delete'])->middleware('auth:sanctum');
     });
 
 Route::prefix('permissions')

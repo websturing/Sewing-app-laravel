@@ -25,4 +25,13 @@ class ModuleRepository implements ModuleRepositoryInterface
             $data
         );
     }
+
+    public function delete(int $id)
+    {
+        $module = Module::find($id);
+        if ($module) {
+            return $module->delete();
+        }
+        return false;
+    }
 }
