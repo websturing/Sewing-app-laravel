@@ -7,6 +7,7 @@ use App\Services\module\ModuleServiceInterface;
 use App\Repositories\module\ModuleRepositoryInterface;
 use App\Repositories\modulepermission\ModulepermissionRepositoryInterface;
 use App\Enums\PermissionType;
+use App\Http\Resources\ModuleResources;
 
 class ModuleService implements ModuleServiceInterface
 {
@@ -23,7 +24,8 @@ class ModuleService implements ModuleServiceInterface
 
     public function getAllModule()
     {
-        return $this->moduleRepository->all();
+        $data = $this->moduleRepository->all();
+        return ModuleResources::collection($data);
     }
 
     public function updateOrCreateModule(array $data)

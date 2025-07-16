@@ -17,10 +17,12 @@ Route::prefix('auth')
     });
 
 Route::prefix('module')
-    ->middleware(['web'])
+    ->middleware(['web', 'auth:sanctum'])
     ->group(function () {
-        Route::post('/', [ModuleController::class, 'store'])->middleware('auth:sanctum');
-        Route::delete('/{id}', [ModuleController::class, 'delete'])->middleware('auth:sanctum');
+        Route::get('/', [ModuleController::class, 'index']);
+
+        Route::post('/', [ModuleController::class, 'store']);
+        Route::delete('/{id}', [ModuleController::class, 'delete']);
     });
 
 Route::prefix('permissions')

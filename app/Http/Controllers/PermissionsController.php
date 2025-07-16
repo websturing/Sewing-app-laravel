@@ -32,7 +32,7 @@ class PermissionsController extends Controller
             return successResponse($permissions);
         } catch (\Throwable $e) {
             // logger()->error($e);
-            return errorResponse('Gagal ambil permissions', 500, [
+            return errorResponse('Failed to Retrieve Permissions', 500, [
                 'exception' => app()->environment('production') ? null : $e->getMessage(),
             ]);
         }

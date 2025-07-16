@@ -14,6 +14,23 @@ class ModuleController extends Controller
         private ModuleServiceInterface $moduleService // Dependency Injection
     ) {}
 
+
+    public function index()
+    {
+        try {
+            $modules = $this->moduleService->getAllModule();
+            return successResponse($modules);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch modules: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Retrieve Module', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
+
     public function store(Request $request)
     {
 
