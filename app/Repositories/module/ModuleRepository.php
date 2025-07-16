@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Module;
+namespace App\Repositories\module;
 
 use App\Models\Module;
 

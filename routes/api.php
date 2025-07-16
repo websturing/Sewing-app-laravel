@@ -19,7 +19,7 @@ Route::prefix('auth')
 Route::prefix('module')
     ->middleware(['web'])
     ->group(function () {
-        Route::post('/', [ModuleController::class, 'store']);
+        Route::post('/', [ModuleController::class, 'store'])->middleware('auth:sanctum');
     });
 
 Route::prefix('permissions')

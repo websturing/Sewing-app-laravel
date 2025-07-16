@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services\Modulepermission;
+namespace App\Services\modulepermission;
 
-use App\Services\Modulepermission\ModulepermissionServiceInterface;
-use App\Repositories\Modulepermission\ModulepermissionRepositoryInterface;
+use App\Services\modulepermission\ModulepermissionServiceInterface;
+use App\Repositories\modulepermission\ModulepermissionRepositoryInterface;
 
 class ModulepermissionService implements ModulepermissionServiceInterface
 {

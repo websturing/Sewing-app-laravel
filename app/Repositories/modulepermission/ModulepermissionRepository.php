@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repositories\Modulepermission;
+namespace App\Repositories\modulepermission;
 
-use App\Models\Modulepermission;
+use App\Models\ModulePermission;
 
 class ModulepermissionRepository implements ModulepermissionRepositoryInterface
 {

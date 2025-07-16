@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Modulepermission;
+namespace App\Repositories\modulepermission;
 
 interface ModulepermissionRepositoryInterface
 {

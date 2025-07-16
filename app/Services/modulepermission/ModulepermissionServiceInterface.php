@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Modulepermission;
+namespace App\Services\modulepermission;
 
 interface ModulepermissionServiceInterface
 {
