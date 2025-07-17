@@ -21,6 +21,7 @@ Route::prefix('module')
     ->middleware(['web', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [ModuleController::class, 'index']);
+        Route::get('/withpermissions', [ModuleController::class, 'getModuleWithPermissions']);
 
         Route::post('/', [ModuleController::class, 'store']);
         Route::post('/{id}', [ModuleController::class, 'update']);

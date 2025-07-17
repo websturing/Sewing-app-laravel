@@ -8,6 +8,7 @@ use App\Repositories\module\ModuleRepositoryInterface;
 use App\Repositories\modulepermission\ModulepermissionRepositoryInterface;
 use App\Enums\PermissionType;
 use App\Http\Resources\ModuleResources;
+use App\Http\Resources\ModuleWithPermissionsResource;
 use Illuminate\Support\Facades\Artisan;
 
 class ModuleService implements ModuleServiceInterface
@@ -27,6 +28,12 @@ class ModuleService implements ModuleServiceInterface
     {
         $module =  $this->moduleRepository->all();
         return ModuleResources::collection($module);
+    }
+
+    public function getModuleWithPermissions()
+    {
+        $module = $this->moduleRepository->moduleWithPermissions();
+        return ModuleWithPermissionsResource::collection($module);
     }
 
     public function updateOrCreateModule(array $data)

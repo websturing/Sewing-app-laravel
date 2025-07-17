@@ -31,6 +31,22 @@ class ModuleController extends Controller
         }
     }
 
+    public function getModuleWithPermissions()
+    {
+        try {
+            $modules = $this->moduleService->getModuleWithPermissions();
+            return successResponse($modules);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch modules: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Retrieve Module', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
+
     public function store(Request $request)
     {
 

@@ -12,6 +12,13 @@ class ModuleRepository implements ModuleRepositoryInterface
             ->orderBy('name', 'asc')->get();
     }
 
+    public function moduleWithPermissions()
+    {
+        return Module::with(['permissions'])
+            ->where('parent_id', null)
+            ->orderBy('name', 'asc')->get();
+    }
+
     public function create(array $data)
     {
         return Module::create($data);
