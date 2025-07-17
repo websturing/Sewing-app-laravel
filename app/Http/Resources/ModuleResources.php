@@ -19,6 +19,12 @@ class ModuleResources extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'parent_id' => $this->parent_id,
+            'parent' => $this->whenLoaded('parent', function () {
+                return $this->name;
+            }),
+            'children' => $this->whenLoaded('children', function () {
+                return self::collection($this->children);
+            }),
         ];
     }
 }
