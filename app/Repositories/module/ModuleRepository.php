@@ -8,7 +8,8 @@ class ModuleRepository implements ModuleRepositoryInterface
 {
     public function all()
     {
-        return Module::orderBy('name', 'asc')->get();
+        return Module::with(['parent', 'children'])
+            ->orderBy('name', 'asc')->get();
     }
 
     public function create(array $data)

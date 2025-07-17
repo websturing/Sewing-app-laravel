@@ -67,8 +67,8 @@ class ModuleController extends Controller
     {
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:modules,name',
-            'slug' => 'required|string|max:255|unique:modules,slug',
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255',
             'parent_id' => 'nullable|integer'
         ]);
 
