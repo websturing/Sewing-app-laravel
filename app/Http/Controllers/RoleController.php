@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Role;
+use App\Services\Role\RoleServiceInterface;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class RoleController extends Controller
+{
+
+    public function __construct(
+        private RoleServiceInterface $roleService
+    ) {}
+
+
+    public function index()
+    {
+        try {
+            $roles = $this->roleService->getAllRole();
+            return successResponse($roles);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch roles: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Retrieve Module', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
+    public function createRole(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:roles,name',
+            'guard_name' => 'nullable|string',
+        ]);
+        try {
+            $roles = $this->roleService->createRole($validated);
+            return successResponse($roles);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch roles: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Retrieve Role', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function deleteRole(Request $request, int $id)
+    {
+        try {
+            $deleted = $this->roleService->deleteRole($id);
+
+            if ($deleted) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Role deleted successfully'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Role not found or could not be deleted'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('Module deletion failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' =>  $e->getMessage()
+            ], 500);
+        }
+    }
+}

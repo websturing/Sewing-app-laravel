@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Models\Setting;
@@ -25,6 +26,19 @@ Route::prefix('module')
         Route::post('/{id}', [ModuleController::class, 'update']);
         Route::delete('/{id}', [ModuleController::class, 'delete']);
     });
+
+Route::prefix('roles')
+    ->middleware(['web', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [RoleController::class, 'index']);
+
+        Route::post('/', [RoleController::class, 'createRole']);
+        Route::post('/{id}', [RoleController::class, 'updateRole']);
+        Route::delete('/{id}', [RoleController::class, 'deleteRole']);
+    });
+
+
+
 
 Route::prefix('permissions')
     ->middleware(['web'])

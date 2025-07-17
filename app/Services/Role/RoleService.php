@@ -18,4 +18,14 @@ class RoleService implements RoleServiceInterface
     {
         return $this->roleRepository->all();
     }
+
+    public function createRole(array $data)
+    {
+        return $this->roleRepository->create($data);
+    }
+
+    public function deleteRole(int $id)
+    {
+        return $this->roleRepository->delete($id);
+    }
 }

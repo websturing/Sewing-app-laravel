@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Repositories\Role;
+
+use App\Models\Role;
+
+class RoleRepository implements RoleRepositoryInterface
+{
+    public function all()
+    {
+        return Role::all();
+    }
+
+    public function create(array $data)
+    {
+        return Role::create($data);
+    }
+    public function delete(int $id)
+    {
+        $data = Role::find($id);
+        if ($data) {
+            return $data->delete();
+        }
+        return false;
+    }
+}
