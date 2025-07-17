@@ -15,10 +15,15 @@ class ModuleWithPermissionsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'   => $this->id,
+            'key'   => $this->id,
             'name' => $this->name,
-            'permissions' => ModulePermissionsResources::collection($this->permissions),
-            'children' => ModuleWithPermissionsResource::collection($this->children),
+            'permissions' => ModulePermissionsResources::collection(
+                $this->permissions->sortBy(function ($permission) {
+                    $order = ['read', 'create', 'update', 'delete', 'upload', 'download'];
+                    return array_search($permission->action, $order);
+                })
+            ),
+            'children' => self::collection($this->children),
         ];
     }
 }
