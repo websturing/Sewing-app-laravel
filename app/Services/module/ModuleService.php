@@ -8,6 +8,7 @@ use App\Repositories\module\ModuleRepositoryInterface;
 use App\Repositories\modulepermission\ModulepermissionRepositoryInterface;
 use App\Enums\PermissionType;
 use App\Http\Resources\ModuleResources;
+use Illuminate\Support\Facades\Artisan;
 
 class ModuleService implements ModuleServiceInterface
 {
@@ -48,6 +49,9 @@ class ModuleService implements ModuleServiceInterface
 
         // 3. Bulk insert permissions
         $this->modulePermissionRepository->bulkCreate($permissions);
+
+        // 4. sync ini spatie Permissions
+        Artisan::call('permissions:sync-from-db');
         return $module;
     }
 
@@ -64,7 +68,11 @@ class ModuleService implements ModuleServiceInterface
     /** DELETE DATA */
     public function deleteModule(int $id)
     {
-        return $this->moduleRepository->delete($id);
+
+        $data =  $this->moduleRepository->delete($id);
+        // 1. sync ini spatie Permissions
+        Artisan::call('permissions:sync-from-db');
+        return $data;
     }
 
     private function generateDefaultPermissions(string $moduleSlug, Module $module): array

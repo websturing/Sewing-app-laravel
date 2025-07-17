@@ -10,44 +10,51 @@ use Spatie\Permission\Models\Role;
 class SyncModulePermissions extends Command
 {
     protected $signature = 'permissions:sync-from-db';
-    protected $description = 'Sync permissions from module_permissions table to Spatie permissions table and assign them to roles';
+    protected $description = 'Sync permissions from module_permissions table to Spatie permissions table';
 
     public function handle()
     {
         $this->info('🔁 Starting permission sync from `module_permissions` table...');
 
         $modulePermissions = ModulePermission::all();
-        $roleName = 'admin'; // You can later make this dynamic
-
-        $role = Role::firstOrCreate(['name' => $roleName]);
         $syncedCount = 0;
-        $assignedCount = 0;
+        $deletedCount = 0;
 
-        foreach ($modulePermissions as $modulePerm) {
-            $permName = $modulePerm->permission_name;
+        // Ambil semua nama permission dari module_permissions
+        $modulePermissionNames = $modulePermissions->pluck('permission_name')->toArray();
 
-            // Sync to Spatie permissions
-            $permission = Permission::firstOrCreate(['name' => $permName]);
+        // Sync permission ke Spatie
+        foreach ($modulePermissionNames as $permName) {
+            $permission = Permission::firstOrCreate(
+                ['name' => $permName],
+                ['guard_name' => 'web']
+            );
+
             if ($permission->wasRecentlyCreated) {
                 $this->line("✅ Created permission: $permName");
                 $syncedCount++;
             } else {
                 $this->line("⚠️  Already exists: $permName");
             }
+        }
 
-            // Assign to role
-            if (!$role->hasPermissionTo($permName)) {
-                $role->givePermissionTo($permName);
-                $this->line("🔗 Assigned [$permName] to [$roleName] role");
-                $assignedCount++;
-            } else {
-                $this->line("⚠️  Role already has: $permName");
+        // Hapus permission dari Spatie jika tidak ada di module_permissions
+        $spatiePermissions = Permission::pluck('name')->toArray();
+        $permissionsToDelete = array_diff($spatiePermissions, $modulePermissionNames);
+
+        foreach ($permissionsToDelete as $obsoletePerm) {
+            $permission = Permission::where('name', $obsoletePerm)->first();
+
+            if ($permission) {
+                $permission->delete();
+                $this->line("🗑️  Deleted obsolete permission: $obsoletePerm");
+                $deletedCount++;
             }
         }
 
         $this->info("✅ Sync complete.");
         $this->info("→ New permissions created: $syncedCount");
-        $this->info("→ Permissions assigned to [$roleName]: $assignedCount");
+        $this->info("→ Obsolete permissions deleted: $deletedCount");
 
         return 0;
     }
