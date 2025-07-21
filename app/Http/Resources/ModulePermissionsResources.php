@@ -15,7 +15,7 @@ class ModulePermissionsResources extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "key" => $this->id,
+            "id" => $this->id,
             "name" => $this->permission_name,
             "action" => $this->action
         ];

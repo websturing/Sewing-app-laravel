@@ -15,7 +15,7 @@ class ModuleWithPermissionsResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'key'   => $this->id,
+            'id'   => $this->id,
             'name' => $this->name,
             'permissions' => ModulePermissionsResources::collection(
                 $this->permissions->sortBy(function ($permission) {
