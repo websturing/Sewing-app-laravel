@@ -11,6 +11,7 @@ class RepositoryServiceProvider extends ServiceProvider
     public function register()
     {
         // AUTO-BINDINGS BELOW (DO NOT REMOVE)
+        $this->app->bind(\App\Repositories\Rolepermission\RolepermissionRepositoryInterface::class, \App\Repositories\Rolepermission\RolepermissionRepository::class);
         $this->app->bind(\App\Repositories\modulepermission\ModulepermissionRepositoryInterface::class, \App\Repositories\modulepermission\ModulepermissionRepository::class);
         $this->app->bind(\App\Repositories\module\ModuleRepositoryInterface::class, \App\Repositories\module\ModuleRepository::class);
         $this->app->bind(\App\Repositories\Role\RoleRepositoryInterface::class, \App\Repositories\Role\RoleRepository::class);

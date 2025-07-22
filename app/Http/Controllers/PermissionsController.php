@@ -28,7 +28,7 @@ class PermissionsController extends Controller
     function allPermissions(): JsonResponse
     {
         try {
-            $permissions = $this->permissionService->getModulePermission();
+            $permissions = $this->permissionService->getAllPermissions();
             return successResponse($permissions);
         } catch (\Throwable $e) {
             // logger()->error($e);

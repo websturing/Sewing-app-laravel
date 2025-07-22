@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Services\Role\RoleServiceInterface;
+use App\Services\Rolepermission\RolepermissionServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -11,7 +12,8 @@ class RoleController extends Controller
 {
 
     public function __construct(
-        private RoleServiceInterface $roleService
+        private RoleServiceInterface $roleService,
+        private RolepermissionServiceInterface $rolePermissionService
     ) {}
 
 
@@ -37,8 +39,9 @@ class RoleController extends Controller
             'guard_name' => 'nullable|string',
         ]);
         try {
-            $roles = $this->roleService->createRole($validated);
-            return successResponse($roles);
+            $role = $this->roleService->createRole($validated);
+            $permissoins = $this->rolePermissionService->createRolePermissions($request->get('permissions'), $role->id);
+            return successResponse($role);
         } catch (\Exception $e) {
             Log::error('Failed to fetch roles: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
