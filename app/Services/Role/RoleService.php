@@ -2,6 +2,7 @@
 
 namespace App\Services\Role;
 
+use App\Http\Resources\RoleResources;
 use App\Services\Role\RoleServiceInterface;
 use App\Repositories\Role\RoleRepositoryInterface;
 
@@ -16,7 +17,8 @@ class RoleService implements RoleServiceInterface
 
     public function getAllRole()
     {
-        return $this->roleRepository->all();
+        $roles = $this->roleRepository->all();
+        return RoleResources::collection($roles);
     }
 
     public function createRole(array $data)

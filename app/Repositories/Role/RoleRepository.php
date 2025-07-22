@@ -8,7 +8,7 @@ class RoleRepository implements RoleRepositoryInterface
 {
     public function all()
     {
-        return Role::all();
+        return Role::with(['permissions'])->get();
     }
 
     public function create(array $data)

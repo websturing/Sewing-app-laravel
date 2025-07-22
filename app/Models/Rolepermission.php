@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Permission;
 
 class Rolepermission extends Model
 {
@@ -15,4 +16,9 @@ class Rolepermission extends Model
         'permission_id'
         // tambahkan kolom lain yang boleh diisi
     ];
+
+    public function permissions()
+    {
+        return $this->belongsTo(Permission::class, 'permission_id');
+    }
 }
