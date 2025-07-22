@@ -36,4 +36,55 @@ class UserService implements UserServiceInterface
             ]);
         }
     }
+
+    public function createUser(array $userData)
+    {
+
+        try {
+            $users =  $this->userRepository->create($userData);
+            return successResponse($users);
+        } catch (\Exception $e) {
+            Log::error('Failed to Create User: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Create User', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function updateUser(int $userId, array $userData)
+    {
+
+        try {
+            $users =  $this->userRepository->update($userId, $userData);
+            return successResponse($users);
+        } catch (\Exception $e) {
+            Log::error('Failed to Update User: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Update User', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function deleteUser(int $userId)
+    {
+
+        try {
+            $users =  $this->userRepository->delete($userId);
+            return successResponse($users);
+        } catch (\Exception $e) {
+            Log::error('Failed to Delete User: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Delete User', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
+    }
 }
