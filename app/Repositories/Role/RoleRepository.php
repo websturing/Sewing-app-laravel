@@ -15,6 +15,15 @@ class RoleRepository implements RoleRepositoryInterface
     {
         return Role::create($data);
     }
+
+    public function update(int $id, array $data)
+    {
+        $role = Role::findOrFail($id);
+        $role->update($data);
+        return $role;
+    }
+
+
     public function delete(int $id)
     {
         $data = Role::find($id);

@@ -41,7 +41,7 @@ class RoleController extends Controller
         try {
             $role = $this->roleService->createRole($validated);
             $permissoins = $this->rolePermissionService->createRolePermissions($request->get('permissions'), $role->id);
-            return successResponse($role);
+            return successResponse($role, "Succesfully created role : " . $role->name);
         } catch (\Exception $e) {
             Log::error('Failed to fetch roles: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -50,6 +50,34 @@ class RoleController extends Controller
             return errorResponse('Failed to Retrieve Role', 500, [
                 'exception' => app()->environment('production') ? null : $e->getMessage(),
             ]);
+        }
+    }
+
+    public function updateRole(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+
+        try {
+            // Gunakan service yang sudah di-inject via constructor
+            $role = $this->roleService->updateRole($id, $validated);
+            $permissoins = $this->rolePermissionService->createRolePermissions($request->get('permissions'), $role->id);
+            return response()->json([
+                'success' => true,
+                'message' => 'Role updated successfully',
+                'data' => $role
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Role update failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' =>  $e->getMessage()
+            ], 500);
         }
     }
 

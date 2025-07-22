@@ -13,6 +13,12 @@ class RolepermissionRepository implements RolepermissionRepositoryInterface
 
     public function createPermissions(array $permissions)
     {
-        return Rolepermission::insert($permissions);
+
+        foreach ($permissions as $item) {
+            Rolepermission::updateOrCreate([
+                'role_id' => $item['role_id'],
+                'permission_id' => $item['permission_id'],
+            ], $item);
+        }
     }
 }

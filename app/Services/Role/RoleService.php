@@ -26,6 +26,11 @@ class RoleService implements RoleServiceInterface
         return $this->roleRepository->create($data);
     }
 
+    public function updateRole(int $id, array $data)
+    {
+        return $this->roleRepository->update($id, $data);
+    }
+
     public function deleteRole(int $id)
     {
         return $this->roleRepository->delete($id);
