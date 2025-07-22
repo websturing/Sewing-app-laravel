@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Models\Permission;
 
 class ModulePermission extends Model
 {
@@ -11,5 +12,10 @@ class ModulePermission extends Model
     public function module()
     {
         return $this->belongsTo(Module::class);
+    }
+
+    public function permission()
+    {
+        return $this->belongsTo(Permission::class, 'permission_name', 'name');
     }
 }

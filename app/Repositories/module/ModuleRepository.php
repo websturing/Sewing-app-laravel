@@ -14,7 +14,7 @@ class ModuleRepository implements ModuleRepositoryInterface
 
     public function moduleWithPermissions()
     {
-        return Module::with(['permissions'])
+        return Module::with(['permissions.permission'])
             ->where('parent_id', null)
             ->orderBy('name', 'asc')->get();
     }
