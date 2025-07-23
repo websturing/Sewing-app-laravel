@@ -16,6 +16,11 @@ class UserRepository implements UserRepositoryInterface
         return User::with(['roles'])->get();
     }
 
+    public function findById(int $userId)
+    {
+        return User::findOrFail($userId);
+    }
+
     public function create(array $userData)
     {
         return User::create($userData);

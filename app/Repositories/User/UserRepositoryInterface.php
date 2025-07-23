@@ -5,6 +5,7 @@ namespace App\Repositories\User;
 interface UserRepositoryInterface
 {
     public function all();
+    public function findById(int $userId);
     public function userWithRoles();
     public function create(array $userData);
     public function update(int $userId, array $userData);

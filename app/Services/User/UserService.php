@@ -5,6 +5,7 @@ namespace App\Services\User;
 use App\Http\Resources\UserWithRolesResources;
 use App\Services\User\UserServiceInterface;
 use App\Repositories\User\UserRepositoryInterface;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UserService implements UserServiceInterface
@@ -53,8 +54,15 @@ class UserService implements UserServiceInterface
     {
 
         try {
+            $userData['password'] = Hash::make('123456789');
             $users =  $this->userRepository->create($userData);
-            return successResponse($users);
+
+            foreach ($userData['role_names'] as $roleName) {
+                if (!$users->hasRole($roleName)) {
+                    $users->assignRole($roleName);
+                }
+            }
+            return successResponse($users, 'Succesfully Created User' . $users->email);
         } catch (\Exception $e) {
             Log::error('Failed to Create User: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -70,8 +78,19 @@ class UserService implements UserServiceInterface
     {
 
         try {
+            $user = $this->userRepository->findById($userId);
+            if (!$user) {
+                return errorResponse('User not found', 404);
+            }
+
+            /** 1. Update data User */
             $users =  $this->userRepository->update($userId, $userData);
-            return successResponse($users);
+
+            /** 2. Sync Roles make user role_names is array */
+            if (isset($userData['role_names'])) {
+                $user->syncRoles($userData['role_names']); // <- Ini kunci utamanya
+            }
+            return successResponse($users, 'Successfully Update Users');
         } catch (\Exception $e) {
             Log::error('Failed to Update User: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -87,8 +106,20 @@ class UserService implements UserServiceInterface
     {
 
         try {
-            $users =  $this->userRepository->delete($userId);
-            return successResponse($users);
+            $user = $this->userRepository->findById($userId);
+
+            if (!$user) {
+                return errorResponse('User not found', 404);
+            }
+
+            // 2. Hapus relasi roles/permissions sebelum delete user
+            $user->roles()->detach();
+            $user->permissions()->detach();
+
+            // 3. Eksekusi penghapusan user
+            $this->userRepository->delete($userId);
+
+            return successResponse('User deleted successfully');
         } catch (\Exception $e) {
             Log::error('Failed to Delete User: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()

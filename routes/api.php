@@ -43,7 +43,10 @@ Route::prefix('users')
     ->middleware(['web', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [UserController::class, 'index']);
+        Route::post('/', [UserController::class, 'createUser']);
+        Route::post('/{id}', [UserController::class, 'updateUser']);
         Route::get('/role', [UserController::class, 'getUserWithRole']);
+        Route::delete('/{id}', [UserController::class, 'deleteUser']);
     });
 
 
