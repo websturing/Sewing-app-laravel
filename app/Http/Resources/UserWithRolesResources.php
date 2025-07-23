@@ -18,7 +18,7 @@ class UserWithRolesResources extends JsonResource
             "id" => $this->id,
             "name" => $this->name,
             "email" => $this->email,
-            "roles" => $this->getRoleNames()
+            "role_names" => $this->getRoleNames()
         ];
     }
 }
