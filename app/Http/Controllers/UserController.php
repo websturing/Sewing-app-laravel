@@ -11,6 +11,11 @@ class UserController extends Controller
         private UserServiceInterface $userService,
     ) {}
 
+    public function index()
+    {
+        return $this->userService->getAllUser();
+    }
+
     public function getUserWithRole()
     {
         return $this->userService->getUserWithRoles();

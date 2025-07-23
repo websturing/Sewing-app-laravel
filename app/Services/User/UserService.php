@@ -18,7 +18,19 @@ class UserService implements UserServiceInterface
 
     public function getAllUser()
     {
-        return $this->userRepository->all();
+
+        try {
+            $users =   $this->userRepository->all();
+            return successResponse($users);
+        } catch (\Exception $e) {
+            Log::error('Failed to Retrive User: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return errorResponse('Failed to Retrive User', 500, [
+                'exception' => app()->environment('production') ? null : $e->getMessage(),
+            ]);
+        }
     }
     public function getUserWithRoles()
     {

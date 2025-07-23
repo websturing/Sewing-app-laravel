@@ -7,6 +7,7 @@ use App\Services\Role\RoleServiceInterface;
 use App\Services\Rolepermission\RolepermissionServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Spatie\Permission\Models\Role as ModelsRole;
 
 class RoleController extends Controller
 {
@@ -63,7 +64,8 @@ class RoleController extends Controller
         try {
             // Gunakan service yang sudah di-inject via constructor
             $role = $this->roleService->updateRole($id, $validated);
-            $permissoins = $this->rolePermissionService->createRolePermissions($request->get('permissions'), $role->id);
+            $roleSpatie = ModelsRole::find($role->id);
+            $roleSpatie->syncPermissions($request->get('permissions', []));
             return response()->json([
                 'success' => true,
                 'message' => 'Role updated successfully',

@@ -42,6 +42,7 @@ Route::prefix('roles')
 Route::prefix('users')
     ->middleware(['web', 'auth:sanctum'])
     ->group(function () {
+        Route::get('/', [UserController::class, 'index']);
         Route::get('/role', [UserController::class, 'getUserWithRole']);
     });
 
