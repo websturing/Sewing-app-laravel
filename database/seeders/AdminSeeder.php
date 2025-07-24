@@ -21,10 +21,24 @@ class AdminSeeder extends Seeder
 
         // 2. Buat Permissions
         $permissions = [
-            'manage users',
-            'edit post',
-            'delete post',
-            'view dashboard'
+            'dashboard.create',
+            'dashboard.read',
+            'dashboard.update',
+            'dashboard.delete',
+            'dashboard.upload',
+            'dashboard.download',
+            'permissions.create',
+            'permissions.read',
+            'permissions.update',
+            'permissions.delete',
+            'permissions.upload',
+            'permissions.download',
+            'users.create',
+            'users.read',
+            'users.update',
+            'users.delete',
+            'users.upload',
+            'users.download',
         ];
 
         foreach ($permissions as $perm) {

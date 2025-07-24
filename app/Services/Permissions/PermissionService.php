@@ -27,34 +27,36 @@ class PermissionService implements PermissionServiceInterface
 
     private function buildNestedModules(Collection $modules, Collection $userPermissions, $parentId = null): Collection
     {
-        return $modules->where('parent_id', $parentId)->map(function ($module) use ($modules, $userPermissions) {
-            // Ambil permission module yang dimiliki user
-            $filteredPermissions = $module->permissions
-                ->filter(fn($perm) => $userPermissions->contains($perm->permission_name))
-                ->map(fn($perm) => [
-                    'action' => $perm->action,
-                    'permission_name' => $perm->permission_name,
-                ])
-                ->values();
+        return $modules->where('parent_id', $parentId)
+            ->sortBy('order')
+            ->map(function ($module) use ($modules, $userPermissions) {
+                // Ambil permission module yang dimiliki user
+                $filteredPermissions = $module->permissions
+                    ->filter(fn($perm) => $userPermissions->contains($perm->permission_name))
+                    ->map(fn($perm) => [
+                        'action' => $perm->action,
+                        'permission_name' => $perm->permission_name,
+                    ])
+                    ->values();
 
-            // Apakah module ini layak tampil?
-            $hasViewPermission = $filteredPermissions;
+                // Apakah module ini layak tampil?
+                $hasViewPermission = $filteredPermissions;
 
-            $children = $this->buildNestedModules($modules, $userPermissions, $module->id);
+                $children = $this->buildNestedModules($modules, $userPermissions, $module->id);
 
-            if (!$hasViewPermission && $children->isEmpty()) {
-                return null;
-            }
+                if (!$hasViewPermission && $children->isEmpty()) {
+                    return null;
+                }
 
-            return [
-                'id' => $module->id,
-                'name' => $module->name,
-                'slug' => $module->slug,
-                'icon' => $module->icon,
-                'permissions' => $filteredPermissions,
-                'children' => $children,
-            ];
-        })->filter()->values();
+                return [
+                    'id' => $module->id,
+                    'name' => $module->name,
+                    'slug' => $module->slug,
+                    'icon' => $module->icon,
+                    'permissions' => $filteredPermissions,
+                    'children' => $children,
+                ];
+            })->filter()->values();
     }
 
     /** MODULE PERMISSION */
