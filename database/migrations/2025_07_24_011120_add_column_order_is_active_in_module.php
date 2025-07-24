@@ -12,10 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('modules', function (Blueprint $table) {
-            $table->string('icon')
-                ->nullable()
-                ->after('parent_id')
-                ->comment('name icon from library Nucleo');
+            $table->integer('order')->default(0)->after('icon');
+            $table->boolean('is_active')->default(true)->after('order');
         });
     }
 
@@ -25,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('modules', function (Blueprint $table) {
-            $table->dropColumn('icon');
+            $table->dropColumn(['order', 'is_active']);
         });
     }
 };

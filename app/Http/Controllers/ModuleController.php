@@ -53,6 +53,9 @@ class ModuleController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:modules,name',
             'slug' => 'required|string|max:255|unique:modules,slug',
+            'icon' => 'required|string|max:255',
+            'order' => 'required|integer|min:0',
+            'is_active' => 'required|boolean',
             'parent_id' => 'nullable|integer'
         ]);
 
@@ -85,6 +88,9 @@ class ModuleController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255',
+            'icon' => 'required|string|max:255',
+            'order' => 'required|integer|min:0',
+            'is_active' => 'required|boolean',
             'parent_id' => 'nullable|integer'
         ]);
 

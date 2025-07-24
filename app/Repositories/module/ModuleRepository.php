@@ -9,14 +9,14 @@ class ModuleRepository implements ModuleRepositoryInterface
     public function all()
     {
         return Module::with(['parent', 'children'])
-            ->orderBy('name', 'asc')->get();
+            ->orderBy('order', 'asc')->get();
     }
 
     public function moduleWithPermissions()
     {
         return Module::with(['permissions.permission'])
             ->where('parent_id', null)
-            ->orderBy('name', 'asc')->get();
+            ->orderBy('order', 'asc')->get();
     }
 
     public function create(array $data)

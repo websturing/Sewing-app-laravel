@@ -50,6 +50,7 @@ class PermissionService implements PermissionServiceInterface
                 'id' => $module->id,
                 'name' => $module->name,
                 'slug' => $module->slug,
+                'icon' => $module->icon,
                 'permissions' => $filteredPermissions,
                 'children' => $children,
             ];

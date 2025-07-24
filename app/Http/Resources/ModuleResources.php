@@ -18,6 +18,9 @@ class ModuleResources extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'icon' => $this->icon,
+            'order' => $this->order,
+            'is_active' => $this->is_active,
             'parent_id' => $this->parent_id,
             'parent' => $this->whenLoaded('parent', function () {
                 return $this->name;
