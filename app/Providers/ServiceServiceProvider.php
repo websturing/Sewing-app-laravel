@@ -11,8 +11,8 @@ class ServiceServiceProvider extends ServiceProvider
     public function register()
     {
         // AUTO-BINDINGS BELOW
-        $this->app->bind(\App\Services\Shift_\Shift_ServiceInterface::class, \App\Services\Shift_\Shift_Service::class);
-        $this->app->bind(\App\Services\Line\LineServiceInterface::class, \App\Services\Line\LineService::class);
+        $this->app->bind(\App\Services\Shift\ShiftServiceInterface::class, \App\Services\Shift\ShiftService::class);
+
         $this->app->bind(\App\Services\User\UserServiceInterface::class, \App\Services\User\UserService::class);
         $this->app->bind(\App\Services\Rolepermission\RolepermissionServiceInterface::class, \App\Services\Rolepermission\RolepermissionService::class);
         $this->app->bind(\App\Services\modulepermission\ModulepermissionServiceInterface::class, \App\Services\modulepermission\ModulepermissionService::class);
