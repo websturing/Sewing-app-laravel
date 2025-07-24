@@ -16,17 +16,17 @@ class ShiftRepository implements ShiftRepositoryInterface
         return Shift::create($shitfData);
     }
 
-    public function update(int $id, array $data)
+    public function update(int $shiftId, array $shiftData)
     {
-        $shift = Shift::findOrFail($id);
-        $shift->update($data);
+        $shift = Shift::findOrFail($shiftId);
+        $shift->update($shiftData);
         return $shift;
     }
 
 
-    public function delete(int $id)
+    public function delete(int $shiftId)
     {
-        $Shift = Shift::find($id);
+        $Shift = Shift::find($shiftId);
         if ($Shift) {
             return $Shift->delete();
         }

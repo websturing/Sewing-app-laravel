@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -57,6 +58,16 @@ Route::prefix('permissions')
     ->group(function () {
         Route::get('/menu', [PermissionsController::class, 'menu']);
         Route::get('/', [PermissionsController::class, 'allPermissions']);
+    });
+
+
+Route::prefix('shift')
+    ->middleware(['web', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [ShiftController::class, 'index']);
+        Route::post('/', [ShiftController::class, 'createShift']);
+        Route::post('/{id}', [ShiftController::class, 'updateShift']);
+        Route::delete('/{id}', [ShiftController::class, 'deleteShift']);
     });
 
 
