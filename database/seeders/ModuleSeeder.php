@@ -27,13 +27,21 @@ class ModuleSeeder extends Seeder
                 "name" => "Permissions",
                 "slug" => "permissions",
                 "icon" => "icon-blockchain-3",
+                "order" => 1,
+                "is_active" => true,
+                "parent_slug" => "users-management", // nanti kita proses ini
+            ],
+            [
+                "name" => "users",
+                "slug" => "users",
+                "icon" => "icon-profile",
                 "order" => 2,
                 "is_active" => true,
-                "parent_slug" => "users", // nanti kita proses ini
+                "parent_slug" => "users-management", // nanti kita proses ini
             ],
             [
                 "name" => "User management",
-                "slug" => "users",
+                "slug" => "users-management",
                 "icon" => "icon-profile",
                 "order" => 3,
                 "is_active" => true,
