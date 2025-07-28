@@ -8,7 +8,7 @@ class ShiftRepository implements ShiftRepositoryInterface
 {
     public function all()
     {
-        return Shift::all();
+        return Shift::orderBy('start_time', 'ASC')->get();
     }
 
     public function create(array $shitfData)
@@ -26,10 +26,19 @@ class ShiftRepository implements ShiftRepositoryInterface
 
     public function delete(int $shiftId)
     {
-        $Shift = Shift::find($shiftId);
-        if ($Shift) {
-            return $Shift->delete();
+        $shift = Shift::find($shiftId);
+
+        if (!$shift) {
+            return null;
         }
-        return false;
+
+        // Simpan data shift sebelum dihapus
+        $deletedShift = clone $shift;
+
+        // Hapus shift
+        $shift->delete();
+
+        // Kembalikan data yang sudah dihapus
+        return $deletedShift;
     }
 }

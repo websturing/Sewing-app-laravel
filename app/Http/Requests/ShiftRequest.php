@@ -26,8 +26,8 @@ class ShiftRequest extends FormRequest
             'name' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
-            'tolerance' => 'nullable|integer',
-            'is_night_shift' => 'nullable',
+            'tolerance' => 'nullable|date_format:H:i',
+            'is_night_shift' => 'nullable|boolean',
         ];
     }
 }

@@ -24,31 +24,11 @@ class ShiftService implements ShiftServiceInterface
     public function createShift(array $shiftData)
     {
 
-        // Validasi di Service Layer
-        $validator = Validator::make($shiftData, [
-            'name' => 'required|string|max:255|unique:roles,name',
-            'guard_name' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
-
         return $this->shiftRepository->create($shiftData);
     }
 
     public function updateShift(int $shiftId, array $shiftData)
     {
-
-        // Validasi di Service Layer
-        $validator = Validator::make($shiftData, [
-            'name' => 'required|string|max:255|unique:roles,name',
-            'guard_name' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            throw new ValidationException($validator);
-        }
 
         return $this->shiftRepository->update($shiftId, $shiftData);
     }

@@ -18,23 +18,35 @@ class ShiftController extends Controller
     public function index()
     {
         $shift = $this->shiftService->getAllShift();
-        return ShiftResources::collection($shift);
+
+        if (!$shift) {
+            return errorResponse('Shift not found', 404);
+        }
+        $collection = ShiftResources::collection($shift);
+        return successResponse($collection);
     }
 
     public function createShift(ShiftRequest $request)
     {
-        $shift = $this->shiftService->createShift($request->validated());
-        return response()->json($shift, 201);
+        $shift = new ShiftResources($this->shiftService->createShift($request->validated()));
+        return successResponse($shift, 'Succesfully Created Shift : ' . $shift->name);
     }
     public function updateShift(ShiftRequest $request, $shiftId)
     {
-        $shift = $this->shiftService->updateShift($shiftId, $request->validated());
-        return response()->json($shift, 201);
+        $shift = new ShiftResources($this->shiftService->updateShift($shiftId, $request->validated()));
+        return successResponse($shift, "Succesfully Updated Shift : " . $shift->name);
     }
 
     public function deleteShift($shiftId)
     {
-        $shift = $this->shiftService->deleteShift($shiftId);
-        return response()->json($shift, 201);
+        $deletedShift = $this->shiftService->deleteShift($shiftId);
+        if (!$deletedShift) {
+            return errorResponse('Shift not found', 404);
+        }
+
+        return successResponse(
+            new ShiftResources($deletedShift),
+            "Successfully deleted shift: {$deletedShift->name}"
+        );
     }
 }
