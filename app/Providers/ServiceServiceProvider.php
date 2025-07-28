@@ -11,6 +11,7 @@ class ServiceServiceProvider extends ServiceProvider
     public function register()
     {
         // AUTO-BINDINGS BELOW
+        $this->app->bind(\App\Services\Employee\EmployeeServiceInterface::class, \App\Services\Employee\EmployeeService::class);
         $this->app->bind(\App\Services\Shift\ShiftServiceInterface::class, \App\Services\Shift\ShiftService::class);
 
         $this->app->bind(\App\Services\User\UserServiceInterface::class, \App\Services\User\UserService::class);
