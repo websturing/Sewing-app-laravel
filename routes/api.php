@@ -75,9 +75,9 @@ Route::prefix('employee')
     ->middleware(['web', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [EmployeeController::class, 'index']);
-        Route::post('/', [ShiftController::class, 'createShift']);
-        Route::post('/{id}', [ShiftController::class, 'updateShift']);
-        Route::delete('/{id}', [ShiftController::class, 'deleteShift']);
+        Route::post('/', [EmployeeController::class, 'createEmployee']);
+        Route::post('/{id}', [EmployeeController::class, 'updateEmployee']);
+        Route::delete('/{id}', [EmployeeController::class, 'deleteEmployee']);
     });
 
 
