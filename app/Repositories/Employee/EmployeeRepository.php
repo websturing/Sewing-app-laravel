@@ -11,6 +11,11 @@ class EmployeeRepository implements EmployeeRepositoryInterface
         return Employee::with(['user'])->get();
     }
 
+    public function lastEmployeeCode()
+    {
+        return Employee::orderBy('employee_code', 'DESC')->first();
+    }
+
     public function create(array $employeeData)
     {
         return Employee::create($employeeData);

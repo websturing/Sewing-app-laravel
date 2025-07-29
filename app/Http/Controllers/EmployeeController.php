@@ -26,6 +26,12 @@ class EmployeeController extends Controller
         return successResponse($collection);
     }
 
+    function getEmployeeLastCode()
+    {
+        $code = $this->employeeService->getEmployeeLastCode();
+        return successResponse($code->employee_code, 'Successfully Retrived Last Code Employee');
+    }
+
     function createEmployee(EmployeeRequest $request)
     {
         $employee = new EmployeeResource($this->employeeService->createEmployee($request->validated()));

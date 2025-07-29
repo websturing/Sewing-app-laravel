@@ -19,6 +19,11 @@ class EmployeeService implements EmployeeServiceInterface
         return $this->employeeRepository->all();
     }
 
+    public function getEmployeeLastCode()
+    {
+        return $this->employeeRepository->lastEmployeeCode();
+    }
+
     public function createEmployee(array $employeeData)
     {
 
