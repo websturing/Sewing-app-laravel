@@ -1,0 +1,36 @@
+name: Laravel Artisan Cache Clear
+
+on:
+  workflow_dispatch: # Bisa dijalankan manual dari GitHub web
+
+jobs:
+  clear-cache:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, bcmath, xml, ctype, json, pdo_mysql
+
+      - name: Install composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Buat .env dari secret
+        run: echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Clear Laravel caches
+        run: |
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+          php artisan cache:clear
+
+      - name: Rebuild Laravel caches
+        run: |
+          php artisan config:cache
+          php artisan route:cache
