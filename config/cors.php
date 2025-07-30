@@ -24,7 +24,7 @@ return [
 
     // IZINKAN HANYA frontend Vue-mu
     'allowed_origins' => [
-        'https://vue.starter.localhost',
+        'https://attendify.localhost',
         'https://starter-vueapp-vo75-obhs7ks86-afriandis-projects.vercel.app',
         'https://attendances-vue.vercel.app',
     ],

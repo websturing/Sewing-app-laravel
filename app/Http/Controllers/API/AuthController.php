@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Services\Permissions\PermissionServiceInterface;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -21,35 +23,40 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Invalid credential'], 401);
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $request->session()->regenerate();
+        /** TOKEN GENERATE
+         * 1. 1 User 1 Token
+         * 2. Create Token
+         */
 
+        $user->tokens()->delete();
+        $token = $user->createToken('spa-token')->plainTextToken;
 
-        $user = [
-            'user' => $request->user(),
-            'roles' => $request->user()->getRoleNames(),
-            'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+        $response = [
+            'status' => true,
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user,
+            'roles' => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name'),
         ];
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Logged in',
-            'data' => $user
-        ]);
+        return successResponse($response, 'Successfully login');
     }
 
     public function logout(Request $request)
     {
         try {
-            Auth::guard('web')->logout();
-
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            $request->user()->currentAccessToken()->delete();
 
             return response()->json([
                 'status' => true,
