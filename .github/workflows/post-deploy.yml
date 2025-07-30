@@ -30,7 +30,7 @@ jobs:
         run: php artisan migrate --force
 
       - name: Run Seeder
-        run: php artisan db:seed --class=DummyProductSeeder --force
+        run: php artisan db:seed --force
 
       - name: Cache Config
         run: php artisan config:cache
