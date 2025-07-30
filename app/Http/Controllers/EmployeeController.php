@@ -29,19 +29,19 @@ class EmployeeController extends Controller
     function getEmployeeLastCode()
     {
         $code = $this->employeeService->getEmployeeLastCode();
-        return successResponse($code, 'Successfully Retrived Last Code Employee');
+        return successResponse($code->employee_code, 'Successfully Retrived Last Code Employee');
     }
 
     function createEmployee(EmployeeRequest $request)
     {
         $employee = new EmployeeResource($this->employeeService->createEmployee($request->validated()));
-        return successResponse($employee, 'Succesfully Created Employee : ' . $employee->name);
+        return successResponse($employee, 'Succesfully Created Employee : ' . $employee->employee_code);
     }
 
     function updateEmployee(EmployeeRequest $request, $employeeId)
     {
         $employee = new EmployeeResource($this->employeeService->updateEmployee($employeeId, $request->validated()));
-        return successResponse($employee, 'Succesfully Updated Employee : ' . $employee->name);
+        return successResponse($employee, 'Succesfully Updated Employee : ' . $employee->employee_code);
     }
 
     function deleteEmployee($employeeId)
@@ -53,7 +53,7 @@ class EmployeeController extends Controller
 
         return successResponse(
             new EmployeeResource($deletedEmployee),
-            "Successfully deleted shift: {$deletedEmployee->name}"
+            "Successfully deleted Employee: {$deletedEmployee->employee_code}"
         );
     }
 }

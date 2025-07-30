@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ModulePermissionSeeder::class,
             SpatiePermissionSeeder::class,
             SettingSeeder::class,
+            EmployeeSeeder::class
         ]);
     }
 }

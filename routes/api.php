@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\UserShiftAssignmentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Models\Setting;
@@ -61,6 +62,16 @@ Route::prefix('permissions')
         Route::get('/', [PermissionsController::class, 'allPermissions']);
     });
 
+
+Route::prefix('assignment')
+    ->middleware(['web', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [UserShiftAssignmentController::class, 'index']);
+        Route::get('/summary', [UserShiftAssignmentController::class, 'summaryAssigment']);
+        Route::post('/', [UserShiftAssignmentController::class, 'createShift']);
+        Route::post('/{id}', [UserShiftAssignmentController::class, 'updateShift']);
+        Route::delete('/{id}', [UserShiftAssignmentController::class, 'deleteShift']);
+    });
 
 Route::prefix('shift')
     ->middleware(['web', 'auth:sanctum'])

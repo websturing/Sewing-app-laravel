@@ -14,6 +14,12 @@ class Shift extends Model
     ];
 
 
+    public function assignments()
+    {
+        return $this->hasMany(UserShiftAssignment::class, 'shift_id');
+    }
+
+
     public function getToleranceBreakDownRawAttribute(): array
     {
         [$hours, $minutes, $seconds] = array_pad(explode(':', $this->tolerance), 3, 0);
