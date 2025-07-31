@@ -22,7 +22,7 @@ Route::prefix('auth')
     });
 
 Route::prefix('module')
-    ->middleware(['web', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [ModuleController::class, 'index']);
         Route::get('/withpermissions', [ModuleController::class, 'getModuleWithPermissions']);
@@ -33,7 +33,7 @@ Route::prefix('module')
     });
 
 Route::prefix('roles')
-    ->middleware(['web', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [RoleController::class, 'index']);
 
@@ -43,7 +43,7 @@ Route::prefix('roles')
     });
 
 Route::prefix('users')
-    ->middleware(['web', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [UserController::class, 'index']);
         Route::post('/', [UserController::class, 'createUser']);
@@ -56,7 +56,7 @@ Route::prefix('users')
 
 
 Route::prefix('permissions')
-    ->middleware(['web'])
+    ->middleware(['api'])
     ->group(function () {
         Route::get('/menu', [PermissionsController::class, 'menu']);
         Route::get('/', [PermissionsController::class, 'allPermissions']);
@@ -64,7 +64,7 @@ Route::prefix('permissions')
 
 
 Route::prefix('assignment')
-    ->middleware(['web', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [UserShiftAssignmentController::class, 'index']);
         Route::get('/summary', [UserShiftAssignmentController::class, 'summaryAssigment']);
@@ -74,7 +74,7 @@ Route::prefix('assignment')
     });
 
 Route::prefix('shift')
-    ->middleware(['web', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [ShiftController::class, 'index']);
         Route::post('/', [ShiftController::class, 'createShift']);
@@ -83,7 +83,7 @@ Route::prefix('shift')
     });
 
 Route::prefix('employee')
-    ->middleware(['web', 'auth:sanctum'])
+    ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [EmployeeController::class, 'index']);
         Route::get('/code', [EmployeeController::class, 'getEmployeeLastCode']);
