@@ -15,4 +15,23 @@ class ShiftassignmentRepository implements ShiftassignmentRepositoryInterface
     {
         return UserShiftAssignment::with(['user', 'shift'])->get();
     }
+
+    public function create(array $data)
+    {
+        return UserShiftAssignment::create($data);
+    }
+
+    public function delete(int $id)
+    {
+        $data = UserShiftAssignment::find($id);
+
+        if (!$data) {
+            return null;
+        }
+
+        $deletedData = clone $data;
+
+        $data->delete();
+        return $deletedData;
+    }
 }
