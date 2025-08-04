@@ -77,6 +77,7 @@ Route::prefix('shift')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [ShiftController::class, 'index']);
+        Route::get('/assignments', [ShiftController::class, 'getAssignments']);
         Route::post('/', [ShiftController::class, 'createShift']);
         Route::post('/{id}', [ShiftController::class, 'updateShift']);
         Route::delete('/{id}', [ShiftController::class, 'deleteShift']);

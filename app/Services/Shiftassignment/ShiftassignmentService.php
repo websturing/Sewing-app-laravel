@@ -29,11 +29,27 @@ class ShiftassignmentService implements ShiftassignmentServiceInterface
     {
         $employeeCount = $this->employeeService->getAllEmployee()->count();
         $assignments = $this->shiftassignmentRepository->withShiftUser();
+        $assignmentGroupByShift =  $assignments->groupBy('shift.id')->map(function ($items) {
+            return [
+                'shift_id' => $items->first()->shift->id,
+                'shift_name' => $items->first()->shift->name,
+                'start_time' => $items->first()->shift->start_time,
+                'end_time' => $items->first()->shift->end_time,
+                'user_count' => $items->count(),
+                'users' => $items->map(function ($item) {
+                    return [
+                        'user_id' => $item->user->id,
+                        'user_name' => $item->user->name
+                    ];
+                })
+            ];
+        })->values();
         $unassigned = abs($assignments->count() - $employeeCount);
 
         return [
             "employee_count" => $employeeCount,
-            "assignments" => $assignments->count(),
+            "assignments" => $assignmentGroupByShift,
+            "assigned" => $assignments->count(),
             "unassigned" => $unassigned,
         ];
     }

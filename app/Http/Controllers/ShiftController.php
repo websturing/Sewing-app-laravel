@@ -26,6 +26,10 @@ class ShiftController extends Controller
         return successResponse($collection);
     }
 
+    public function getAssignments(){
+        return "getAssignments";
+    }
+
     public function createShift(ShiftRequest $request)
     {
         $shift = new ShiftResources($this->shiftService->createShift($request->validated()));

@@ -18,7 +18,8 @@ class UserShiftAssignmentController extends Controller
 
     function summaryAssigment()
     {
-        return $this->userShiftAssignment->getSummaryShift();
+        $result = $this->userShiftAssignment->getSummaryShift();
+        return successResponse($result, 'Successfully Received User Assignment Summary');
     }
 
     function createUserShiftAssignment(UserShiftAssignmentRequest $request)
