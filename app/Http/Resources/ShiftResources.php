@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
 
+/**
+ * @method static \Illuminate\Http\Resources\Json\AnonymousResourceCollection collection($resource)
+ */
+
 class ShiftResources extends JsonResource
 {
     /**
@@ -24,7 +28,8 @@ class ShiftResources extends JsonResource
             "end_time" => $this->end_time,
             "is_night_shift" => $this->is_night_shift,
             "tolerance" => $this->tolerance,
-            "tolerance_breakdown" => $this->tolerance_break_down
+            "tolerance_breakdown" => $this->tolerance_break_down,
+            "assignments" => ShiftUserAssignmentResource::collection($this->whenLoaded('assignments'))
         ];
     }
 }

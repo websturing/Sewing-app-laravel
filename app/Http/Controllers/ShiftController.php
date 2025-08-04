@@ -7,6 +7,7 @@ use App\Http\Resources\ShiftResources;
 use App\Services\Shift\ShiftServiceInterface;
 use Illuminate\Http\Request;
 
+
 class ShiftController extends Controller
 {
 
@@ -26,8 +27,11 @@ class ShiftController extends Controller
         return successResponse($collection);
     }
 
-    public function getAssignments(){
-        return "getAssignments";
+    public function getAssignments()
+    {
+        $shiftAssignments = $this->shiftService->getShiftWithAssignments();
+        $collection = ShiftResources::collection($shiftAssignments);
+        return successResponse($collection);
     }
 
     public function createShift(ShiftRequest $request)

@@ -21,6 +21,10 @@ class ShiftService implements ShiftServiceInterface
         return $this->shiftRepository->all();
     }
 
+    public function getShiftWithAssignments(){
+        return $this->shiftRepository->withAssignments();
+    }
+
     public function createShift(array $shiftData)
     {
 
