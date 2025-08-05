@@ -47,13 +47,54 @@ class ModuleSeeder extends Seeder
                 "is_active" => true,
                 "parent_id" => null,
             ],
+            [
+                "name" => "Employee",
+                "slug" => "employee",
+                "icon" => "icon-profile",
+                "order" => 4,
+                "is_active" => true,
+                "parent_slug" => "users-management",
+            ],
+            [
+                "name" => "Attendance Management",
+                "slug" => "attendance-mn",
+                "icon" => "icon-progress-2-3",
+                "order" => 1,
+                "is_active" => true,
+                "parent_id" => null,
+            ],
+            [
+                "name" => "Shift",
+                "slug" => "shift",
+                "icon" => "icon-stopwatch",
+                "order" => 2,
+                "is_active" => true,
+                "parent_slug" => "attendance-mn",
+            ],
+            [
+                "name" => "Shift Assignments",
+                "slug" => "assignments",
+                "icon" => "icon-algorithm-2",
+                "order" => 3,
+                "is_active" => true,
+                "parent_slug" => "attendance-mn",
+            ],
+            [
+                "name" => "Attendances",
+                "slug" => "attendance",
+                "icon" => "icon-calendar",
+                "order" => 4,
+                "is_active" => true,
+                "parent_slug" => "attendance-mn",
+            ],
         ];
 
         // Step 1: Insert parents first
         $slugToId = [];
 
         foreach ($modules as $data) {
-            if (isset($data['parent_slug'])) continue;
+            if (isset($data['parent_slug']))
+                continue;
 
             $module = Module::updateOrCreate(
                 ['slug' => $data['slug']],
@@ -65,7 +106,8 @@ class ModuleSeeder extends Seeder
 
         // Step 2: Insert children (with parent_slug)
         foreach ($modules as $data) {
-            if (!isset($data['parent_slug'])) continue;
+            if (!isset($data['parent_slug']))
+                continue;
 
             $data['parent_id'] = $slugToId[$data['parent_slug']] ?? null;
             unset($data['parent_slug']);
