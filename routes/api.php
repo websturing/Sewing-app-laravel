@@ -69,8 +69,7 @@ Route::prefix('assignment')
         Route::get('/', [UserShiftAssignmentController::class, 'index']);
         Route::get('/summary', [UserShiftAssignmentController::class, 'summaryAssigment']);
         Route::post('/', [UserShiftAssignmentController::class, 'createUserShiftAssignment']);
-        Route::post('/{id}', [UserShiftAssignmentController::class, 'updateShift']);
-        Route::delete('/{id}', [UserShiftAssignmentController::class, 'deleteShift']);
+        Route::delete('/{id}', [UserShiftAssignmentController::class, 'deleteUserShiftAssignment']);
     });
 
 Route::prefix('shift')

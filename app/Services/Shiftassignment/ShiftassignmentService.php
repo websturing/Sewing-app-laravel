@@ -22,7 +22,7 @@ class ShiftassignmentService implements ShiftassignmentServiceInterface
 
     public function getAllShiftassignment()
     {
-        return $this->shiftassignmentRepository->all();
+        return $this->shiftassignmentRepository->all()->sortBy('shift.start_time')->values();
     }
 
     public function getSummaryShift()
@@ -59,7 +59,7 @@ class ShiftassignmentService implements ShiftassignmentServiceInterface
     {
         foreach ($shiftAssignmentData['employee_selected_data'] as $item) {
             $result[] = $this->shiftassignmentRepository->create([
-                "user_id" => $item['id'],
+                "user_id" => $item['user']['id'],
                 "shift_id" => $shiftAssignmentData['shift_selected']['id'],
                 'effective_date_start' => $shiftAssignmentData['effective_date']
             ]);

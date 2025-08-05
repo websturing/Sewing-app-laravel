@@ -35,4 +35,17 @@ class UserShiftAssignmentController extends Controller
         // $shift = new ShiftResources($result);
         return successResponse($result, 'Succesfully Created User Assignment');
     }
+
+    public function deleteUserShiftAssignment($id)
+    {
+        $deletedShift = $this->userShiftAssignment->deleteShiftAssignment($id);
+        if (!$deletedShift) {
+            return errorResponse('Shift Assignment not found', 404);
+        }
+
+        return successResponse(
+            new ShiftUserAssignmentAllResource($deletedShift),
+            "Successfully deleted"
+        );
+    }
 }
