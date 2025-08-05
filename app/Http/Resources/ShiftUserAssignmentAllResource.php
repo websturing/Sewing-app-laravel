@@ -21,6 +21,8 @@ class ShiftUserAssignmentAllResource extends JsonResource
             'user' => $this->whenLoaded('user') ? $this->user->name : null,
             'shift' => $this->whenLoaded('shift') ? $this->shift->name : null,
             'time' => $this->whenLoaded('shift') ? $this->shift->start_time . ' - ' . $this->shift->end_time : null,
+            'date_start' => $this->effective_date_start,
+            'date_end' => $this->effective_date_end ?? "-"
         ];
     }
 }
