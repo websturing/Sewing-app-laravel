@@ -11,8 +11,12 @@ class ShiftRepository implements ShiftRepositoryInterface
         return Shift::orderBy('start_time', 'ASC')->get();
     }
 
-    public function withAssignments(){
-        return Shift::with(['assignments.user'])->get();
+    public function withAssignments()
+    {
+        return Shift::with(['assignments.user'])
+            ->withCount('assignments')
+            ->orderBy('start_time', 'ASC')
+            ->get();
     }
 
     public function create(array $shitfData)

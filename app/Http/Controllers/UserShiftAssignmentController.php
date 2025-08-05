@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserShiftAssignmentRequest;
+use App\Http\Resources\ShiftUserAssignmentAllResource;
 use App\Services\Shiftassignment\ShiftassignmentServiceInterface;
 use Illuminate\Http\Request;
 
@@ -11,18 +12,24 @@ class UserShiftAssignmentController extends Controller
 
     public function __construct(
         private ShiftassignmentServiceInterface $userShiftAssignment
-    ) {}
+    ) {
+    }
 
 
-    function index() {}
+    public function index()
+    {
+        $result = $this->userShiftAssignment->getAllShiftassignment();
+        $assignments = ShiftUserAssignmentAllResource::collection($result);
+        return successResponse($assignments);
+    }
 
-    function summaryAssigment()
+    public function summaryAssigment()
     {
         $result = $this->userShiftAssignment->getSummaryShift();
         return successResponse($result, 'Successfully Received User Assignment Summary');
     }
 
-    function createUserShiftAssignment(UserShiftAssignmentRequest $request)
+    public function createUserShiftAssignment(UserShiftAssignmentRequest $request)
     {
         $result = $this->userShiftAssignment->createShiftAssignment($request->validated());
         // $shift = new ShiftResources($result);

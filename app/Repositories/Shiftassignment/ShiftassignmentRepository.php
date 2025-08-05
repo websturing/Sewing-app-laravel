@@ -8,7 +8,8 @@ class ShiftassignmentRepository implements ShiftassignmentRepositoryInterface
 {
     public function all()
     {
-        return UserShiftAssignment::all();
+        return UserShiftAssignment::with(['user', 'shift'])
+            ->get();
     }
 
     public function withShiftUser()

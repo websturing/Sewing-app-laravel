@@ -29,6 +29,7 @@ class ShiftResources extends JsonResource
             "is_night_shift" => $this->is_night_shift,
             "tolerance" => $this->tolerance,
             "tolerance_breakdown" => $this->tolerance_break_down,
+            'assignments_count' => $this->assignments_count,
             "assignments" => ShiftUserAssignmentResource::collection($this->whenLoaded('assignments'))
         ];
     }

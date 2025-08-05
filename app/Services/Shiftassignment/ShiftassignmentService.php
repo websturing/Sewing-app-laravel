@@ -29,21 +29,17 @@ class ShiftassignmentService implements ShiftassignmentServiceInterface
     {
         $employeeCount = $this->employeeService->getAllEmployee()->count();
         $assignments = $this->shiftassignmentRepository->withShiftUser();
-        $assignmentGroupByShift =  $assignments->groupBy('shift.id')->map(function ($items) {
-            return [
-                'shift_id' => $items->first()->shift->id,
-                'shift_name' => $items->first()->shift->name,
-                'start_time' => $items->first()->shift->start_time,
-                'end_time' => $items->first()->shift->end_time,
-                'user_count' => $items->count(),
-                'users' => $items->map(function ($item) {
-                    return [
-                        'user_id' => $item->user->id,
-                        'user_name' => $item->user->name
-                    ];
-                })
-            ];
-        })->values();
+        $assignmentGroupByShift = $assignments->groupBy('shift.id')->map(fn($items) => [
+            'shift_id' => $items->first()->shift->id,
+            'shift_name' => $items->first()->shift->name,
+            'start_time' => $items->first()->shift->start_time,
+            'end_time' => $items->first()->shift->end_time,
+            'user_count' => $items->count(),
+            'users' => $items->map(fn($item) => [
+                'user_id' => $item->user->id,
+                'user_name' => $item->user->name
+            ])
+        ])->values();
         $unassigned = abs($assignments->count() - $employeeCount);
 
         return [
@@ -63,8 +59,8 @@ class ShiftassignmentService implements ShiftassignmentServiceInterface
     {
         foreach ($shiftAssignmentData['employee_selected_data'] as $item) {
             $result[] = $this->shiftassignmentRepository->create([
-                "user_id"   => $item['id'],
-                "shift_id"  => $shiftAssignmentData['shift_selected']['id'],
+                "user_id" => $item['id'],
+                "shift_id" => $shiftAssignmentData['shift_selected']['id'],
                 'effective_date_start' => $shiftAssignmentData['effective_date']
             ]);
         }
