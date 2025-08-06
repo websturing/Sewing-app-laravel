@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Module;
 use App\Models\ModulePermission;
 
@@ -12,50 +13,37 @@ class ModulePermissionSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
-        $permissions = [
-            ["permission_name" => "dashboard.read",      "action" => "read"],
-            ["permission_name" => "dashboard.create",    "action" => "create"],
-            ["permission_name" => "dashboard.update",    "action" => "update"],
-            ["permission_name" => "dashboard.delete",    "action" => "delete"],
-            ["permission_name" => "dashboard.upload",    "action" => "upload"],
-            ["permission_name" => "dashboard.download",  "action" => "download"],
+        // Dapatkan mapping slug ke ID dari cache atau query database
+        $slugToId = Cache::get('module_slug_to_id') ?? Module::pluck('id', 'slug')->toArray();
 
-            ["permission_name" => "users.read",      "action" => "read"],
-            ["permission_name" => "users.create",    "action" => "create"],
-            ["permission_name" => "users.update",    "action" => "update"],
-            ["permission_name" => "users.delete",    "action" => "delete"],
-            ["permission_name" => "users.upload",    "action" => "upload"],
-            ["permission_name" => "users.download",  "action" => "download"],
+        // Daftar action default untuk setiap module
+        $defaultActions = ['read', 'create', 'update', 'delete', 'upload', 'download'];
 
-            ["permission_name" => "permissions.read",      "action" => "read"],
-            ["permission_name" => "permissions.create",    "action" => "create"],
-            ["permission_name" => "permissions.update",    "action" => "update"],
-            ["permission_name" => "permissions.delete",    "action" => "delete"],
-            ["permission_name" => "permissions.upload",    "action" => "upload"],
-            ["permission_name" => "permissions.download",  "action" => "download"],
+        // Konfigurasi khusus untuk module tertentu
+        $moduleActions = [
+            'dashboard' => ['read'], // Dashboard hanya perlu read
+            // Tambahkan konfigurasi khusus lainnya di sini
         ];
 
-        $slugToId = cache()->get('module_slug_to_id') ?? Module::pluck('id', 'slug')->toArray();
+        foreach ($slugToId as $slug => $moduleId) {
+            // Gunakan action khusus jika ada, otherwise gunakan default
+            $actions = $moduleActions[$slug] ?? $defaultActions;
 
-        foreach ($permissions as $data) {
-            $parts = explode('.', $data['permission_name']);
-            $slug = $parts[0] ?? null;
-            $moduleId = $slugToId[$slug] ?? null;
+            foreach ($actions as $action) {
+                $permissionName = $slug . '.' . $action;
 
-            if (!$moduleId) {
-                echo "Skipping permission: {$data['permission_name']} - module not found.\n";
-                continue;
+                ModulePermission::updateOrCreate(
+                    ['permission_name' => $permissionName],
+                    [
+                        'action' => $action,
+                        'module_id' => $moduleId
+                    ]
+                );
             }
-
-            ModulePermission::updateOrCreate(
-                ['permission_name' => $data['permission_name']],
-                [
-                    'action' => $data['action'],
-                    'module_id' => $moduleId
-                ]
-            );
         }
+
+        $this->command->info('Module permissions seeded successfully!');
     }
 }

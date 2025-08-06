@@ -6,13 +6,14 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Module;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 
 class ModuleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
         $modules = [
             [
@@ -29,18 +30,18 @@ class ModuleSeeder extends Seeder
                 "icon" => "icon-blockchain-3",
                 "order" => 1,
                 "is_active" => true,
-                "parent_slug" => "users-management", // nanti kita proses ini
+                "parent_slug" => "users-management",
             ],
             [
-                "name" => "users",
+                "name" => "Users",
                 "slug" => "users",
                 "icon" => "icon-profile",
                 "order" => 2,
                 "is_active" => true,
-                "parent_slug" => "users-management", // nanti kita proses ini
+                "parent_slug" => "users-management",
             ],
             [
-                "name" => "User management",
+                "name" => "User Management",
                 "slug" => "users-management",
                 "icon" => "icon-profile",
                 "order" => 3,
@@ -93,8 +94,9 @@ class ModuleSeeder extends Seeder
         $slugToId = [];
 
         foreach ($modules as $data) {
-            if (isset($data['parent_slug']))
+            if (isset($data['parent_slug'])) {
                 continue;
+            }
 
             $module = Module::updateOrCreate(
                 ['slug' => $data['slug']],
@@ -106,8 +108,9 @@ class ModuleSeeder extends Seeder
 
         // Step 2: Insert children (with parent_slug)
         foreach ($modules as $data) {
-            if (!isset($data['parent_slug']))
+            if (!isset($data['parent_slug'])) {
                 continue;
+            }
 
             $data['parent_id'] = $slugToId[$data['parent_slug']] ?? null;
             unset($data['parent_slug']);
@@ -120,7 +123,9 @@ class ModuleSeeder extends Seeder
             $slugToId[$module->slug] = $module->id;
         }
 
-        // Simpan mapping buat dipakai di permission seeder
-        cache()->put('module_slug_to_id', $slugToId);
+        // Simpan mapping untuk permission seeder
+        Cache::put('module_slug_to_id', $slugToId, now()->addHours(1));
+
+        $this->command->info('Modules seeded successfully!');
     }
 }
