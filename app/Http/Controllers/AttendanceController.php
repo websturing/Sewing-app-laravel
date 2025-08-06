@@ -15,7 +15,17 @@ class AttendanceController extends Controller
 
     public function index()
     {
-        $result = $this->attendanceService->getAttendanceToday();
+        $result = $this->attendanceService->getAllAttendance();
         return AttendanceResource::collection($result);
+    }
+
+    public function getAttendanceToday()
+    {
+        $result = $this->attendanceService->getAttendanceToday();
+        $data = [
+            "summary" => $result['summary'],
+            "items" => AttendanceResource::collection($result['items'])
+        ];
+        return successResponse($data);
     }
 }

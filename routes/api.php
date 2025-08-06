@@ -98,7 +98,7 @@ Route::prefix('attendance')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [AttendanceController::class, 'index']);
-        Route::get('/code', [EmployeeController::class, 'getEmployeeLastCode']);
+        Route::get('/today', [AttendanceController::class, 'getAttendanceToday']);
         Route::post('/', [EmployeeController::class, 'createEmployee']);
         Route::post('/{id}', [EmployeeController::class, 'updateEmployee']);
         Route::delete('/{id}', [EmployeeController::class, 'deleteEmployee']);
