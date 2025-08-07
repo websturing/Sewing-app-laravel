@@ -16,7 +16,7 @@ class AttendanceRepository implements AttendanceRepositoryInterface
 
     public function today()
     {
-        return Attendance::with(['logs', 'user'])
+        return Attendance::with(['logs', 'user', 'user.shiftAssignments.shift'])
             ->whereDate('attendance_date', Carbon::today())
             ->withCount('logs')
             ->get();
