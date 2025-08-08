@@ -34,8 +34,10 @@ class AttendanceService implements AttendanceServiceInterface
     public function getAttendanceToday()
     {
         $attendances = $this->attendanceRepository->today();
+        $attendancesAll = $this->attendanceRepository->all();
 
-        return $this->calculateOntimeByShift($attendances);
+
+
         $statusOptions = $this->statusOptions;
 
         // * Group attendances once by status
@@ -59,11 +61,20 @@ class AttendanceService implements AttendanceServiceInterface
             return Carbon::parse($item->check_in_time)->secondsSinceMidnight();
         });
         $checkInAverage = Carbon::createFromTime(0)->addSeconds(intval($checkInTotalInSeconds / $attendances->count()))->format('H:i:s');
+        $checkInPercentage = $this->calculateOntimeByShift($attendances);
 
+        /**
+         * 
+         * * Return summary, average check-in time, and percentage of on-time check-ins
+         */
+
+        $shiftAverage = $this->averageCheckInPerShift($attendancesAll);
 
         return [
             'summary' => $summaryResult->map(fn($data) => $data['count']),
             'check_in_average' => $checkInAverage,
+            'check_in_percentage' => $checkInPercentage,
+            'shift_average' => $shiftAverage,
             'items' => $attendances
         ];
     }
@@ -120,6 +131,80 @@ class AttendanceService implements AttendanceServiceInterface
             'data' => $data,
             'total' => $total,
         ];
+    }
+
+    public function averageCheckInPerShift(Collection $attendances): array
+    {
+        $result = [];
+        $shiftInfoMap = [];
+
+        // Group berdasarkan nama shift
+        $grouped = $attendances->groupBy(function ($attendance) use (&$shiftInfoMap) {
+            $shiftAssignment = $attendance->user->shiftAssignments
+                ->filter(fn($sa) => Carbon::parse($sa->effective_date_start)->lte($attendance->attendance_date))
+                ->sortByDesc('effective_date_start')
+                ->first();
+
+            $shiftName = $shiftAssignment?->shift?->name ?? 'Unknown';
+
+            // Simpan shift reference di map
+            if (!isset($shiftInfoMap[$shiftName]) && $shiftAssignment?->shift) {
+                $shiftInfoMap[$shiftName] = [
+                    'start_time' => $shiftAssignment->shift->start_time,
+                    'end_time' => $shiftAssignment->shift->end_time,
+                ];
+            }
+
+            return $shiftName;
+        });
+
+        foreach ($grouped as $shiftName => $items) {
+            $valid = $items->filter(fn($a) => $a->check_in_time);
+            $count = $valid->count();
+
+            if ($count === 0) {
+                $result[$shiftName] = [
+                    'average_check_in' => null,
+                    'count' => 0,
+                    'on_time_percentage' => 0,
+                    'start_time' => $shiftInfoMap[$shiftName]['start_time'] ?? null,
+                    'end_time' => $shiftInfoMap[$shiftName]['end_time'] ?? null,
+                    'employees' => [],
+                ];
+                continue;
+            }
+
+            $onTimeCount = $valid->filter(fn($a) => $a->status === 'present')->count();
+            $onTimePercentage = round(($onTimeCount / $count) * 100, 2);
+
+            $totalSeconds = $valid->sum(function ($a) {
+                return Carbon::parse($a->check_in_time)->secondsSinceMidnight();
+            });
+
+            $average = Carbon::createFromTime(0)->addSeconds(intval($totalSeconds / $count));
+
+            $employees = $valid->map(function ($a) {
+                return [
+                    'name' => $a->user->name,
+                    'email' => $a->user->email,
+                    'status' => $a->status,
+                    'date' => $a->attendance_date,
+                    'check_in' => $a->check_in_time ? Carbon::parse($a->check_in_time)->format('H:i:s') : null,
+                ];
+            })->values();
+
+            $result[$shiftName] = [
+                'average_check_in' => $average->format('H:i'),
+                'count' => $count,
+                'on_time_count' => $onTimeCount,
+                'on_time_percentage' => $onTimePercentage,
+                'start_time' => $shiftInfoMap[$shiftName]['start_time'] ?? null,
+                'end_time' => $shiftInfoMap[$shiftName]['end_time'] ?? null,
+                // 'employees' => $employees,
+            ];
+        }
+
+        return $result;
     }
 
 }

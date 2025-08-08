@@ -21,11 +21,13 @@ class AttendanceController extends Controller
 
     public function getAttendanceToday()
     {
-        return $result = $this->attendanceService->getAttendanceToday();
+        $result = $this->attendanceService->getAttendanceToday();
         $data = [
             "summary" => $result['summary'],
             'check_in_average' => $result['check_in_average'],
-            "items" => AttendanceResource::collection($result['items'])
+            'check_in_analytics' => $result['check_in_percentage'],
+            'shift_statistics' => $result['shift_average'],
+            "records" => AttendanceResource::collection($result['items'])
         ];
         return successResponse($data);
     }

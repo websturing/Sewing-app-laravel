@@ -8,7 +8,8 @@ use Faker\Factory as Faker;
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
 use App\Models\Employee;
-
+use App\Models\UserShiftAssignment;
+use Carbon\Carbon;
 class AttendanceTodaySeeder extends Seeder
 {
     /**
@@ -17,47 +18,76 @@ class AttendanceTodaySeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        $today = now()->format('Y-m-d');
+        $today = now()->toDateString();
 
-        // Ambil semua employee aktif
         $employees = Employee::where('active', true)->with('user')->get();
-        $statusOptions = ['present', 'late', 'absent', 'on_leave', 'wfh'];
         $logTypes = ['check_in', 'location', 'check_out'];
+        $toleranceMinutes = 10;
 
         foreach ($employees as $employee) {
-            $userId = $employee->user_id;
+            $user = $employee->user;
 
-            // Cek apakah sudah ada attendance hari ini
-            $existingAttendance = Attendance::where('user_id', $userId)
+            $shiftAssignment = UserShiftAssignment::with('shift')
+                ->where('user_id', $user->id)
+                ->where('effective_date_start', '<=', $today)
+                ->orderByDesc('effective_date_start')
+                ->first();
+
+            if (!$shiftAssignment || !$shiftAssignment->shift) {
+                continue;
+            }
+
+            $shift = $shiftAssignment->shift;
+
+            $shiftStart = Carbon::parse($today . ' ' . $shift->start_time);
+            $shiftEnd = Carbon::parse($today . ' ' . $shift->end_time);
+
+            if ($shiftStart->gt($shiftEnd)) {
+                // Shift malam: jam keluar besok
+                $shiftEnd->addDay();
+            }
+
+            // Randomkan status awal (untuk variasi data)
+            $statusRoll = $faker->randomElement(['present', 'present', 'present', 'wfh', 'absent', 'on_leave']);
+
+            // Skip pembuatan attendance jika tidak perlu
+            if (in_array($statusRoll, ['absent', 'on_leave'])) {
+                continue;
+            }
+
+            // Generate waktu check-in dan check-out
+            $checkIn = $faker->dateTimeBetween($shiftStart, $shiftStart->copy()->addHour());
+            $checkOut = (clone $checkIn)->modify('+8 hours');
+
+            // Hitung apakah terlambat atau tidak
+            $checkInCarbon = Carbon::parse($checkIn);
+            $toleranceTime = $shiftStart->copy()->addMinutes($toleranceMinutes);
+
+            $finalStatus = $statusRoll === 'wfh'
+                ? 'wfh'
+                : ($checkInCarbon->gt($toleranceTime) ? 'late' : 'present');
+
+            // Bersihkan data lama
+            $existingAttendance = Attendance::where('user_id', $user->id)
                 ->where('attendance_date', $today)
                 ->first();
 
-            // Generate waktu check-in dan check-out
-            $checkIn = $faker->dateTimeBetween($today . ' 07:00:00', $today . ' 10:00:00');
-            $checkOut = (clone $checkIn)->modify('+8 hours');
+            if ($existingAttendance) {
+                $existingAttendance->logs()->delete();
+                $existingAttendance->delete();
+            }
 
-            // Data attendance
-            $attendanceData = [
-                'user_id' => $userId,
+            // Simpan Attendance
+            $attendance = Attendance::create([
+                'user_id' => $user->id,
                 'attendance_date' => $today,
                 'check_in_time' => $checkIn,
                 'check_out_time' => $checkOut,
-                'status' => $faker->randomElement($statusOptions),
+                'status' => $finalStatus,
                 'note' => $faker->optional()->sentence(),
-            ];
+            ]);
 
-            // Jika sudah ada, update. Jika tidak, create baru
-            if ($existingAttendance) {
-                $existingAttendance->update($attendanceData);
-                $attendance = $existingAttendance;
-
-                // Hapus logs lama jika ada
-                AttendanceLog::where('attendance_id', $attendance->id)->delete();
-            } else {
-                $attendance = Attendance::create($attendanceData);
-            }
-
-            // Buat logs baru
+            // Simpan Log
             foreach ($logTypes as $type) {
                 AttendanceLog::create([
                     'attendance_id' => $attendance->id,
@@ -75,6 +105,8 @@ class AttendanceTodaySeeder extends Seeder
                 ]);
             }
         }
-        $this->command->info('Today attendance data has been generated/updated!');
+
+        $this->command->info('✅ Attendance data for today has been refreshed with realistic status and timing.');
     }
+
 }
