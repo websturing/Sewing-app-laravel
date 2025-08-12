@@ -18,10 +18,12 @@ class DatabaseSeeder extends Seeder
             ModuleSeeder::class,
             ModulePermissionSeeder::class,
             SpatiePermissionSeeder::class,
+            EmployeeSeeder::class,
             SettingSeeder::class,
-            AttendanceSeeder::class,
             ShiftSeeder::class,
-            // EmployeeSeeder::class
+
+            AttendanceSeeder::class,
+
         ]);
     }
 }
