@@ -14,6 +14,14 @@ class AttendanceRepository implements AttendanceRepositoryInterface
             ->get();
     }
 
+    public function byRangeDate(string $startDate, string $endDate)
+    {
+        return Attendance::with(['logs', 'user'])
+            ->whereBetween('attendance_date', [$startDate, $endDate])
+            ->withCount('logs')
+            ->get();
+    }
+
     public function today()
     {
         return Attendance::with(['logs', 'user', 'user.shiftAssignments.shift'])

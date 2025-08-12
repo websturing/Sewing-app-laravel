@@ -23,80 +23,68 @@ class AttendanceSeeder extends Seeder
     public function run(): void
     {
         $faker = Faker::create();
-        $shifts = Shift::all();
-
-        // 2. Buat User & Employee jika kurang dari 50
-        if (User::count() < 50) {
-            for ($i = 1; $i <= 50; $i++) {
-                $user = User::create([
-                    'name' => $faker->name,
-                    'email' => "user$i@example.com",
-                    'password' => bcrypt('password'),
-                ]);
-
-                Employee::create([
-                    'user_id' => $user->id,
-                    'employee_code' => 'EMP' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                    'position' => $faker->jobTitle,
-                    'department' => $faker->randomElement(['IT', 'HR', 'Finance', 'Ops']),
-                    'join_date' => $faker->dateTimeBetween('-5 years', '-1 month'),
-                    'active' => true,
-                    'device_id' => $faker->uuid,
-                ]);
-            }
-        }
-
-        // 3. Ambil employee aktif
         $employees = Employee::where('active', true)->with('user')->get();
-        $statusOptions = ['present', 'late', 'absent', 'on_leave', 'wfh'];
         $logTypes = ['check_in', 'location', 'check_out'];
-
-        // 4. Generate shift assignment & attendance untuk 30 hari terakhir
-        $today = now()->startOfDay();
+        $statusOptions = ['present', 'present', 'present', 'wfh', 'absent', 'on_leave'];
+        $toleranceMinutes = 10;
+        $today = now();
 
         foreach ($employees as $employee) {
             $user = $employee->user;
 
             for ($i = 0; $i < 30; $i++) {
-                $date = $today->copy()->subDays($i)->format('Y-m-d');
+                $date = $today->copy()->subDays($i)->toDateString();
 
-                // Hapus data lama
-                Attendance::where('user_id', $user->id)
-                    ->where('attendance_date', $date)
-                    ->each(function ($a) {
-                        $a->logs()->delete();
-                        $a->delete();
-                    });
+                $shiftAssignment = UserShiftAssignment::with('shift')
+                    ->where('user_id', $user->id)
+                    ->where('effective_date_start', '<=', $date)
+                    ->orderByDesc('effective_date_start')
+                    ->first();
 
-                // Assign shift random
-                $shift = $faker->randomElement($shifts);
-
-                UserShiftAssignment::updateOrCreate(
-                    ['user_id' => $user->id, 'effective_date_start' => $date],
-                    ['shift_id' => $shift->id]
-                );
-
-                // Hitung waktu check-in & out berdasarkan shift
-                $shiftStart = $date . ' ' . $shift->start_time;
-                $shiftEnd = $shift->end_time;
-
-                // Penanganan shift malam
-                if (strtotime($shift->start_time) > strtotime($shift->end_time)) {
-                    $shiftOut = date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date . ' ' . $shift->end_time)));
-                } else {
-                    $shiftOut = $date . ' ' . $shift->end_time;
+                if (!$shiftAssignment || !$shiftAssignment->shift) {
+                    continue;
                 }
 
-                $checkIn = $faker->dateTimeBetween($shiftStart, date('Y-m-d H:i:s', strtotime($shiftStart . ' +1 hour')));
+                $shift = $shiftAssignment->shift;
+
+                $shiftStart = Carbon::parse("$date {$shift->start_time}");
+                $shiftEnd = Carbon::parse("$date {$shift->end_time}");
+
+                if ($shiftStart->gt($shiftEnd)) {
+                    $shiftEnd->addDay(); // shift malam
+                }
+
+                $statusRoll = $faker->randomElement($statusOptions);
+
+                if (in_array($statusRoll, ['absent', 'on_leave'])) {
+                    continue;
+                }
+
+                $checkIn = $faker->dateTimeBetween($shiftStart, $shiftStart->copy()->addHour());
                 $checkOut = (clone $checkIn)->modify('+8 hours');
 
-                // Simpan attendance
+                $checkInCarbon = Carbon::parse($checkIn);
+                $toleranceTime = $shiftStart->copy()->addMinutes($toleranceMinutes);
+
+                $finalStatus = $statusRoll === 'wfh'
+                    ? 'wfh'
+                    : ($checkInCarbon->gt($toleranceTime) ? 'late' : 'present');
+
+                $existingAttendance = Attendance::where('user_id', $user->id)
+                    ->where('attendance_date', $date)
+                    ->first();
+
+                if ($existingAttendance) {
+                    $existingAttendance->logs()->delete();
+                    $existingAttendance->delete();
+                }
+
                 $attendance = Attendance::create([
                     'user_id' => $user->id,
                     'attendance_date' => $date,
                     'check_in_time' => $checkIn,
                     'check_out_time' => $checkOut,
-                    'status' => $faker->randomElement($statusOptions),
+                    'status' => $finalStatus,
                     'note' => $faker->optional()->sentence(),
                 ]);
 
@@ -118,5 +106,8 @@ class AttendanceSeeder extends Seeder
                 }
             }
         }
+
+        $this->command->info('✅ Attendance seeded for last 30 days using assigned shifts.');
     }
+
 }

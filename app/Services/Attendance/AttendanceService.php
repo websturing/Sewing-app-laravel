@@ -23,6 +23,7 @@ class AttendanceService implements AttendanceServiceInterface
         return $this->attendanceRepository->all();
     }
 
+
     public function getAttendanceGroupDate()
     {
         $attendances = $this->attendanceRepository->all();
@@ -68,13 +69,71 @@ class AttendanceService implements AttendanceServiceInterface
          * * Return summary, average check-in time, and percentage of on-time check-ins
          */
 
-        $shiftAverage = $this->averageCheckInPerShift($attendancesAll);
+        $shiftAverage = $this->averageCheckInPerShift($attendances);
 
         return [
             'summary' => $summaryResult->map(fn($data) => $data['count']),
             'check_in_average' => $checkInAverage,
             'check_in_percentage' => $checkInPercentage,
             'shift_average' => $shiftAverage,
+            'items' => $attendances
+        ];
+    }
+
+    public function getAttendanceByRangeDate(string $startDate, string $endDate)
+    {
+
+        $attendances = $this->attendanceRepository->byRangeDate($startDate, $endDate);
+        $statusOptions = $this->statusOptions;
+
+        // * Group attendances once by status
+        $groupedByStatus = $attendances->groupBy('status');
+        $summaryResult = collect($statusOptions)->mapWithKeys(function ($status) use ($groupedByStatus) {
+            $items = $groupedByStatus->get($status, collect());
+            return [
+                $status => [
+                    'count' => $items->count(),
+                    'items' => $items->values()
+                ]
+            ];
+        });
+
+        /**
+         * * Average the summary result
+         * * Return Clock In and Clock Out
+         */
+
+        $checkInTotalInSeconds = $attendances->sum(function ($item) {
+            return Carbon::parse($item->check_in_time)->secondsSinceMidnight();
+        });
+        $checkInAverage = Carbon::createFromTime(0)->addSeconds(intval($checkInTotalInSeconds / $attendances->count()))->format('H:i:s');
+        $checkInPercentage = $this->calculateOntimeByShift($attendances);
+
+        /**
+         * 
+         * * Return summary, average check-in time, and percentage of on-time check-ins
+         */
+
+        $shiftAverage = $this->averageCheckInPerShift($attendances);
+
+        return [
+            'summary' => $summaryResult->map(fn($data) => $data['count']),
+            'check_in_average' => $checkInAverage,
+            'check_in_percentage' => $checkInPercentage,
+            'shift_average' => $shiftAverage,
+            'items' => $attendances
+        ];
+
+
+    }
+
+    public function getAttendanceShiftSummary()
+    {
+        $attendances = $this->attendanceRepository->all();
+        $shiftSummary = $this->averageCheckInPerShift($attendances);
+
+        return [
+            'shift_summary' => $shiftSummary,
             'items' => $attendances
         ];
     }
