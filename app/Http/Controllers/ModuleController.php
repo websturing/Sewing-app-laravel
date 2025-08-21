@@ -101,7 +101,7 @@ class ModuleController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Module and permissions created successfully',
+                'message' => 'Module and permissions Updated successfully',
                 'data' => $module // Tambahkan data module jika diperlukan
             ], 201);
         } catch (\Exception $e) {

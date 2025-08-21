@@ -17,6 +17,7 @@ class ModuleWithPermissionsResource extends JsonResource
         return [
             'id'   => $this->id,
             'name' => $this->name,
+            'slug' => $this->slug,
             'permissions' => ModulePermissionsResources::collection(
                 $this->permissions->sortBy(function ($permission) {
                     $order = ['read', 'create', 'update', 'delete', 'upload', 'download'];

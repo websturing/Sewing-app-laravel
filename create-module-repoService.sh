@@ -3,26 +3,30 @@
 read -p "Masukkan nama module (Contoh: RoleManagement, role management): " raw_module
 
 # =========== Normalisasi Nama ===========
-# 1. Hapus karakter non-alfanumerik, ubah ke lowercase dengan dash
+# 1. Slug lowercase dengan underscore
 slug_name=$(echo "$raw_module" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/_/g')
 
-# 2. PascalCase untuk class dan file
+# 2. PascalCase untuk class dan folder (PSR-4)
 ModuleName=$(echo "$slug_name" | sed -E 's/(^|_)([a-z])/\U\2/g')
 
 # 3. camelCase untuk variabel
 LowerName=$(echo "$ModuleName" | sed -E 's/^([A-Z])/\L\1/')
 
-# 4. lowercase folder
-folder_name="$slug_name"
-
-# === Paths ===
-repo_path="app/Repositories/$folder_name"
-service_path="app/Services/$folder_name"
+# === Paths === (PascalCase folder agar PSR-4 sesuai)
+repo_path="app/Repositories/$ModuleName"
+service_path="app/Services/$ModuleName"
 repo_provider="app/Providers/RepositoryServiceProvider.php"
 service_provider="app/Providers/ServiceServiceProvider.php"
 
 mkdir -p "$repo_path"
 mkdir -p "$service_path"
+
+# === Generate Model jika belum ada ===
+model_path="app/Models/${ModuleName}.php"
+if [ ! -f "$model_path" ]; then
+    echo "📦 Membuat model $ModuleName..."
+    php artisan make:model "$ModuleName" >/dev/null 2>&1
+fi
 
 # === Repository Interface ===
 cat > "$repo_path/${ModuleName}RepositoryInterface.php" <<EOL
@@ -71,7 +75,6 @@ cat > "$service_path/${ModuleName}Service.php" <<EOL
 
 namespace App\Services\\$ModuleName;
 
-use App\Services\\$ModuleName\\${ModuleName}ServiceInterface;
 use App\Repositories\\$ModuleName\\${ModuleName}RepositoryInterface;
 
 class ${ModuleName}Service implements ${ModuleName}ServiceInterface
@@ -90,18 +93,16 @@ class ${ModuleName}Service implements ${ModuleName}ServiceInterface
 }
 EOL
 
-
-
-# === Helper: Inject Binding ===
+# === Helper: Inject Binding Aman ===
 inject_binding_block() {
     local file="$1"
-    local line="$2"
+    local marker="$2"
     local bind="$3"
     local tmpfile="$(mktemp)"
 
-    if ! grep -q "$bind" "$file"; then
-        awk -v line="$line" -v bind="$bind" '
-            $0 ~ line {
+    if ! grep -qF "$bind" "$file"; then
+        awk -v marker="$marker" -v bind="$bind" '
+            index(\$0, marker) {
                 print
                 print bind
                 next
@@ -114,7 +115,7 @@ inject_binding_block() {
     fi
 }
 
-# === Helper: Tambahkan AUTO-BINDINGS jika belum ada
+# === Helper: Tambahkan Marker jika belum ada ===
 ensure_autobind_block() {
     local file="$1"
     if ! grep -q "// AUTO-BINDINGS BELOW" "$file"; then
@@ -131,12 +132,14 @@ ensure_autobind_block() {
     fi
 }
 
-# === Binding Repository
+# === Binding Repository ===
 ensure_autobind_block "$repo_provider"
 inject_binding_block "$repo_provider" "// AUTO-BINDINGS BELOW" "        \$this->app->bind(\\App\\Repositories\\${ModuleName}\\${ModuleName}RepositoryInterface::class, \\App\\Repositories\\${ModuleName}\\${ModuleName}Repository::class);"
 
-# === Binding Service
+# === Binding Service ===
 ensure_autobind_block "$service_provider"
 inject_binding_block "$service_provider" "// AUTO-BINDINGS BELOW" "        \$this->app->bind(\\App\\Services\\${ModuleName}\\${ModuleName}ServiceInterface::class, \\App\\Services\\${ModuleName}\\${ModuleName}Service::class);"
 
-echo "🎉 Modul '$ModuleName' berhasil dibuat di folder '$folder_name'!"
+echo "🎉 Modul '$ModuleName' berhasil dibuat di:"
+echo "   📂 $repo_path"
+echo "   📂 $service_path"

@@ -18,7 +18,7 @@ class ModulePermissionsResources extends JsonResource
             "id" => $this->id,
             "name" => $this->permission_name,
             "action" => $this->action,
-            "permission_id" => $this->permission->id ?? null
+            "permission_id" => $this->id ?? 1
         ];
     }
 }
