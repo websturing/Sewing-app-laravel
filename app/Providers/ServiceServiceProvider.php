@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\Activity\ActivityService;
+use App\Services\Activity\ActivityServiceInterface;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Permissions\PermissionServiceInterface;
 use App\Services\Permissions\PermissionService;
@@ -23,6 +25,7 @@ class ServiceServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\Role\RoleServiceInterface::class, \App\Services\Role\RoleService::class);
 
         $this->app->bind(PermissionServiceInterface::class, PermissionService::class);
+        $this->app->bind(ActivityServiceInterface::class, ActivityService::class);
     }
 
     public function boot() {}

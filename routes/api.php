@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ModuleController;
@@ -21,6 +22,13 @@ Route::prefix('auth')
         Route::post('/password/{userId}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
+        Route::get('/activities', [AuthController::class, 'getActivitiesByUser'])->middleware('auth:sanctum');
+    });
+
+Route::prefix('activities')
+    ->middleware(['api'])
+    ->group(function () {
+        Route::get('/', [ActivityController::class, 'getActivitiesByUser'])->middleware('auth:sanctum');
     });
 
 Route::prefix('module')

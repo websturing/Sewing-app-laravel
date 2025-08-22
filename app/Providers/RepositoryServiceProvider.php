@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Activity\ActivityRepository;
+use App\Repositories\Activity\ActivityRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\Permissions\PermissionRepositoryInterface;
 use App\Repositories\Permissions\PermissionRepository;
@@ -22,6 +24,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\Role\RoleRepositoryInterface::class, \App\Repositories\Role\RoleRepository::class);
 
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
+        $this->app->bind(ActivityRepositoryInterface::class, ActivityRepository::class);
     }
 
     public function boot() {}
