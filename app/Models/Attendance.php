@@ -6,6 +6,9 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 
+/**
+ * @mixin IdeHelperAttendance
+ */
 class Attendance extends Model
 {
     public function logs()

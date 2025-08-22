@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Services\Permissions\PermissionServiceInterface;
+use App\Services\User\UserServiceInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,10 +15,12 @@ class AuthController extends Controller
 {
 
     protected $permissionService;
+    protected $userService;
 
-    public function __construct(PermissionServiceInterface $permissionService)
+    public function __construct(PermissionServiceInterface $permissionService, UserServiceInterface $userService)
     {
         $this->permissionService = $permissionService;
+        $this->userService = $userService;
     }
 
 
@@ -75,6 +78,7 @@ class AuthController extends Controller
     public function profile(Request $request)
     {
         $user = $request->user();
+        $activities = $this->userService->getUserActivities(1);
         $menus = $this->permissionService->getStructuredMenuForUser($user);
 
         return response()->json([
@@ -85,7 +89,48 @@ class AuthController extends Controller
                 'roles' => $user->getRoleNames(),
                 'menu' => $menus,
                 'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                'activities' =>   $activities
             ]
         ]);
     }
+
+
+    /** CHANGE PASSWORD */
+public function changePassword(Request $request, $userId)
+{
+    // Validasi
+    $validated = $request->validate([
+        // 'current_password' => 'required',
+        'password' => 'required|min:8', 
+    ]);
+
+    // Find users
+    $user = User::findOrFail($userId);
+
+    // Verifikasi User login
+    if (Auth::id() !== $user->id) {
+        return response()->json([
+            'message' => 'Unauthorized action'
+        ], 403);
+    }
+
+    // Update password
+    $user->update([
+        'password' => Hash::make($request->password)
+    ]);
+
+     activity('auth')
+        ->causedBy($user)
+        ->withProperties([
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'changed_at' => now()
+        ])
+        ->log('password_changed');
+    
+
+    return response()->json([
+        'message' => 'Password updated successfully'
+    ], 200);
+}
 }

@@ -18,6 +18,7 @@ Route::prefix('auth')
     ->middleware(['api'])
     ->group(function () {
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/password/{userId}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });

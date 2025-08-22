@@ -33,6 +33,18 @@ class UserService implements UserServiceInterface
             ]);
         }
     }
+
+    public function getUserActivities(int $id){
+      $user = $this->userRepository->userWithActivities($id);
+
+        if (!$user) {
+            // Anda bisa melempar Exception yang lebih spesifik
+            throw new ModelNotFoundException("User dengan ID {$id} tidak ditemukan.");
+        }
+
+        return $user;
+    }
+
     public function getUserWithRoles()
     {
 

@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
+/**
+ * @mixin IdeHelperShift
+ */
 class Shift extends Model
 {
     protected $fillable = ['name', 'start_time', 'end_time', 'tolerance', 'is_night_shift'];

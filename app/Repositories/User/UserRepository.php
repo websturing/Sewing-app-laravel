@@ -8,12 +8,18 @@ class UserRepository implements UserRepositoryInterface
 {
     public function all()
     {
-        return User::all();
+        return User::with(['activities'])->get();
     }
 
     public function userWithRoles()
     {
-        return User::with(['roles'])->get();
+        return User::with(['roles','activities'])->get();
+    }
+
+    public function userWithActivities($id){
+         return User::where('id', $id)
+            ->with(['activities'])
+            ->first();
     }
 
     public function findById(int $userId)

@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Permission;
 
+/**
+ * @mixin IdeHelperRolepermission
+ */
 class Rolepermission extends Model
 {
 
