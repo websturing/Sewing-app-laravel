@@ -18,3 +18,4 @@ class Role extends Model
         return $this->hasMany(Rolepermission::class, 'role_id');
     }
 }
+
