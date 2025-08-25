@@ -22,7 +22,6 @@ Route::prefix('auth')
         Route::post('/password/{userId}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
-        Route::get('/activities', [AuthController::class, 'getActivitiesByUser'])->middleware('auth:sanctum');
     });
 
 Route::prefix('activities')
