@@ -53,6 +53,16 @@ class AuthController extends Controller
             'roles' => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions()->pluck('name'),
         ];
+
+        activity('auth')
+            ->causedBy($user)
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'changed_at' => now()
+            ])
+            ->log('Login Application');
+
         return successResponse($response, 'Successfully login');
     }
 
@@ -60,6 +70,16 @@ class AuthController extends Controller
     {
         try {
             $request->user()->currentAccessToken()->delete();
+            $user = User::findOrFail(Auth::id());
+
+            activity('auth')
+                ->causedBy($user)
+                ->withProperties([
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'changed_at' => now()
+                ])
+                ->log('Logout Application');
 
             return response()->json([
                 'status' => true,
@@ -96,41 +116,41 @@ class AuthController extends Controller
 
 
     /** CHANGE PASSWORD */
-public function changePassword(Request $request, $userId)
-{
-    // Validasi
-    $validated = $request->validate([
-        // 'current_password' => 'required',
-        'password' => 'required|min:8', 
-    ]);
+    public function changePassword(Request $request, $userId)
+    {
+        // Validasi
+        $validated = $request->validate([
+            // 'current_password' => 'required',
+            'password' => 'required|min:8',
+        ]);
 
-    // Find users
-    $user = User::findOrFail($userId);
+        // Find users
+        $user = User::findOrFail($userId);
 
-    // Verifikasi User login
-    if (Auth::id() !== $user->id) {
+        // Verifikasi User login
+        if (Auth::id() !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized action'
+            ], 403);
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        activity('auth')
+            ->causedBy($user)
+            ->withProperties([
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'changed_at' => now()
+            ])
+            ->log('password_changed');
+
+
         return response()->json([
-            'message' => 'Unauthorized action'
-        ], 403);
+            'message' => 'Password updated successfully'
+        ], 200);
     }
-
-    // Update password
-    $user->update([
-        'password' => Hash::make($request->password)
-    ]);
-
-     activity('auth')
-        ->causedBy($user)
-        ->withProperties([
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'changed_at' => now()
-        ])
-        ->log('password_changed');
-    
-
-    return response()->json([
-        'message' => 'Password updated successfully'
-    ], 200);
-}
 }

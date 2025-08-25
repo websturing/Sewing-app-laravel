@@ -28,7 +28,8 @@ Route::prefix('auth')
 Route::prefix('activities')
     ->middleware(['api'])
     ->group(function () {
-        Route::get('/', [ActivityController::class, 'getActivitiesByUser'])->middleware('auth:sanctum');
+        Route::get('/', [ActivityController::class, 'getActivities'])->middleware('auth:sanctum');
+        Route::get('/user', [ActivityController::class, 'getActivitiesByUser'])->middleware('auth:sanctum');
     });
 
 Route::prefix('module')

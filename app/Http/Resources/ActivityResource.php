@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class ActivityResource extends JsonResource
 {
@@ -15,6 +16,6 @@ class ActivityResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = parent::toArray($request);
-        return Arr::except($data, ['created_at', 'updated_at']);
+        return Arr::except($data, ['created_at', 'updated_at','causer_type','causer_id','subject_id']);
     }
 }
