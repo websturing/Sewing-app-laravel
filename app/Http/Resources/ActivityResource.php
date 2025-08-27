@@ -41,6 +41,6 @@ class ActivityResource extends JsonResource
         }
 
         // Jika tidak ada causer sama sekali
-        return null;
+        return "system (admin@system.com)";
     }
 }
