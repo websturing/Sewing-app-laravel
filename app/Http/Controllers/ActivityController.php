@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ActivityGroupDateResource;
 use App\Http\Resources\ActivityResource;
 use App\Services\Activity\ActivityServiceInterface;
 use Illuminate\Http\Request;
@@ -33,7 +34,7 @@ class ActivityController extends Controller
         try {
             $activities = $this->activityService->getAllActivity($request->all());
 
-            return ActivityResource::collection($activities);
+            return ActivityGroupDateResource::collection($activities);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to retrieve activities',

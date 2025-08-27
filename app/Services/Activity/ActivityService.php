@@ -17,7 +17,7 @@ class ActivityService implements ActivityServiceInterface
 
     public function getAllActivity(array $filters)
     {
-        $query = $this->activityRepository->query()->with('causer');
+        $query = $this->activityRepository->query()->with(['causer']);
 
         $query->when(
             $filters['user_id'] ?? null,
