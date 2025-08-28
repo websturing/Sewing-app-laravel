@@ -53,7 +53,7 @@ class ActivityService implements ActivityServiceInterface
         );
 
         // Pagination (ambil dulu data flat)
-        $perPage = $filters['per_page'] ?? 20;
+        $perPage = $filters['per_page'] ?? 5;
         $activities = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         // Grouping per tanggal tanpa jam

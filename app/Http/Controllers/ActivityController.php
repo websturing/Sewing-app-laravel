@@ -34,7 +34,11 @@ class ActivityController extends Controller
         try {
             $activities = $this->activityService->getAllActivity($request->all());
 
-            return ActivityGroupDateResource::collection($activities);
+
+            return ActivityGroupDateResource::collection($activities)->additional([
+                'status' => true,
+                'message' => 'Succesfully Retrieved Activity'
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to retrieve activities',

@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 class ActivityResource extends JsonResource
 {
@@ -19,6 +20,9 @@ class ActivityResource extends JsonResource
         $data = Arr::except($data, ['created_at', 'updated_at', 'causer_type', 'causer_id', 'subject_id', 'causer']);
 
         $data['causer'] = $this->getCauserInfo();
+        $data['time'] = Carbon::parse($this->created_at)
+            ->timezone('Asia/Jakarta')
+            ->toDateTimeString();
         return $data;
     }
 
