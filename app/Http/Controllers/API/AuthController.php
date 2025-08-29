@@ -10,6 +10,7 @@ use App\Services\Permissions\PermissionServiceInterface;
 use App\Services\User\UserServiceInterface;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Contracts\Role;
 
 class AuthController extends Controller
 {
@@ -98,8 +99,9 @@ class AuthController extends Controller
     public function profile(Request $request)
     {
         $user = $request->user();
+
         $activities = $this->userService->getUserActivities(1);
-        $menus = $this->permissionService->getStructuredMenuForUser($user);
+        $menus = $this->permissionService->getStructuredMenuForUser($user, $request->user()->getAllPermissions()->pluck('name')->toArray());
 
         return response()->json([
             'status' => true,

@@ -17,12 +17,40 @@ class PermissionService implements PermissionServiceInterface
         return $this->permissionRepository->all();
     }
 
-    public function getStructuredMenuForUser($user): Collection
-    {
-        $allModules = $this->permissionRepository->getAllModulesWithPermissions();
-        $userPermissions = $user->getAllPermissions()->pluck('name');
 
-        return $this->buildNestedModules($allModules, $userPermissions);
+    public function getStructuredMenuForUser($user)
+    {
+        $allModules      = $this->permissionRepository->getAllModulesWithPermissions();
+        $userPermissions = $user->getAllPermissions()->pluck('name'); // Collection
+
+        $menu = $this->buildNestedModules($allModules, $userPermissions); // Collection
+        return $this->filterMenu($menu, $userPermissions); // aman (Collection)
+    }
+
+    private function filterMenu(array|Collection $menus, array|Collection $userPermissions): array
+    {
+        $userPermissions = collect($userPermissions)->toArray();
+
+        return collect($menus)
+            ->map(function ($menu) use ($userPermissions) {
+                // children bisa Collection/array/null → normalisasi
+                $children = $this->filterMenu(collect(data_get($menu, 'children', [])), $userPermissions);
+
+                $hasReadPermission = collect(data_get($menu, 'permissions', []))
+                    ->pluck('permission_name')
+                    ->intersect($userPermissions)
+                    ->filter(fn($perm) => str_ends_with($perm, '.read'))
+                    ->isNotEmpty();
+
+                if ($hasReadPermission || !empty($children)) {
+                    $menu['children'] = $children;
+                    return $menu;
+                }
+                return null;
+            })
+            ->filter()
+            ->values()
+            ->toArray();
     }
 
     private function buildNestedModules(Collection $modules, Collection $userPermissions, $parentId = null): Collection
@@ -30,7 +58,6 @@ class PermissionService implements PermissionServiceInterface
         return $modules->where('parent_id', $parentId)
             ->sortBy('order')
             ->map(function ($module) use ($modules, $userPermissions) {
-                // Ambil permission module yang dimiliki user
                 $filteredPermissions = $module->permissions
                     ->filter(fn($perm) => $userPermissions->contains($perm->permission_name))
                     ->map(fn($perm) => [
@@ -39,25 +66,27 @@ class PermissionService implements PermissionServiceInterface
                     ])
                     ->values();
 
-                // Apakah module ini layak tampil?
-                $hasViewPermission = $filteredPermissions;
-
                 $children = $this->buildNestedModules($modules, $userPermissions, $module->id);
 
-                if (!$hasViewPermission && $children->isEmpty()) {
+                // boolean yang jelas, bukan Collection truthy
+                if ($filteredPermissions->isEmpty() && $children->isEmpty()) {
                     return null;
                 }
 
                 return [
-                    'id' => $module->id,
-                    'name' => $module->name,
-                    'slug' => $module->slug,
-                    'icon' => $module->icon,
-                    'permissions' => $filteredPermissions,
-                    'children' => $children,
+                    'id'          => $module->id,
+                    'name'        => $module->name,
+                    'slug'        => $module->slug,
+                    'icon'        => $module->icon,
+                    'permissions' => $filteredPermissions->toArray(), // konsisten array
+                    'children'    => $children, // biarkan Collection, filterMenu handle
                 ];
-            })->filter()->values();
+            })
+            ->filter()
+            ->values();
     }
+
+
 
     /** MODULE PERMISSION */
     public function getModulePermission(): Collection
