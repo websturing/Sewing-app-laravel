@@ -2,10 +2,17 @@
 
 namespace App\Repositories\Employee;
 
+use Illuminate\Database\Eloquent\Builder;
 use App\Models\Employee;
 
 class EmployeeRepository implements EmployeeRepositoryInterface
 {
+
+    public function query(): Builder
+    {
+        return Employee::query();
+    }
+
     public function all()
     {
         return Employee::with(['user'])->get();

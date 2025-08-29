@@ -14,10 +14,25 @@ class EmployeeService implements EmployeeServiceInterface
         $this->employeeRepository = $employeeRepository;
     }
 
-    public function getAllEmployee()
+
+
+    public function getAllEmployee(array $filters)
     {
-        return $this->employeeRepository->all();
+        $query = $this->employeeRepository->query();
+
+        if (!empty($filters['q'])) {
+            $search = $filters['q'];
+            $query->where(
+                fn($q) =>
+                $q->where('employee_code', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('position', 'like', "%{$search}%")
+            );
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
+
 
     public function getEmployeeLastCode()
     {
@@ -39,5 +54,21 @@ class EmployeeService implements EmployeeServiceInterface
     public function deleteEmployee(int $employeeId)
     {
         return $this->employeeRepository->delete($employeeId);
+    }
+
+    public function paginateEmployee(array $filters)
+    {
+        $query = $this->employeeRepository->query();
+
+        if (!empty($filters['q'])) {
+            $search = $filters['q'];
+            $query->where(
+                fn($q) =>
+                $q->where('employee_code', 'like', "%{$search}%")
+                    ->orWhere('position', 'like', "%{$search}%")
+            );
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate($filters['per_page'] ?? 10);
     }
 }

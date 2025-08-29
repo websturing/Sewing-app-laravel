@@ -14,16 +14,15 @@ class EmployeeController extends Controller
         private EmployeeServiceInterface $employeeService
     ) {}
 
-    function index()
+    function index(Request $request)
     {
-        $employee = $this->employeeService->getAllEmployee();
+        $employee = $this->employeeService->paginateEmployee($request->all());
 
         if (!$employee) {
-            return errorResponse('Shift not found', 404);
+            return errorResponse('Employee Not Found', 404);
         }
 
-        $collection = EmployeeResource::collection($employee);
-        return successResponse($collection);
+        return $collection = EmployeeResource::collection($employee);
     }
 
     function getEmployeeLastCode()

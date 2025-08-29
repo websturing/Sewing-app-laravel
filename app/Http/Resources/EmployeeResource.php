@@ -16,7 +16,7 @@ class EmployeeResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // $data = parent::toArray($request);
+        return $data = parent::toArray($request);
         // return Arr::except($data, ['created_at', 'updated_at', 'user']);
 
         return [
