@@ -22,7 +22,10 @@ class EmployeeController extends Controller
             return errorResponse('Employee Not Found', 404);
         }
 
-        return $collection = EmployeeResource::collection($employee);
+        return $collection = EmployeeResource::collection($employee)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Employees'
+        ]);
     }
 
     function getEmployeeLastCode()
