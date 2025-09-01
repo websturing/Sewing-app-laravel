@@ -37,7 +37,30 @@ class EmployeeService implements EmployeeServiceInterface
 
     public function getEmployeeLastCode()
     {
-        return $this->employeeRepository->lastEmployeeCode();
+        $lastEmployee = $this->employeeRepository->lastEmployeeCode();
+
+        if (!$lastEmployee) {
+            return 'EMP20250001';
+        }
+
+        $lastCode = $lastEmployee->employee_code;
+        $year = date('Y'); // Tahun sekarang
+
+        // Pastikan format sesuai
+        if (preg_match('/EMP(\d{4})(\d{4})/', $lastCode, $matches)) {
+            $lastYear = $matches[1];
+            $lastNumber = (int) $matches[2];
+
+            // Jika tahun berbeda, reset counter
+            if ($lastYear != $year) {
+                return 'EMP' . $year . '0001';
+            }
+
+            $nextNumber = $lastNumber + 1;
+            return 'EMP' . $year . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        }
+
+        throw new \Exception('Format kode karyawan tidak valid');
     }
 
     public function createEmployee(array $employeeData)

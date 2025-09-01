@@ -31,7 +31,7 @@ class EmployeeController extends Controller
     function getEmployeeLastCode()
     {
         $code = $this->employeeService->getEmployeeLastCode();
-        return successResponse($code->employee_code, 'Successfully Retrived Last Code Employee');
+        return successResponse($code, 'Successfully Retrived Last Code Employee');
     }
 
     function createEmployee(EmployeeRequest $request)

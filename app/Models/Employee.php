@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Employee extends Model
 {
-    protected $fillable = ['employee_code', 'position', 'department', 'join_date', 'active', 'user_id', 'device_id'];
+    protected $fillable = ['name', 'gender', 'date_birth', 'employee_code', 'position', 'department', 'join_date', 'active', 'user_id', 'device_id'];
     protected $casts = [
         'active' => 'boolean'
     ];
