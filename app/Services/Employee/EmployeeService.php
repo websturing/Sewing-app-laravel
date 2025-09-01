@@ -4,6 +4,7 @@ namespace App\Services\Employee;
 
 use App\Services\Employee\EmployeeServiceInterface;
 use App\Repositories\Employee\EmployeeRepositoryInterface;
+use Illuminate\Support\Carbon;
 
 class EmployeeService implements EmployeeServiceInterface
 {
@@ -60,14 +61,22 @@ class EmployeeService implements EmployeeServiceInterface
     {
         $query = $this->employeeRepository->query();
 
-        if (!empty($filters['q'])) {
-            $search = $filters['q'];
-            $query->where(
-                fn($q) =>
-                $q->where('employee_code', 'like', "%{$search}%")
-                    ->orWhere('position', 'like', "%{$search}%")
-            );
-        }
+        $query->when(
+            $filters['q'] ?? null,
+            fn($q, $search) =>
+            $q->where('employee_code', 'like', "%{$search}%")
+                ->orWhere('position', 'like', "%{$search}%")
+        );
+
+        $query->when(
+            ($filters['date_from'] ?? null) && ($filters['date_to'] ?? null),
+            fn($q) => $q->whereBetween('join_date', [
+                Carbon::parse($filters['date_from'])->startOfDay(),
+                Carbon::parse($filters['date_to'])->endOfDay(),
+            ])
+        );
+
+
 
         return $query->orderBy('created_at', 'desc')->paginate($filters['per_page'] ?? 10);
     }
