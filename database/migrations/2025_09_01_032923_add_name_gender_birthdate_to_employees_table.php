@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('employees', function (Blueprint $table) {
             $table->string('name')->after('user_id'); // Tambah setelah user_id
-            $table->enum('gender', ['L', 'P'])->nullable()->after('name');
+            $table->enum('gender', ['male', 'female'])->nullable()->after('name');
             $table->date('date_birth')->nullable()->after('gender');
         });
     }
