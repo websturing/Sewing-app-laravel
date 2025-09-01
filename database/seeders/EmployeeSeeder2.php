@@ -60,7 +60,7 @@ class EmployeeSeeder2 extends Seeder
                 'user_id' => null, // bisa diisi nanti jika perlu relasi ke users
                 'employee_code' => $this->generateEmployeeCode($i),
                 'name' => $faker->name,
-                'gender' => $faker->randomElement(['L', 'P']),
+                'gender' => $faker->randomElement(['male', 'female']),
                 'date_birth' => $birthDate->format('Y-m-d'),
                 'position' => $faker->randomElement($positions),
                 'department' => $faker->randomElement($departments),
