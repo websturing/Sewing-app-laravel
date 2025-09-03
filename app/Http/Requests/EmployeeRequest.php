@@ -30,6 +30,7 @@ class EmployeeRequest extends FormRequest
             'department' => 'required|string',
             'join_date' => 'required|date_format:Y-m-d',
             'active' => 'required|boolean',
+            'user_id' => 'nullable|integer|exists:users,id',
         ];
     }
 }
