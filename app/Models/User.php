@@ -34,7 +34,7 @@ class User extends Authenticatable
 
     public function activities(): HasMany
     {
-            return $this->hasMany(\Spatie\Activitylog\Models\Activity::class, 'causer_id');
+        return $this->hasMany(\Spatie\Activitylog\Models\Activity::class, 'causer_id');
     }
 
 
@@ -75,5 +75,10 @@ class User extends Authenticatable
     public function shiftAssignments()
     {
         return $this->hasMany(UserShiftAssignment::class, 'user_id');
+    }
+
+    public function employee()
+    {
+        return $this->hasOne(Employee::class, 'user_id');
     }
 }

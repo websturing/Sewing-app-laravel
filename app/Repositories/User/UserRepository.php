@@ -9,7 +9,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function all(array $filters)
     {
-        $query = User::with('roles');
+        $query = User::with('roles', 'employee');
 
         $query->when(
             $filters['email'] ?? null,

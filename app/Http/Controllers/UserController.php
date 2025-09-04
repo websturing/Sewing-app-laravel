@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use App\Services\User\UserServiceInterface;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,8 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
+
+
         $users = $this->userService->getAllUser($request->all());
 
         if (!$users) {

@@ -16,13 +16,16 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         $data = parent::toArray($request);
-        $data = Arr::except($data, ['created_at', 'updated_at', 'email_verified_at', 'roles']);
+        $data = Arr::except($data, ['created_at', 'updated_at', 'email_verified_at', 'roles', 'employee']);
 
-        $data['role_names'] = $this->roles->map(function ($role) {
-            return [
-                'name' => $role->name,
-                'color' => $role->color,
-            ];
+        $data['employee'] = new EmployeeResource($this->whenLoaded('employee'));
+        $data['role_names'] = $this->whenLoaded('roles', function () {
+            return $this->roles->map(function ($role) {
+                return [
+                    'name' => $role->name,
+                    'color' => $role->color,
+                ];
+            });
         });
 
         return $data;
