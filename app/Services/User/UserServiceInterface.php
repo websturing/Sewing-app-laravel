@@ -4,7 +4,7 @@ namespace App\Services\User;
 
 interface UserServiceInterface
 {
-    public function getAllUser();
+    public function getAllUser(array $filters);
     public function getUserWithRoles();
     public function getUserActivities(int $id);
     public function createUser(array $UserData);

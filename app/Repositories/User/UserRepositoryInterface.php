@@ -4,7 +4,7 @@ namespace App\Repositories\User;
 
 interface UserRepositoryInterface
 {
-    public function all();
+    public function all(array $filters);
     public function findById(int $userId);
     public function userWithRoles();
     public function userWithActivities($id);

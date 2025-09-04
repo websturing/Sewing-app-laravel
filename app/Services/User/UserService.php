@@ -17,29 +17,20 @@ class UserService implements UserServiceInterface
         $this->userRepository = $userRepository;
     }
 
-    public function getAllUser()
+    public function getAllUser(array $filters)
     {
-
-        try {
-            $users =   $this->userRepository->all();
-            return successResponse($users);
-        } catch (\Exception $e) {
-            Log::error('Failed to Retrive User: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            return errorResponse('Failed to Retrive User', 500, [
-                'exception' => app()->environment('production') ? null : $e->getMessage(),
-            ]);
-        }
+        return $this->userRepository->all([])
+            ->orderBy('created_at', 'desc')
+            ->paginate($filters['per_page'] ?? 10);
     }
 
-    public function getUserActivities(int $id){
-      $user = $this->userRepository->userWithActivities($id);
+    public function getUserActivities(int $id)
+    {
+        $user = $this->userRepository->userWithActivities($id);
 
         if (!$user) {
             // Anda bisa melempar Exception yang lebih spesifik
-            throw new ModelNotFoundException("User dengan ID {$id} tidak ditemukan.");
+            // throw new ModelNotFoundException("User dengan ID {$id} tidak ditemukan.");
         }
 
         return $user;

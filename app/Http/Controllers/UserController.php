@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use App\Services\User\UserServiceInterface;
 use Illuminate\Http\Request;
 
@@ -11,9 +12,18 @@ class UserController extends Controller
         private UserServiceInterface $userService,
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
-        return $this->userService->getAllUser();
+        $users = $this->userService->getAllUser($request->all());
+
+        if (!$users) {
+            return errorResponse('Users Not Found', 404);
+        }
+
+        return $collection = UserResource::collection($users)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Employees'
+        ]);
     }
 
     public function getUserWithRole()
