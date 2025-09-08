@@ -53,7 +53,10 @@ class SpatiePermissionSeeder extends Seeder
         $this->command->info("🔁 Permission sync done. Created: $synced, Deleted: $deleted");
 
         // Buat role admin kalau belum ada
-        $admin = Role::firstOrCreate(['name' => 'admin'], ['guard_name' => 'web']);
+        $admin = Role::firstOrCreate(['name' => 'admin'], [
+            'guard_name' => 'web',
+            'color' => '#a8dadc',
+        ]);
         $admin->syncPermissions(Permission::all());
 
         $this->command->info("👑 Role `admin` now has all permissions.");

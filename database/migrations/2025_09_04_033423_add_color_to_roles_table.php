@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->string('color')->after('guard_name');
+            $table->string('color')->after('guard_name')->default('#6c757d');
         });
     }
 

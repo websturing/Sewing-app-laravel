@@ -11,11 +11,10 @@ use App\Models\Traits\Auditable;
 class Role extends Model
 {
     use Auditable;
-    protected $fillable = ['name', 'guard_name'];
+    protected $fillable = ['name', 'guard_name', 'color'];
 
     public function permissions()
     {
         return $this->hasMany(Rolepermission::class, 'role_id');
     }
 }
-
