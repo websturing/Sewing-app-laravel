@@ -13,8 +13,17 @@ class LineService implements LineServiceInterface
         $this->lineRepository = $lineRepository;
     }
 
-    public function getAllLine()
+    public function getAllLine(array $filters)
     {
-        return $this->lineRepository->all();
+        return $this->lineRepository->all($filters)
+            ->orderBy('created_at', 'desc')
+            ->paginate($filters['per_page'] ?? 10);;
+    }
+
+    public function getLinePaginate(array $filters)
+    {
+        return $this->lineRepository->all($filters)
+            ->orderBy('name', 'ASC')
+            ->paginate($filters['per_page'] ?? 10);
     }
 }

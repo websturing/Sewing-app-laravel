@@ -9,6 +9,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\lineController;
 use App\Http\Controllers\UserShiftAssignmentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -22,6 +23,12 @@ Route::prefix('auth')
         Route::post('/password/{userId}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
+    });
+
+Route::prefix('lines')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [lineController::class, 'index']);
     });
 
 Route::prefix('activities')

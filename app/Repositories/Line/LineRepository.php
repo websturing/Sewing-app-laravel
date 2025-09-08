@@ -3,11 +3,22 @@
 namespace App\Repositories\Line;
 
 use App\Models\Line;
+use Illuminate\Support\Carbon;
 
 class LineRepository implements LineRepositoryInterface
 {
-    public function all()
+    public function all(array $filters)
     {
-        return Line::all();
+        $query = Line::query();
+
+
+
+        $query->when(
+            $filters['name'] ?? null,
+            fn($q, $name) => $q->where('name', 'LIKE', "%{$name}%")
+        );
+
+
+        return $query; // <--- jangan pakai get()
     }
 }

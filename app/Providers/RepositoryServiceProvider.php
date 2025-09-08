@@ -22,6 +22,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(\App\Repositories\modulepermission\ModulepermissionRepositoryInterface::class, \App\Repositories\modulepermission\ModulepermissionRepository::class);
         $this->app->bind(\App\Repositories\module\ModuleRepositoryInterface::class, \App\Repositories\module\ModuleRepository::class);
         $this->app->bind(\App\Repositories\Role\RoleRepositoryInterface::class, \App\Repositories\Role\RoleRepository::class);
+        $this->app->bind(\App\Repositories\Line\LineRepositoryInterface::class, \App\Repositories\Line\LineRepository::class);
+        $this->app->bind(\App\Repositories\Assigmentline\AssigmentlineRepositoryInterface::class, \App\Repositories\Assigmentline\AssigmentlineRepository::class);
 
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
         $this->app->bind(ActivityRepositoryInterface::class, ActivityRepository::class);

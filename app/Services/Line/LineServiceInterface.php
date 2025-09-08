@@ -4,5 +4,6 @@ namespace App\Services\Line;
 
 interface LineServiceInterface
 {
-    public function getAllLine();
+    public function getAllLine(array $filters);
+    public function getLinePaginate(array $filters);
 }

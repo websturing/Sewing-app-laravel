@@ -4,5 +4,5 @@ namespace App\Repositories\Line;
 
 interface LineRepositoryInterface
 {
-    public function all();
+    public function all(array $filters);
 }

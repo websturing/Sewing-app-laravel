@@ -59,11 +59,24 @@ class SpatiePermissionSeeder extends Seeder
         ]);
         $admin->syncPermissions(Permission::all());
 
+
+
         $this->command->info("👑 Role `admin` now has all permissions.");
 
         // 4. Buat user admin
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@admin.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('password'), // ganti kalau perlu
+            ]
+        );
+
+        // 5. Assign role admin ke user
+        $adminUser->assignRole($admin);
+
+        $adminUser = User::firstOrCreate(
+            ['email' => 'postman@admin.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'), // ganti kalau perlu
