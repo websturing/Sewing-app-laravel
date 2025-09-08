@@ -80,6 +80,22 @@ class ModuleSeeder extends Seeder
                 "is_active" => true,
                 "parent_slug" => "transfers",
             ],
+            [
+                "name" => "Defect",
+                "slug" => "defect",
+                "icon" => "CheckboxWarning20Regular",
+                "order" => 3,
+                "is_active" => true,
+                "parent_slug" => "transfers",
+            ],
+            [
+                "name" => "Request Form",
+                "slug" => "request-form",
+                "icon" => "Forms",
+                "order" => 4,
+                "is_active" => true,
+                "parent_slug" => "transfers",
+            ],
         ];
 
         // Step 1: Insert parents first
