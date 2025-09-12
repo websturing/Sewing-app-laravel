@@ -13,9 +13,16 @@ class AssigmentlineService implements AssigmentlineServiceInterface
         $this->assigmentlineRepository = $assigmentlineRepository;
     }
 
-    public function getAllAssigmentline(array $filters)
+    public function getAll(array $filters)
     {
-        return $this->assigmentlineRepository->all($filters);
+        return $items = $this->assigmentlineRepository->all($filters);
+
+        return $items->filter(function ($item) use ($filters) {
+            return str_contains(strtolower($item->line?->name ?? ''), strtolower($filters['line_name'] ?? '')) &&
+                str_contains(strtolower($item->glnumber?->gl_number ?? ''), strtolower($filters['gl_number'] ?? '')) &&
+                str_contains(strtolower($item->date_start ?? ''), strtolower($filters['date_start'] ?? '')) &&
+                str_contains(strtolower($item->date_end ?? ''), strtolower($filters['date_end'] ?? ''));
+        })->values();
     }
 
     public function create(array $createData)

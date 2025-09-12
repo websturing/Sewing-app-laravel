@@ -44,6 +44,7 @@ Route::prefix('gls')
 Route::prefix('assignment')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
+        Route::get('/lines', [AssignmentLineController::class, 'index']);
         Route::post('/line', [AssignmentLineController::class, 'store']);
     });
 

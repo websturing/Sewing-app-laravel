@@ -14,4 +14,19 @@ class Assigmentline extends Model
         'date_start',
         'date_end',
     ];
+
+    function line()
+    {
+        return $this->belongsTo(Line::class, 'line_id');
+    }
+
+    function layingPlanning()
+    {
+        return $this->hasMany(LayingPlanning::class, 'assignment_line_id');
+    }
+
+    function glNumber()
+    {
+        return $this->belongsTo(GlNumber::class, 'gl_id');
+    }
 }

@@ -3,39 +3,65 @@
 namespace App\Repositories\Assigmentline;
 
 use App\Models\Assigmentline;
+use App\Models\LayingPlanning;
+use App\Models\Line;
 use Illuminate\Support\Carbon;
 
 class AssigmentlineRepository implements AssigmentlineRepositoryInterface
 {
     public function all(array $filters)
     {
-        $query = Assigmentline::All();
+        $query = Assigmentline::with(['line', 'glnumber', 'layingPlanning'])->get();
 
-        $query->when(
-            $filters['email'] ?? null,
-            fn($q, $email) => $q->where('email', 'LIKE', "%{$email}%")
-        );
-
-        $query->when(
-            $filters['name'] ?? null,
-            fn($q, $name) => $q->where('name', 'LIKE', "%{$name}%")
-        );
-
-        $query->when(
-            ($filters['date_from'] ?? null) && ($filters['date_to'] ?? null),
-            fn($q) => $q->whereBetween('created_at', [
-                Carbon::parse($filters['date_from'])->startOfDay(),
-                Carbon::parse($filters['date_to'])->endOfDay(),
-            ])
-        );
-
+        return Line::with(['assignment', 'assignment.line', 'assignment.glnumber', 'assignment.layingPlanning'])->get();
         return $query;
     }
 
     public function create(array $createData)
     {
-        return Assigmentline::create($createData);
+        // ambil data assignment_line (exclude laying_planning)
+        $assignmentData = collect($createData)->except('laying_planning')->toArray();
+
+        // cek apakah assignment_line sudah ada
+        $assignment = Assigmentline::where('gl_id', $assignmentData['gl_id'])
+            ->where('line_id', $assignmentData['line_id'])
+            ->where('date_start', $assignmentData['date_start'])
+            ->where('date_end', $assignmentData['date_end'])
+            ->first();
+
+        if (!$assignment) {
+            // kalau belum ada, create baru
+            $assignment = Assigmentline::create($assignmentData);
+        }
+
+        // create/update laying_planning
+        if (!empty($createData['laying_planning'])) {
+            $exists = LayingPlanning::where('assignment_line_id', $assignment->id)
+                ->where('color', $createData['laying_planning']['color'])
+                ->where('type', $createData['laying_planning']['type'])
+                ->first();
+
+            if (!$exists) {
+                LayingPlanning::create([
+                    'assignment_line_id' => $assignment->id,
+                    'color'              => $createData['laying_planning']['color'],
+                    'type'               => $createData['laying_planning']['type'],
+                    'order_qty'          => $createData['laying_planning']['summary']['order_qty'],
+                    'cut_qty'            => $createData['laying_planning']['summary']['cut_qty'],
+                ]);
+            } else {
+                // optional: kalau mau update qty kalau duplikat color
+                $exists->update([
+                    'order_qty' => $createData['laying_planning']['summary']['order_qty'],
+                    'cut_qty'   => $createData['laying_planning']['summary']['cut_qty'],
+                ]);
+            }
+        }
+
+        return $assignment;
     }
+
+
 
     public function update(int $id, array $updateData)
     {
