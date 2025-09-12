@@ -13,8 +13,21 @@ class AssigmentlineService implements AssigmentlineServiceInterface
         $this->assigmentlineRepository = $assigmentlineRepository;
     }
 
-    public function getAllAssigmentline()
+    public function getAllAssigmentline(array $filters)
     {
-        return $this->assigmentlineRepository->all();
+        return $this->assigmentlineRepository->all($filters);
+    }
+
+    public function create(array $createData)
+    {
+        return $this->assigmentlineRepository->create($createData);
+    }
+    public function update(int $id, array $updateData)
+    {
+        return $this->assigmentlineRepository->update($id, $updateData);
+    }
+    public function delete(int $id)
+    {
+        return $this->assigmentlineRepository->delete($id);
     }
 }

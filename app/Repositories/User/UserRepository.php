@@ -29,7 +29,7 @@ class UserRepository implements UserRepositoryInterface
             ])
         );
 
-        return $query; // <--- jangan pakai get()
+        return $query;
     }
 
     public function userWithRoles()

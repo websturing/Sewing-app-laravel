@@ -16,14 +16,13 @@ class LineService implements LineServiceInterface
     public function getAllLine(array $filters)
     {
         return $this->lineRepository->all($filters)
-            ->orderBy('created_at', 'desc')
-            ->paginate($filters['per_page'] ?? 10);;
+            ->orderByRaw('CAST(SUBSTRING(name, 6) AS UNSIGNED) ASC');
     }
 
     public function getLinePaginate(array $filters)
     {
         return $this->lineRepository->all($filters)
-            ->orderBy('name', 'ASC')
-            ->paginate($filters['per_page'] ?? 10);
+            ->orderByRaw('CAST(SUBSTRING(name, 6) AS UNSIGNED) ASC')
+            ->paginate($filters['per_page'] ?? 100);
     }
 }

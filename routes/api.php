@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\AssignmentLineController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\GlNumberController;
 use App\Http\Controllers\lineController;
 use App\Http\Controllers\UserShiftAssignmentController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +31,20 @@ Route::prefix('lines')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [lineController::class, 'index']);
+    });
+
+Route::prefix('gls')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [GlNumberController::class, 'index']);
+        Route::get('/number/{glNumber}', [GlNumberController::class, 'show']);
+        Route::get('/cutting-summary', [GlNumberController::class, 'cuttingSummary']);
+    });
+
+Route::prefix('assignment')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::post('/line', [AssignmentLineController::class, 'store']);
     });
 
 Route::prefix('activities')

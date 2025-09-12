@@ -24,7 +24,8 @@ class EmployeeController extends Controller
 
         return $collection = EmployeeResource::collection($employee)->additional([
             'status' => true,
-            'message' => 'Succesfully Retrieved Employees'
+            'message' => 'Succesfully Retrieved Employees',
+            // 'code' => 200
         ]);
     }
 

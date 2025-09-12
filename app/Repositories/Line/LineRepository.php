@@ -11,10 +11,8 @@ class LineRepository implements LineRepositoryInterface
     {
         $query = Line::query();
 
-
-
         $query->when(
-            $filters['name'] ?? null,
+            $filters['q'] ?? null,
             fn($q, $name) => $q->where('name', 'LIKE', "%{$name}%")
         );
 

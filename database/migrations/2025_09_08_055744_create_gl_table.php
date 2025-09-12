@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gl', function (Blueprint $table) {
+        Schema::create('gls', function (Blueprint $table) {
             $table->id();
             $table->string('gl_number');
             $table->timestamps();
