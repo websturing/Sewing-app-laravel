@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\StockInResource;
 use App\Services\Stockin\StockinServiceInterface;
 use Illuminate\Http\Request;
 
@@ -14,18 +15,18 @@ class StockInController extends Controller
     public function index()
     {
 
-        return $items = $this->stockIn
+        $items = $this->stockIn
             ->getPaginate(
                 request()->all()
             );
 
-        // if (!$lines) {
-        //     return errorResponse('List Line Not Found', 404);
-        // }
+        if (!$items) {
+            return errorResponse('List Line Not Found', 404);
+        }
 
-        // return $collection = LineResource::collection($lines)->additional([
-        //     'status' => true,
-        //     'message' => 'Succesfully Retrieved Lines'
-        // ]);
+        return StockInResource::collection($items)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved StockIns'
+        ]);
     }
 }
