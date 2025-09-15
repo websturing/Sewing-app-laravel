@@ -27,6 +27,7 @@ class ServiceServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\Assigmentline\AssigmentlineServiceInterface::class, \App\Services\Assigmentline\AssigmentlineService::class);
         $this->app->bind(\App\Services\Glnumber\GlnumberServiceInterface::class, \App\Services\Glnumber\GlnumberService::class);
         $this->app->bind(\App\Services\Cutting\CuttingIntegrationServiceInterface::class, \App\Services\Cutting\CuttingIntegrationService::class);
+        $this->app->bind(\App\Services\Stockin\StockinServiceInterface::class, \App\Services\Stockin\StockinService::class);
 
         $this->app->bind(PermissionServiceInterface::class, PermissionService::class);
         $this->app->bind(ActivityServiceInterface::class, ActivityService::class);

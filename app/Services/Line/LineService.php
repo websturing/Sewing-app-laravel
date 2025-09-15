@@ -22,7 +22,7 @@ class LineService implements LineServiceInterface
     public function getLinePaginate(array $filters)
     {
         return $this->lineRepository->all($filters)
-            ->orderByRaw('CAST(SUBSTRING(name, 6) AS UNSIGNED) ASC')
+            ->orderByRaw('CAST(SUBSTRING(name, 2) AS UNSIGNED) ASC')
             ->paginate($filters['per_page'] ?? 100);
     }
 }

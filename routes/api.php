@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GlNumberController;
 use App\Http\Controllers\lineController;
+use App\Http\Controllers\StockInController;
 use App\Http\Controllers\UserShiftAssignmentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -32,6 +33,15 @@ Route::prefix('lines')
     ->group(function () {
         Route::get('/', [lineController::class, 'index']);
     });
+
+Route::prefix('stock-ins')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [StockInController::class, 'index']);
+    });
+
+
+
 
 Route::prefix('gls')
     ->middleware(['api', 'auth:sanctum'])

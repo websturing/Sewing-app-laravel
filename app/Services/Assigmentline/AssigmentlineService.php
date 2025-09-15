@@ -15,15 +15,35 @@ class AssigmentlineService implements AssigmentlineServiceInterface
 
     public function getAll(array $filters)
     {
-        return $items = $this->assigmentlineRepository->all($filters);
+        $items = $this->assigmentlineRepository->all($filters);
 
-        return $items->filter(function ($item) use ($filters) {
-            return str_contains(strtolower($item->line?->name ?? ''), strtolower($filters['line_name'] ?? '')) &&
-                str_contains(strtolower($item->glnumber?->gl_number ?? ''), strtolower($filters['gl_number'] ?? '')) &&
-                str_contains(strtolower($item->date_start ?? ''), strtolower($filters['date_start'] ?? '')) &&
-                str_contains(strtolower($item->date_end ?? ''), strtolower($filters['date_end'] ?? ''));
-        })->values();
+        return $items->map(function ($line) {
+            $activeAssignments = $line->assignment->where('is_active', 1);
+
+            $glNumbers = $activeAssignments
+                ->map(fn($a) => $a->glnumber->gl_number ?? null)
+                ->filter()
+                ->unique()
+                ->values();
+
+            $colors = $activeAssignments
+                ->flatMap(fn($a) => collect($a->layingPlanning)->pluck('color'))
+                ->filter()
+                ->unique()
+                ->values();
+
+            return [
+                'id'         => $line->id,
+                'name'       => $line->name,
+                'created_at' => $line->created_at,
+                'updated_at' => $line->updated_at,
+                'location'   => $line->location,
+                'glNumber'   => $glNumbers,
+                'colors'     => $colors,
+            ];
+        });
     }
+
 
     public function create(array $createData)
     {

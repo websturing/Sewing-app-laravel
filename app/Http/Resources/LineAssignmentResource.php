@@ -15,7 +15,7 @@ class LineAssignmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $data =  parent::toArray($request);
+        return $data =  parent::toArray($request);
         $data = Arr::except($data, ['created_at', 'updated_at', 'assignment']);
 
         $data['assignment'] = $this->whenLoaded('assignment', fn() => AssignmentLineResource::collection($this->assignment));

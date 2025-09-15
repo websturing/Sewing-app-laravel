@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Services\Stockin;
+
+use App\Repositories\Stockin\StockinRepositoryInterface;
+
+class StockinService implements StockinServiceInterface
+{
+    protected $stockinRepository;
+
+    public function __construct(StockinRepositoryInterface $stockinRepository)
+    {
+        $this->stockinRepository = $stockinRepository;
+    }
+
+    public function getAllStockin()
+    {
+        return $this->stockinRepository->all();
+    }
+
+    public function getPaginate(array $filters)
+    {
+        return $this->stockinRepository->paginateAll($filters)
+            ->paginate($filters['per_page'] ?? 100);
+    }
+}
