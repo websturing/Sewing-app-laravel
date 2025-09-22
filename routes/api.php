@@ -11,6 +11,7 @@ use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GlNumberController;
+use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\lineController;
 use App\Http\Controllers\StockInController;
 use App\Http\Controllers\UserShiftAssignmentController;
@@ -38,6 +39,12 @@ Route::prefix('stock-ins')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [StockInController::class, 'index']);
+    });
+
+Route::prefix('integration')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/bundle', [IntegrationController::class, 'getBundlesByTicket']);
     });
 
 

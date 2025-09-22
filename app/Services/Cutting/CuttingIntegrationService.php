@@ -26,6 +26,15 @@ class CuttingIntegrationService implements CuttingIntegrationServiceInterface
         return $summaryGlNumber;
     }
 
+    public function bundleByTicket(string $ticketNumber)
+    {
+        $item = $this->get('bundle-qr-code-scan', [
+            'serial_number' => $ticketNumber
+        ]);
+        return $item;
+    }
+
+
     public function get(string $endpoint, array $params = [])
     {
         return Http::get($this->baseUrl . '/' . ltrim($endpoint, '/'), $params)

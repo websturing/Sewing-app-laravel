@@ -21,6 +21,8 @@ class StockinService implements StockinServiceInterface
     public function getPaginate(array $filters)
     {
         return $this->stockinRepository->paginateAll($filters)
+            ->with('line')
+            ->orderBy('created_at', 'DESC')
             ->paginate($filters['per_page'] ?? 100);
     }
 }
