@@ -44,7 +44,9 @@ Route::prefix('stock-ins')
 Route::prefix('integration')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
-        Route::get('/bundle', [IntegrationController::class, 'getBundlesByTicket']);
+        Route::get('/bundle/ticket/{ticket_number}', [IntegrationController::class, 'getBundlesByTicket']);
+        Route::get('/bundle/container/{container_number}', [IntegrationController::class, 'getBundlesByContainer']);
+        Route::get('/bundle/check-qrcode/{serial_number}', [IntegrationController::class, 'getBundleByQrcode']);
     });
 
 

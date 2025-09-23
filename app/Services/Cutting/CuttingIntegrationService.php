@@ -34,6 +34,43 @@ class CuttingIntegrationService implements CuttingIntegrationServiceInterface
         return $item;
     }
 
+    public function bundleByContainer(string $containerNumber)
+    {
+        $item = $this->get('bundle-by-container', [
+            'container_serial_number' => $containerNumber
+        ]);
+        return $item;
+    }
+
+    public function qrcodeType(string $serialNumber)
+    {
+        $prefix = substr($serialNumber, 0, 3);
+        if (str_starts_with($prefix, 'CT-')) {
+            return [
+                'type' => 'ticket',
+                'serial_number' => $serialNumber,
+                'valid' => true,
+                'message' => 'QR code terdeteksi sebagai TICKET'
+            ];
+        }
+
+        if (str_starts_with($prefix, 'CTA')) {
+            return [
+                'type' => 'container',
+                'serial_number' => $serialNumber,
+                'valid' => true,
+                'message' => 'QR code terdeteksi sebagai CONTAINER'
+            ];
+        }
+
+        return [
+            'type' => 'unknown',
+            'serial_number' => $serialNumber,
+            'valid' => false,
+            'message' => 'Format QR code tidak dikenali'
+        ];
+    }
+
 
     public function get(string $endpoint, array $params = [])
     {
