@@ -14,15 +14,15 @@ return new class extends Migration
         Schema::create('stock_ins', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('serial_number', 191);
-            $table->integer('ticket_no')->unique();
+            $table->integer('ticket_no');
             $table->string('gl_no', 191);
             $table->string('size', 10);
             $table->integer('user_dispatch_id')->nullable();
             $table->string('color', 255);
             $table->integer('pcs');
             $table->date('date_stock_out');
-            $table->bigInteger('cor_id')->unique();
-            $table->bigInteger('user_id')->unique();
+            $table->bigInteger('cor_id');
+            $table->bigInteger('user_id');
             $table->string('user_dispatch_name', 191)->nullable();
             $table->string('box_number', 191)->nullable();
             $table->integer('line_id');

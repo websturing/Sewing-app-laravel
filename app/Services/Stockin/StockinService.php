@@ -18,6 +18,11 @@ class StockinService implements StockinServiceInterface
         return $this->stockinRepository->all();
     }
 
+    public function create(array $data)
+    {
+        return $this->stockinRepository->create($data);
+    }
+
     public function getPaginate(array $filters)
     {
         return $this->stockinRepository->paginateAll($filters)

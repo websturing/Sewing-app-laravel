@@ -39,6 +39,7 @@ Route::prefix('stock-ins')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [StockInController::class, 'index']);
+        Route::post('/', [StockInController::class, 'store']);
     });
 
 Route::prefix('integration')

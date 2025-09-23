@@ -6,4 +6,5 @@ interface StockinRepositoryInterface
 {
     public function all();
     public function paginateAll(array $filters);
+    public function create(array $data);
 }

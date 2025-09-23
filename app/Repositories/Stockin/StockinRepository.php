@@ -11,6 +11,13 @@ class StockinRepository implements StockinRepositoryInterface
         return Stockin::all();
     }
 
+
+    public function create(array $data)
+    {
+
+        return Stockin::create($data);
+    }
+
     public function paginateAll(array $filters)
     {
         $query = Stockin::query();
