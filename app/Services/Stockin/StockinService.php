@@ -23,6 +23,16 @@ class StockinService implements StockinServiceInterface
         return $this->stockinRepository->create($data);
     }
 
+    public function update(int $id, array $data)
+    {
+        return $this->stockinRepository->update($id, $data);
+    }
+
+    public function delete(int $id)
+    {
+        return $this->stockinRepository->delete($id);
+    }
+
     public function getPaginate(array $filters)
     {
         return $this->stockinRepository->paginateAll($filters)
