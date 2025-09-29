@@ -14,6 +14,7 @@ use App\Http\Controllers\GlNumberController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\lineController;
 use App\Http\Controllers\StockInController;
+use App\Http\Controllers\StockInSummaryController;
 use App\Http\Controllers\UserShiftAssignmentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
@@ -39,7 +40,14 @@ Route::prefix('stock-ins')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [StockInController::class, 'index']);
+        Route::get('/activity', [StockInController::class, 'activity']);
         Route::post('/', [StockInController::class, 'store']);
+        Route::post('/ticket-number', [StockInController::class, 'storeByTicketNumber']);
+        Route::post('/{id}', [StockInController::class, 'update']);
+        Route::delete('/{id}', [StockInController::class, 'delete']);
+
+        // Summary 
+        Route::get('/summaries', [StockInSummaryController::class, 'summary']);
     });
 
 Route::prefix('integration')

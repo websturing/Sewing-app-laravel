@@ -3,9 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Traits\Auditable;
 
 class Stockin extends Model
 {
+
+    use Auditable;
+
+
+
     protected $table = "stock_ins";
     protected $fillable = [
         'serial_number',
@@ -24,6 +30,12 @@ class Stockin extends Model
         'input_source',
         'container_scan_status'
     ];
+
+
+    function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     function line()
     {

@@ -3,36 +3,80 @@
 namespace App\Repositories\Stockin;
 
 use App\Models\Stockin;
+use Illuminate\Database\Eloquent\Builder;
 
 class StockinRepository implements StockinRepositoryInterface
 {
-    public function all()
+
+    protected $model;
+
+    public function __construct(StockIn $model)
     {
-        return Stockin::all();
+        $this->model = $model;
+    }
+
+
+    public function all(array $params)
+    {
+        $query = $this->model->newQuery();
+
+        if (!empty($params['filters'])) {
+            $query = $this->applyFilters($query, $params['filters']);
+        }
+
+        // Apply sorting
+        if (!empty($params['sorts'])) {
+            foreach ($params['sorts'] as $field => $direction) {
+                $query->orderBy($field, $direction);
+            }
+        }
+
+        // Apply relations
+        if ($params['with_relations'] && !empty($params['relations'])) {
+            $query->with($params['relations']);
+        }
+
+        return $query->paginate(
+            $params['per_page'],
+            ['*'],
+            'page',
+            $params['page']
+        );
+    }
+
+    public function query(): Builder
+    {
+        return $this->model::query();
+    }
+
+
+    public function findBySerialNumber(string $serialNumber): ?Stockin
+    {
+        return $this->model::where('serial_number', $serialNumber)->first();
     }
 
 
     public function create(array $data): Stockin
     {
 
-        return Stockin::create($data);
+        return $this->model::create($data);
     }
 
     public function update(int $id, array $data): Stockin
     {
-        $record = StockIn::findOrFail($id);
+        $record = $this->model::findOrFail($id);
         $record->update($data);
         return $record;
     }
 
     public function delete(int $id): ?Stockin
     {
-        $record = StockIn::find($id);
+        $record = $this->model::find($id);
 
         if (!$record) {
             return null;
         }
-        $deletedRecord = $record->replicate;
+        $deletedRecord = $record->replicate();
         $record->delete();
 
         return $deletedRecord;
@@ -40,7 +84,7 @@ class StockinRepository implements StockinRepositoryInterface
 
     public function paginateAll(array $filters)
     {
-        $query = Stockin::query();
+        $query = $this->model::query();
 
         $query->when(
             $filters['q'] ?? null,
@@ -50,6 +94,27 @@ class StockinRepository implements StockinRepositoryInterface
         );
 
 
+
+        return $query;
+    }
+
+    protected function applyFilters($query, array $filters)
+    {
+        // Date range filter
+        if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
+            $query->whereBetween('created_at', [
+                $filters['start_date'],
+                $filters['end_date']
+            ]);
+        }
+
+        // Other filters
+        $filterableFields = ['user_id', 'gl_no', 'line_id'];
+        foreach ($filterableFields as $field) {
+            if (isset($filters[$field]) && $filters[$field] !== null) {
+                $query->where($field, $filters[$field]);
+            }
+        }
 
         return $query;
     }

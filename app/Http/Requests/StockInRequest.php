@@ -22,6 +22,7 @@ class StockInRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'id' => 'nullable|integer',
             'serial_number' => 'required|string|max:191',
             'ticket_no' => 'required|integer',
             'gl_no' => 'required|string|max:191',

@@ -3,6 +3,7 @@
 namespace App\Services\Stockin;
 
 use App\Repositories\Stockin\StockinRepositoryInterface;
+use Carbon\Carbon;
 
 class StockinService implements StockinServiceInterface
 {
@@ -13,14 +14,115 @@ class StockinService implements StockinServiceInterface
         $this->stockinRepository = $stockinRepository;
     }
 
-    public function getAllStockin()
+    public function getByQuery(array $filter)
     {
-        return $this->stockinRepository->all();
+        return $this->stockinRepository->query();
+    }
+
+
+    public function activity(?array $filters)
+    {
+        $query = $this->stockinRepository->query();
+        $results = $query->get();
+
+        return $results;
+    }
+
+    public function summary(array $filters)
+    {
+
+        $query = $this->stockinRepository->query()
+            ->with(['line', 'user'])
+            ->whereBetween('created_at', [
+                Carbon::parse($filters['start_date'])->startOfDay(),
+                Carbon::parse($filters['end_date'])->endOfDay()
+            ]);
+
+        $query->when(
+            $filters['user_id'] ?? null,
+            fn($q, $userId) => $q->where('user_id', $userId)
+        );
+
+        $query->when(
+            $filters['line_id'] ?? null,
+            fn($q, $lineId) => $q->where('line_id', $lineId)
+        );
+
+        $results = $query->get();
+
+
+        $summaryDetails = $results->groupBy('gl_no')->map(function ($group, $glNo) {
+            return [
+                'gl_number' => $glNo,
+                'color_count' => $group->pluck('color')->unique()->count(),
+                'size_count' => $group->pluck('size')->unique()->count(),
+                'total_items' => $group->count(),
+                'colors' => $group->pluck('color')->unique()->values(),
+                'sizes' => $group->pluck('size')->unique()->values()
+            ];
+        })->values();
+
+        $summary = [
+            'gl_numbers' => $results->pluck('gl_no')->unique()->values(),
+            'sizes' => $results->pluck('size')->unique()->values(),
+            'cut_pieces' => $results->count(),
+            'users' => $results->map(function ($item) {
+                return $item->user->name ?? 'System';
+            })->unique()->values(),
+            'details' => $summaryDetails
+        ];
+
+        return $summary;
+    }
+
+    public function getAllStockin(array $params)
+    {
+
+        $defaultParams = [
+            'sorts' => ['created_at' => 'desc'],
+            'per_page' => 15,
+            'page' => 1,
+            'with_relations' => true,
+            'relations' => ['user', 'line']
+        ];
+
+        $params = array_merge($defaultParams, $params);
+        return $this->stockinRepository->all($params);
+    }
+
+    public function activityGroupByGL(array $params)
+    {
+
+        $params['no_pagination'] = true;
+        $query = $this->getAllStockin($params);
+        $results = $query->groupBy('gl_no')->map(
+            function ($group, $glNo) {
+                return [
+                    "gl_number" => $glNo,
+                    "ticket" => $group->first()
+                ];
+            }
+        )->values();
+
+        return $results;
+    }
+
+    public function getBySerialNumber(string $serialNumber)
+    {
+        return $this->stockinRepository->findBySerialNumber($serialNumber);
     }
 
     public function create(array $data)
     {
-        return $this->stockinRepository->create($data);
+        try {
+            return $this->stockinRepository->create($data);
+        } catch (\Exception $e) {
+            \Log::error('StockIn creation failed: ' . $e->getMessage(), [
+                'data' => $data,
+                'exception' => $e
+            ]);
+            throw $e; // Re-throw ke controller
+        }
     }
 
     public function update(int $id, array $data)
