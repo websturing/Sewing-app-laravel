@@ -42,9 +42,10 @@ class AuthController extends Controller
          * 1. 1 User 1 Token
          * 2. Create Token
          */
-
-        $user->tokens()->delete();
-        $token = $user->createToken('spa-token')->plainTextToken;
+        $deviceName = $request->header('User-Agent') ?? 'unknown-device';
+        $user->tokens()->where('name', $deviceName)->delete();
+        // $user->tokens()->delete();
+        $token = $user->createToken($deviceName)->plainTextToken;
 
         $response = [
             'status' => true,
