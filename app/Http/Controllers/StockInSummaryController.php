@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\StockInSummaryResource;
 use Illuminate\Http\Request;
 use App\Services\Stockin\StockinServiceInterface;
 use Carbon\Carbon;
@@ -19,6 +20,11 @@ class StockInSummaryController extends Controller
         $filters['start_date'] = $filters['start_date'] ?? Carbon::today()->format('Y-m-d');
         $filters['end_date'] = $filters['end_date'] ?? Carbon::today()->format('Y-m-d');
 
-        return $this->stockInService->summary($filters);
+        $items =  $this->stockInService->summary($filters);
+
+        return StockInSummaryResource::make($items)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Stock-in Summary'
+        ]);
     }
 }

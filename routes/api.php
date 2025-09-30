@@ -40,6 +40,7 @@ Route::prefix('stock-ins')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [StockInController::class, 'index']);
+        Route::get('/line/last-ticket/{id}', [StockInController::class, 'lastTicketByLine']);
         Route::get('/activity', [StockInController::class, 'activity']);
         Route::post('/', [StockInController::class, 'store']);
         Route::post('/ticket-number', [StockInController::class, 'storeByTicketNumber']);

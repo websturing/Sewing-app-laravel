@@ -36,6 +36,11 @@ class StockInController extends Controller
         ]);
     }
 
+    public function lastTicketByLine($lineId)
+    {
+        return $this->stockIn->lastStockInTicketByLine($lineId);
+    }
+
     public function activity(QueryFilterRequest $request)
     {
 

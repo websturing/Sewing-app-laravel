@@ -46,7 +46,7 @@ class AuthController extends Controller
         $user->tokens()->where('name', $deviceName)->delete();
         // $user->tokens()->delete();
         $token = $user->createToken($deviceName)->plainTextToken;
-
+        $user['role_names'] =  $user->getRoleNames();
         $response = [
             'status' => true,
             'access_token' => $token,

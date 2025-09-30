@@ -75,6 +75,17 @@ class StockinService implements StockinServiceInterface
         return $summary;
     }
 
+    public function lastStockInTicketByLine(int $lineId)
+    {
+        $query = $this->stockinRepository->query();
+
+        $result = $query->orderBy('id', 'DESC')
+            ->where('line_id', $lineId)
+            ->first();
+
+        return $result;
+    }
+
     public function getAllStockin(array $params)
     {
 
