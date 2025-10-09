@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Line;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Stockin\StockinServiceInterface;
 use Illuminate\Http\Request;
@@ -71,10 +72,21 @@ class IntegrationController extends Controller
             case 'container':
                 return $this->getBundlesByContainer($qrcodeNumber);
                 break;
+            case 'table':
+                $lastThree = substr($qrcodeNumber, -3);
+                $lineId = (int) $lastThree;
+                $table = Line::where('id', $lineId)->first();
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Retrived Phyiscal Table Number',
+                    'type' => 'physical-table',
+                    'data' => $table
+                ], 200);
+                break;
             default:
                 return response()->json([
                     'status' => false,
-                    'message' => 'Type harus ticket dan container',
+                    'message' => 'Type harus table, ticket dan container',
                     'type' => 'error'
                 ], 400);
         }

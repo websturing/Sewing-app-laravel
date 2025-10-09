@@ -45,7 +45,9 @@ class StockinService implements StockinServiceInterface
 
         $query->when(
             $filters['line_id'] ?? null,
-            fn($q, $lineId) => $q->where('line_id', $lineId)
+            fn($q, $lineId) => is_array($lineId)
+                ? $q->whereIn('line_id', $lineId)
+                : $q->where('line_id', $lineId)
         );
 
         $results = $query->get();
@@ -57,15 +59,17 @@ class StockinService implements StockinServiceInterface
                 'color_count' => $group->pluck('color')->unique()->count(),
                 'size_count' => $group->pluck('size')->unique()->count(),
                 'total_items' => $group->count(),
+                'total_pcs' => $group->sum('pcs'),
                 'colors' => $group->pluck('color')->unique()->values(),
-                'sizes' => $group->pluck('size')->unique()->values()
+                'sizes' => $group->pluck('size')->unique()->values(),
+                'last_updated' => $group->sortByDesc('updated_at')->first()->updated_at?->format('F d, Y') ?? null
             ];
         })->values();
 
         $summary = [
             'gl_numbers' => $results->pluck('gl_no')->unique()->values(),
             'sizes' => $results->pluck('size')->unique()->values(),
-            'cut_pieces' => $results->count(),
+            'cut_pieces' => $results->sum('pcs'),
             'users' => $results->map(function ($item) {
                 return $item->user->name ?? 'System';
             })->unique()->values(),
@@ -152,5 +156,27 @@ class StockinService implements StockinServiceInterface
             ->with('line')
             ->orderBy('created_at', 'DESC')
             ->paginate($filters['per_page'] ?? 100);
+    }
+
+
+    /**
+     * Get tickets with optional pagination
+     */
+
+    public function getTickets(array $filters)
+    {
+        $query = $this->stockinRepository->query()
+            ->orderBy('created_at', 'DESC');
+
+        if (!empty($filters['size'])) {
+            $query->limit($filters['size']);
+        }
+
+        if (!empty($filters['is_paginate']) && $filters['is_paginate']) {
+            $perPage = $filters['per_page'] ?? 15;
+            return $query->paginate($perPage);
+        } else {
+            return $query->get();
+        }
     }
 }

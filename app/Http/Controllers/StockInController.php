@@ -38,7 +38,12 @@ class StockInController extends Controller
 
     public function lastTicketByLine($lineId)
     {
-        return $this->stockIn->lastStockInTicketByLine($lineId);
+        $items = $this->stockIn->lastStockInTicketByLine($lineId);
+
+        return StockInResource::make($items)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Ticket'
+        ]);
     }
 
     public function activity(QueryFilterRequest $request)

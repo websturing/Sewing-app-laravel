@@ -63,6 +63,15 @@ class CuttingIntegrationService implements CuttingIntegrationServiceInterface
             ];
         }
 
+        if (str_starts_with($prefix, 'SW-')) {
+            return [
+                'type' => 'table',
+                'serial_number' => $serialNumber,
+                'valid' => true,
+                'message' => 'QR code terdeteksi sebagai PHYSICAL TABLE'
+            ];
+        }
+
         return [
             'type' => 'unknown',
             'serial_number' => $serialNumber,

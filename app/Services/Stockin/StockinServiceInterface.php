@@ -14,7 +14,7 @@ interface StockinServiceInterface
     public function delete(int $id);
     public function lastStockInTicketByLine(int $lineId);
 
-
+    public function getTickets(array $filters);
     public function activity(array $filters);
 
     public function summary(array $filters);
