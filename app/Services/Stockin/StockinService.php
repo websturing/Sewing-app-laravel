@@ -14,6 +14,23 @@ class StockinService implements StockinServiceInterface
         $this->stockinRepository = $stockinRepository;
     }
 
+    public function getByLineId(int $lineId)
+    {
+        return $this->stockinRepository->findByLineId($lineId);
+    }
+
+    public function getByLineIdAndDateRange(int $lineId, string $startDate, string $endDate)
+    {
+
+        return $this->stockinRepository->findByLineIdAndDateRange($lineId, $startDate, $endDate);
+    }
+
+    public function getByLineIdAndDateRangeCount(int $lineId, string $startDate, string $endDate)
+    {
+
+        return $this->stockinRepository->findByLineIdAndDateRangeCount($lineId, $startDate, $endDate);
+    }
+
     public function getByQuery(array $filter)
     {
         return $this->stockinRepository->query();
@@ -50,8 +67,10 @@ class StockinService implements StockinServiceInterface
                 : $q->where('line_id', $lineId)
         );
 
-        $results = $query->get();
+        // Tambahkan order by updated_at
+        $query->orderBy('updated_at', 'desc');
 
+        $results = $query->get();
 
         $summaryDetails = $results->groupBy('gl_no')->map(function ($group, $glNo) {
             return [
@@ -64,6 +83,11 @@ class StockinService implements StockinServiceInterface
                 'sizes' => $group->pluck('size')->unique()->values(),
                 'last_updated' => $group->sortByDesc('updated_at')->first()->updated_at?->format('F d, Y') ?? null
             ];
+        })->values();
+
+        // Urutkan summaryDetails berdasarkan last_updated (descending)
+        $summaryDetails = $summaryDetails->sortByDesc(function ($item) {
+            return Carbon::parse($item['last_updated'])->timestamp;
         })->values();
 
         $summary = [
@@ -165,12 +189,21 @@ class StockinService implements StockinServiceInterface
 
     public function getTickets(array $filters)
     {
+
+
         $query = $this->stockinRepository->query()
             ->orderBy('created_at', 'DESC');
 
-        if (!empty($filters['size'])) {
-            $query->limit($filters['size']);
-        }
+        // Filter dengan approach yang lebih clean
+        $query->when(isset($filters['line_id']), function ($q) use ($filters) {
+            return $q->where('line_id', $filters['line_id']);
+        });
+
+        $query->when(isset($filters['limit']), function ($q) use ($filters) {
+            return $q->limit($filters['limit']);
+        });
+
+
 
         if (!empty($filters['is_paginate']) && $filters['is_paginate']) {
             $perPage = $filters['per_page'] ?? 15;

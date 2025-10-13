@@ -6,9 +6,14 @@ interface StockinServiceInterface
 {
     public function getByQuery(array $filters);
     public function getAllStockin(array $params);
+    public function getByLineId(int $lineId);
+    public function getByLineIdAndDateRange(int $lineId, string $startDate, string $endDate);
+    public function getByLineIdAndDateRangeCount(int $lineId, string $startDate, string $endDate);
     public function activityGroupByGL(array $params);
     public function getBySerialNumber(string $serialNumber);
     public function getPaginate(array $filters);
+
+
     public function create(array $data);
     public function update(int $id, array $data);
     public function delete(int $id);

@@ -50,6 +50,7 @@ Route::prefix('stock-ins')
 
         // Summary 
         Route::get('/summaries', [StockInSummaryController::class, 'summary']);
+        Route::get('/summaries/chart/stock-ins/chart', [StockInSummaryController::class, 'stockInChart']);
     });
 
 
@@ -57,6 +58,7 @@ Route::prefix('tickets')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [StockInTicketController::class, 'index']);
+        Route::get('/{serial_number}', [StockInTicketController::class, 'ticketByserialNumber']);
     });
 
 Route::prefix('integration')

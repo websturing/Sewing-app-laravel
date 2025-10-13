@@ -19,4 +19,14 @@ class LineRepository implements LineRepositoryInterface
 
         return $query; // <--- jangan pakai get()
     }
+
+    public function lines()
+    {
+        return Line::all();
+    }
+
+    public function linesWithStockin()
+    {
+        return Line::with(['stockins'])->get();
+    }
 }

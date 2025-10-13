@@ -22,7 +22,8 @@ class StockInTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'size' => 'nullable|integer|between:1,10',
+            'limit' => 'nullable|integer|between:1,10',
+            'line_id' => 'nullable|integer|exists:lines,id',
             'is_paginate' => 'nullable|boolean'
         ];
     }

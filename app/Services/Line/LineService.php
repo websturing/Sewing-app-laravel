@@ -13,6 +13,16 @@ class LineService implements LineServiceInterface
         $this->lineRepository = $lineRepository;
     }
 
+    public function getLines()
+    {
+        return $this->lineRepository->lines();
+    }
+
+    public function getLinesWithStockin()
+    {
+        return $this->lineRepository->linesWithStockin();
+    }
+
     public function getAllLine(array $filters)
     {
         return $this->lineRepository->all($filters)

@@ -49,6 +49,32 @@ class StockinRepository implements StockinRepositoryInterface
         return $this->model::query();
     }
 
+    public function findByLineId(int $lineId): ?Stockin
+    {
+        return $this->model::where('line_id', $lineId)->first();
+    }
+
+    public function findByLineIdAndDateRange(int $lineId, string $startDate, string $endDate)
+    {
+        return $this->model::where('line_id', $lineId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+    }
+
+    public function findByLineIdAndDateRangeCount(int $lineId, string $startDate, string $endDate)
+    {
+        $result = $this->model::where('line_id', $lineId)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->selectRaw('COUNT(*) as bundle, CAST(COALESCE(SUM(pcs), 0) AS UNSIGNED) as pcs')
+            ->first();
+
+        return [
+            'bundle' => $result->bundle ?? 0,
+            'pcs' => $result->pcs ?? 0,
+        ];
+    }
+
+
 
     public function findBySerialNumber(string $serialNumber): ?Stockin
     {

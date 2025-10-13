@@ -10,4 +10,9 @@ class Line extends Model
     {
         return $this->hasMany(Assigmentline::class, 'line_id');
     }
+
+    function stockins()
+    {
+        return $this->hasMany(Stockin::class, 'line_id');
+    }
 }

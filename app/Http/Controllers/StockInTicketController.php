@@ -16,6 +16,21 @@ class StockInTicketController extends Controller
 
     public function index(StockInTicketRequest $request)
     {
-        return $tickets = $this->stockInService->getTickets($request->validated());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Successfully Retrieved Tickets',
+            'data' => $tickets = $this->stockInService->getTickets($request->validated()),
+        ]);
+    }
+
+    public function ticketByserialNumber($serialNumber)
+    {
+        $ticket = $this->stockInService->getBySerialNumber($serialNumber);
+        if (!$ticket) {
+            return errorResponse('Ticket Not Found', 404);
+        }
+
+        return successResponse($ticket, 'Successfully Retrieved Ticket');
     }
 }
