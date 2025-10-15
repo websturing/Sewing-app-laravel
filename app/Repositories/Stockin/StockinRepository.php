@@ -65,12 +65,14 @@ class StockinRepository implements StockinRepositoryInterface
     {
         $result = $this->model::where('line_id', $lineId)
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->selectRaw('COUNT(*) as bundle, CAST(COALESCE(SUM(pcs), 0) AS UNSIGNED) as pcs')
+            ->selectRaw('COUNT(*) as bundle, CAST(COALESCE(SUM(pcs), 0) AS UNSIGNED) as pcs, MAX(updated_at) as updated_at')
             ->first();
 
         return [
             'bundle' => $result->bundle ?? 0,
             'pcs' => $result->pcs ?? 0,
+            'updated_at' => $result->updated_at ? $result->updated_at->diffForHumans() : null,
+            'updated_at_full' => $result->updated_at ? $result->updated_at->isoFormat('dddd, D MMMM YYYY HH:mm') : null,
         ];
     }
 
