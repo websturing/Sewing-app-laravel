@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('lines', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('location')->nullable();
             $table->timestamps();
         });
     }

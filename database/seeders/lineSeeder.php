@@ -14,9 +14,10 @@ class lineSeeder extends Seeder
     {
         for ($i = 1; $i <= 20; $i++) {
             \DB::table('lines')->insert([
-                'name' => 'Line ' . $i,
+                'name' => 'Line A' . $i,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'location' => "Factory A"
             ]);
         }
     }
