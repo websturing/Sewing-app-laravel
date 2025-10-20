@@ -4,6 +4,8 @@ namespace App\Repositories\Stockin;
 
 use App\Models\Stockin;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class StockinRepository implements StockinRepositoryInterface
 {
@@ -49,6 +51,34 @@ class StockinRepository implements StockinRepositoryInterface
         return $this->model::query();
     }
 
+    public function groupByGlNumber($searchTerm)
+    {
+        $results = DB::table('stock_ins')
+            ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
+            ->select(
+                'stock_ins.gl_no',
+                DB::raw('COUNT(*) as total_bundle'),
+                DB::raw('SUM(pcs) as total_pcs'),
+                DB::raw('MAX(stock_ins.updated_at) as last_updated'),
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names')
+            )
+            ->groupBy('stock_ins.gl_no')
+            ->orderBy('total_pcs', 'DESC')
+            ->get()
+            ->map(function ($result) {
+                $result->last_updated = $result->last_updated
+                    ? Carbon::parse($result->last_updated)->isoFormat('dddd, D MMMM YYYY HH:mm')
+                    : null;
+
+                return $result;
+            });
+
+
+
+        return $results;
+    }
+
+
     public function findByLineId(int $lineId): ?Stockin
     {
         return $this->model::where('line_id', $lineId)->first();
@@ -75,8 +105,6 @@ class StockinRepository implements StockinRepositoryInterface
             'updated_at_full' => $result->updated_at ? $result->updated_at->isoFormat('dddd, D MMMM YYYY HH:mm') : null,
         ];
     }
-
-
 
     public function findBySerialNumber(string $serialNumber): ?Stockin
     {

@@ -45,4 +45,19 @@ class StockInSummaryController extends Controller
             'data' => $charts
         ]);
     }
+
+    /**
+     * STOCK IN BY GL NUMBER
+     */
+    public function stockInByGlNumber()
+    {
+
+        $results = $this->stockInSummaryService->groupByGlNumber('');
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Successfully Retrieved Stock-in by GL Number',
+            'data' => $results
+        ]);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Stockin;
 
+use App\Models\Stockin;
 use App\Repositories\Stockin\StockinRepositoryInterface;
 use App\Services\Line\LineServiceInterface;
 use Carbon\Carbon;
@@ -10,13 +11,16 @@ class StockInSummaryService implements StockInSummaryServiceInterface
 {
     protected $lineService;
     protected $stockinService;
+    protected $stockinRepository;
 
     public function __construct(
         LineServiceInterface $lineService,
-        StockinServiceInterface $stockinService
+        StockinServiceInterface $stockinService,
+        StockinRepositoryInterface $stockinRepository
     ) {
         $this->lineService = $lineService;
         $this->stockinService = $stockinService;
+        $this->stockinRepository = $stockinRepository;
     }
 
     public function chart(array $filters)
@@ -35,5 +39,10 @@ class StockInSummaryService implements StockInSummaryServiceInterface
         }
 
         return $lines;
+    }
+
+    public function groupByGlNumber(string $searchTerm)
+    {
+        return $this->stockinRepository->groupByGlNumber($searchTerm);
     }
 }

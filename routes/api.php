@@ -51,6 +51,7 @@ Route::prefix('stock-ins')
         // Summary 
         Route::get('/summaries', [StockInSummaryController::class, 'summary']);
         Route::get('/summaries/chart/stock-ins/chart', [StockInSummaryController::class, 'stockInChart']);
+        Route::get('/summaries/group-glnumber', [StockInSummaryController::class, 'stockInByGlNumber']);
     });
 
 

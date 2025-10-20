@@ -10,6 +10,8 @@ interface StockinRepositoryInterface
     public function all(array $params);
     public function query(): Builder;
 
+    public function groupByGlNumber(string $searchTerm);
+
     public function findBySerialNumber(string $serialNumber): ?Stockin;
     public function findByLineId(int $lineId): ?Stockin;
     public function findByLineIdAndDateRange(int $lineId, string $startDate, string $endDate);
