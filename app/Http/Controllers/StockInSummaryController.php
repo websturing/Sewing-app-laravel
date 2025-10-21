@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\StockInSummaryGroupGlNumberResource;
 use App\Http\Resources\StockInSummaryResource;
 use Illuminate\Http\Request;
 use App\Services\Stockin\StockinServiceInterface;
@@ -49,15 +50,15 @@ class StockInSummaryController extends Controller
     /**
      * STOCK IN BY GL NUMBER
      */
-    public function stockInByGlNumber()
+    public function stockInByGlNumber(Request $request)
     {
 
-        $results = $this->stockInSummaryService->groupByGlNumber('');
+        $results = $this->stockInSummaryService->groupByGlNumber($request->get('search', ''));
 
-        return response()->json([
+
+        return StockInSummaryGroupGlNumberResource::make($results)->additional([
             'status' => true,
-            'message' => 'Successfully Retrieved Stock-in by GL Number',
-            'data' => $results
+            'message' => 'Successfully Retrieved Stock-in by GL Number'
         ]);
     }
 }

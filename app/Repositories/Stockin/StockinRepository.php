@@ -51,31 +51,43 @@ class StockinRepository implements StockinRepositoryInterface
         return $this->model::query();
     }
 
-    public function groupByGlNumber($searchTerm)
+    public function groupByGlNumber($searchTerm, $perPage = 10)
     {
-        $results = DB::table('stock_ins')
+        $query = DB::table('stock_ins')
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
             ->select(
                 'stock_ins.gl_no',
                 DB::raw('COUNT(*) as total_bundle'),
-                DB::raw('SUM(pcs) as total_pcs'),
+                DB::raw('COALESCE(SUM(pcs), 0) as total_pcs'),
                 DB::raw('MAX(stock_ins.updated_at) as last_updated'),
                 DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names')
             )
             ->groupBy('stock_ins.gl_no')
-            ->orderBy('total_pcs', 'DESC')
-            ->get()
-            ->map(function ($result) {
-                $result->last_updated = $result->last_updated
-                    ? Carbon::parse($result->last_updated)->isoFormat('dddd, D MMMM YYYY HH:mm')
-                    : null;
+            ->orderByDesc('total_pcs');
 
-                return $result;
+        if (!empty($searchTerm)) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('stock_ins.gl_no', 'like', "%{$searchTerm}%")
+                    ->orWhere('lines.name', 'like', "%{$searchTerm}%");
             });
+        }
 
+        // Paginate dengan Laravel Paginator
+        $paginator = $query->paginate($perPage);
 
+        // Transform items
+        $paginator->getCollection()->transform(function ($item) {
+            $item->total_bundle = (int) $item->total_bundle;
+            $item->total_pcs = (int) $item->total_pcs;
 
-        return $results;
+            $item->last_updated = $item->last_updated
+                ? Carbon::parse($item->last_updated)->isoFormat('MMMM D, YYYY HH:mm')
+                : null;
+
+            return $item;
+        });
+
+        return $paginator;
     }
 
 
