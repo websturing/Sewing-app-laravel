@@ -29,7 +29,7 @@
                     <th>Color</th>
                     <th>Bundles</th>
                     <th>Cut Pcs</th>
-                    <th>Line Names</th>
+                    <th>Line</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,7 +68,15 @@
                             @endforeach
                             <div class="p-8 bg-gray">{{ $totalPcs }}</div>
                         </td>
-                        <td width="220px" valign="top">{{ $row['line_names'] }}</td>
+                        <td width="100px" class="font-semibold text-center" style="padding: 0px">
+                            @foreach ($row['details'] as $i => $detail)
+                                <div class="p-8">{{ $detail['line_names'] }}</div>
+                                @if ($i < count($row['details']) - 1)
+                                    <hr class="inner-separator">
+                                @endif
+                            @endforeach
+                            <div class="p-8 bg-gray">-</div>
+                        </td>
                     </tr>
                 @endforeach
 

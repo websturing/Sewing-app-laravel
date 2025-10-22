@@ -129,6 +129,7 @@ class StockinRepository implements StockinRepositoryInterface
                         'color' => $item->color,
                         'total_bundle' => (int) $item->total_bundle,
                         'total_pcs' => (int) $item->total_pcs,
+                        'line_names' => $item->line_names, // ✅ tambahkan line per warna
                     ];
                 })->values(),
             ];
@@ -136,6 +137,7 @@ class StockinRepository implements StockinRepositoryInterface
 
         return $grouped;
     }
+
 
 
 
