@@ -16,7 +16,7 @@ class EmployeeController extends Controller
 
     function index(Request $request)
     {
-        $employee = $this->employeeService->paginateEmployee($request->all());
+        return $employee = $this->employeeService->paginateEmployee($request->all());
 
         if (!$employee) {
             return errorResponse('Employee Not Found', 404);

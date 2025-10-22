@@ -56,7 +56,8 @@ class StockInSummaryController extends Controller
         $results = $this->stockInSummaryService->groupByGlNumber($request->get('search', ''));
 
 
-        return StockInSummaryGroupGlNumberResource::make($results)->additional([
+
+        return StockInSummaryGroupGlNumberResource::collection($results)->additional([
             'status' => true,
             'message' => 'Successfully Retrieved Stock-in by GL Number'
         ]);

@@ -77,15 +77,17 @@ class StockinRepository implements StockinRepositoryInterface
 
         // Transform items
         $paginator->getCollection()->transform(function ($item) {
-            $item->total_bundle = (int) $item->total_bundle;
-            $item->total_pcs = (int) $item->total_pcs;
-
-            $item->last_updated = $item->last_updated
-                ? Carbon::parse($item->last_updated)->isoFormat('MMMM D, YYYY HH:mm')
-                : null;
-
-            return $item;
+            return [
+                'gl_no' => $item->gl_no,
+                'total_bundle' => (int) $item->total_bundle,
+                'total_pcs' => (int) $item->total_pcs,
+                'last_updated' => $item->last_updated
+                    ? Carbon::parse($item->last_updated)->isoFormat('MMMM D, YYYY HH:mm')
+                    : null,
+                'line_names' => $item->line_names,
+            ];
         });
+
 
         return $paginator;
     }
