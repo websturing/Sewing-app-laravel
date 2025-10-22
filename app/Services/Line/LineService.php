@@ -35,4 +35,9 @@ class LineService implements LineServiceInterface
             ->orderByRaw('CAST(SUBSTRING(name, 2) AS UNSIGNED) ASC')
             ->paginate($filters['per_page'] ?? 100);
     }
+
+    public function groupByLineGlNumber(string $searchTerm, $startDate, $endDate)
+    {
+        return $this->lineRepository->groupByLineGlNumber($searchTerm, $startDate, $endDate);
+    }
 }

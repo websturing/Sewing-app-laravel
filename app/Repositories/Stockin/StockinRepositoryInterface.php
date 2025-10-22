@@ -11,7 +11,7 @@ interface StockinRepositoryInterface
     public function query(): Builder;
 
     public function groupByGlNumber(string $searchTerm);
-    public function groupByGlNumberColor(string $searchTerm);
+    public function groupByGlNumberColor(string $searchTerm, $startDate, $endDate);
 
     public function findBySerialNumber(string $serialNumber): ?Stockin;
     public function findByLineId(int $lineId): ?Stockin;

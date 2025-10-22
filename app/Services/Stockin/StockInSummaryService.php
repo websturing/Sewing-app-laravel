@@ -46,8 +46,8 @@ class StockInSummaryService implements StockInSummaryServiceInterface
         return $this->stockinRepository->groupByGlNumber($searchTerm);
     }
 
-    public function groupByGlNumberColor(string $searchTerm)
+    public function groupByGlNumberColor(string $searchTerm, $startDate, $endDate)
     {
-        return $this->stockinRepository->groupByGlNumberColor($searchTerm);
+        return $this->stockinRepository->groupByGlNumberColor($searchTerm, $startDate, $endDate);
     }
 }

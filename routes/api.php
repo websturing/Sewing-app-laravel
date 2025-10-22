@@ -53,7 +53,14 @@ Route::prefix('stock-ins')
         Route::get('/summaries/chart/stock-ins/chart', [StockInSummaryController::class, 'stockInChart']);
         Route::get('/summaries/group-glnumber', [StockInSummaryController::class, 'stockInByGlNumber']);
         Route::get('/summaries/group-glnumber-color', [StockInSummaryController::class, 'stockInByGlNumberColor']);
-        Route::get('/summaries/pdf', [StockInSummaryController::class, 'pdf'])->withoutMiddleware(['auth:sanctum']);
+
+        Route::get('/summaries/group-line', [StockInSummaryController::class, 'stockInByGlLines']);
+
+
+
+
+        Route::get('/summaries/pdf/gl-number', [StockInSummaryController::class, 'pdfGlNumber'])->withoutMiddleware(['auth:sanctum']);
+        Route::get('/summaries/pdf/lines', [StockInSummaryController::class, 'pdfLines'])->withoutMiddleware(['auth:sanctum']);
     });
 
 

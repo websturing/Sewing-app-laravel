@@ -92,7 +92,7 @@ class StockinRepository implements StockinRepositoryInterface
         return $paginator;
     }
 
-    public function groupByGlNumberColor($searchTerm)
+    public function groupByGlNumberColor($searchTerm, $startDate = null, $endDate = null)
     {
         $query = DB::table('stock_ins')
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
@@ -115,6 +115,16 @@ class StockinRepository implements StockinRepositoryInterface
                     ->orWhere('lines.name', 'like', "%{$searchTerm}%");
             });
         }
+
+        // 📅 Filter berdasarkan tanggal (date range)
+        if (!empty($startDate) && !empty($endDate)) {
+            $query->whereBetween(DB::raw('DATE(stock_ins.updated_at)'), [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay(),
+            ]);
+        }
+
+
 
         $results = $query->get();
 

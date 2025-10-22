@@ -7,4 +7,6 @@ interface LineRepositoryInterface
     public function all(array $filters);
     public function lines();
     public function linesWithStockin();
+
+    public function groupByLineGlNumber(string $searchTerm, $startDate, $endDate);
 }

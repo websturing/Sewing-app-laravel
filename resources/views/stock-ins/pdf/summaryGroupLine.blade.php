@@ -17,7 +17,7 @@
             <div class="clearer"></div>
         </div>
         <div class="header">
-            <h2>Stock-in Summary Report by GL Number</h2>
+            <h2>Stock-in Summary Report by Line</h2>
             @if ($isRangeDate)
                 <p>
                     {{ \Carbon\Carbon::parse($startDate)->setTimezone('Asia/Jakarta')->format('F j, Y') }}
@@ -31,18 +31,18 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Gl Number</th>
+                    <th>Line</th>
                     <th>Color</th>
                     <th>Bundles</th>
                     <th>Cut Pcs</th>
-                    <th>Line</th>
+                    <th>Gl Number</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($rows as $index => $row)
                     <tr>
                         <td width="10px">{{ $index + 1 }}</td>
-                        <td width="80px" class="text-center font-semibold" valign="top">{{ $row['gl_no'] }}</td>
+                        <td width="80px" class="text-center font-semibold" valign="top">{{ $row['line_name'] }}</td>
                         <td style="padding: 0px">
                             @foreach ($row['details'] as $i => $detail)
                                 <div class="p-8"> {{ $detail['color'] }} </div>
@@ -50,7 +50,11 @@
                                     <hr class="inner-separator">
                                 @endif
                             @endforeach
-                            <div class="p-8 bg-gray">Subtotal</div>
+                            @if (count($row['details']) > 0)
+                                <div class="p-8 bg-gray">Subtotal</div>
+                            @else
+                                <div class="p-8">- &nbsp;</div>
+                            @endif
                         </td>
                         <td width="70px" class="font-semibold text-center" style="padding: 0px">
                             @php($totalBundle = 0)
@@ -76,7 +80,7 @@
                         </td>
                         <td width="100px" class="font-semibold text-center" style="padding: 0px">
                             @foreach ($row['details'] as $i => $detail)
-                                <div class="p-8">{{ $detail['line_names'] }}</div>
+                                <div class="p-8">{{ $detail['gl_no'] }}</div>
                                 @if ($i < count($row['details']) - 1)
                                     <hr class="inner-separator">
                                 @endif
