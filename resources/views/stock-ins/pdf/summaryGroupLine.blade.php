@@ -36,6 +36,7 @@
                     <th>Bundles</th>
                     <th>Cut Pcs</th>
                     <th>Gl Number</th>
+                    <th>Last Updated</th>
                 </tr>
             </thead>
             <tbody>
@@ -81,6 +82,15 @@
                         <td width="100px" class="font-semibold text-center" style="padding: 0px">
                             @foreach ($row['details'] as $i => $detail)
                                 <div class="p-8">{{ $detail['gl_no'] }}</div>
+                                @if ($i < count($row['details']) - 1)
+                                    <hr class="inner-separator">
+                                @endif
+                            @endforeach
+                            <div class="p-8 bg-gray">-</div>
+                        </td>
+                        <td width="150px">
+                            @foreach ($row['details'] as $i => $detail)
+                                <div class="p-8">{{ $detail['last_updated'] }}</div>
                                 @if ($i < count($row['details']) - 1)
                                     <hr class="inner-separator">
                                 @endif

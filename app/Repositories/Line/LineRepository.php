@@ -88,6 +88,9 @@ class LineRepository implements LineRepositoryInterface
                             'color' => $item->color,
                             'total_bundle' => (int) $item->total_bundle,
                             'total_pcs' => (int) $item->total_pcs,
+                            'last_updated' => $item->last_updated
+                                ? Carbon::parse($item->last_updated)->isoFormat('MMMM D, YYYY HH:mm')
+                                : null,
                         ];
                     })->values()
                     : [],

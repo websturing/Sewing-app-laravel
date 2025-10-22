@@ -128,7 +128,7 @@ class StockInSummaryController extends Controller
         $w = $canvas->get_width();
         $h = $canvas->get_height();
 
-        $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+        $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
         $font = $dompdf->getFontMetrics()->get_font("helvetica", "normal");
         $size = 9;
         $textWidth = $dompdf->getFontMetrics()->getTextWidth($text, $font, $size);
@@ -178,7 +178,7 @@ class StockInSummaryController extends Controller
         $w = $canvas->get_width();
         $h = $canvas->get_height();
 
-        $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+        $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
         $font = $dompdf->getFontMetrics()->get_font("helvetica", "normal");
         $size = 9;
         $textWidth = $dompdf->getFontMetrics()->getTextWidth($text, $font, $size);
