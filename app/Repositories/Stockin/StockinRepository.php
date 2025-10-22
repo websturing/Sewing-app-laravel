@@ -92,6 +92,52 @@ class StockinRepository implements StockinRepositoryInterface
         return $paginator;
     }
 
+    public function groupByGlNumberColor($searchTerm)
+    {
+        $query = DB::table('stock_ins')
+            ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
+            ->select(
+                'stock_ins.gl_no',
+                'stock_ins.color',
+                DB::raw('COUNT(*) as total_bundle'),
+                DB::raw('COALESCE(SUM(pcs), 0) as total_pcs'),
+                DB::raw('MAX(stock_ins.updated_at) as last_updated'),
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names')
+            )
+            ->groupBy('stock_ins.gl_no', 'stock_ins.color')
+            ->orderBy('stock_ins.gl_no')
+            ->orderBy('stock_ins.color');
+
+        if (!empty($searchTerm)) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('stock_ins.gl_no', 'like', "%{$searchTerm}%")
+                    ->orWhere('stock_ins.color', 'like', "%{$searchTerm}%")
+                    ->orWhere('lines.name', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        $results = $query->get();
+
+        // ✅ Kelompokkan per GL Number
+        $grouped = $results->groupBy('gl_no')->map(function ($items, $glNo) {
+            return [
+                'gl_no' => $glNo,
+                'last_updated' => Carbon::parse($items->max('last_updated'))->isoFormat('MMMM D, YYYY HH:mm'),
+                'line_names' => $items->pluck('line_names')->unique()->implode(', '),
+                'details' => $items->map(function ($item) {
+                    return [
+                        'color' => $item->color,
+                        'total_bundle' => (int) $item->total_bundle,
+                        'total_pcs' => (int) $item->total_pcs,
+                    ];
+                })->values(),
+            ];
+        })->values();
+
+        return $grouped;
+    }
+
+
 
     public function findByLineId(int $lineId): ?Stockin
     {
