@@ -9,7 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 
-Schedule::command('sync:cutting-summary')
+Schedule::command('app:sync-cutting-summary')
     ->hourly()
     ->onOneServer()
     ->withoutOverlapping()
