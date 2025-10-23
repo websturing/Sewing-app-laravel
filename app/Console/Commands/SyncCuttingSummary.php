@@ -95,6 +95,8 @@ class SyncCuttingSummary extends Command
                         ]
                     );
 
+                    Log::info("✅ Insert Data finished. : ({$glNumber}) " . now());
+
                     // 2️⃣ Sinkronisasi warna per GL (summary_by_color)
                     foreach ($data['summary_by_color'] ?? [] as $colorData) {
                         $colorSummary = $colorData['summary'] ?? [];
@@ -113,6 +115,8 @@ class SyncCuttingSummary extends Command
                                 'last_sync_at' => now(),
                             ]
                         );
+
+
 
                         // 3️⃣ Simpan size breakdown
                         foreach ($colorData['size_breakdown'] ?? [] as $size) {
