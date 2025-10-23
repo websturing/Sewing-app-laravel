@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StockInSummaryReportRequest;
 use App\Http\Resources\StockInSummaryGroupGlNumberResource;
 use App\Http\Resources\StockInSummaryResource;
 use App\Services\Line\LineServiceInterface;
@@ -84,7 +85,16 @@ class StockInSummaryController extends Controller
     }
 
 
+    /**
+     * Report
+     */
 
+    public function reportByGLNumber(StockInSummaryReportRequest $request)
+    {
+
+
+        return $this->stockInSummaryService->reportByGlNumber([], "", "", "");
+    }
 
     /**
      * PDF SUMMARIES

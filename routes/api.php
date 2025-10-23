@@ -57,8 +57,7 @@ Route::prefix('stock-ins')
 
         Route::get('/summaries/group-line', [StockInSummaryController::class, 'stockInByGlLines']);
 
-
-
+        Route::get('/summaries/report/gl-number', [StockInSummaryController::class, 'reportByGLNumber'])->withoutMiddleware(['auth:sanctum']);
 
         Route::get('/summaries/pdf/gl-number', [StockInSummaryController::class, 'pdfGlNumber'])->withoutMiddleware(['auth:sanctum']);
         Route::get('/summaries/pdf/lines', [StockInSummaryController::class, 'pdfLines'])->withoutMiddleware(['auth:sanctum']);
