@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\AssignmentLineController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CuttingGlNumberController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RoleController;
@@ -194,4 +195,17 @@ Route::prefix('application')
         Route::get('/meta', function () {
             return Setting::pluck('value', 'key');
         });
+    });
+
+
+/**
+ * CUTTING DATA
+ * Integration API
+ * Summaries DB Local Sewing
+ */
+
+Route::prefix('cutting')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/gl-number', [CuttingGlNumberController::class, 'index']);
     });
