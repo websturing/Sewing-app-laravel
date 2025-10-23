@@ -17,6 +17,9 @@ class CuttingGlnumberRepository implements CuttingGlnumberRepositoryInterface
 
     public function allWithSearching(?string $glNumber = null, ?array $colors = null)
     {
+
+
+
         $query = CuttingGlSummary::with([
             'colors' => fn($q) => $colors
                 ? $q->whereIn('color', $colors)->with('sizes')
@@ -25,6 +28,6 @@ class CuttingGlnumberRepository implements CuttingGlnumberRepositoryInterface
             ->when($glNumber, fn($q) => $q->where('gl_number', $glNumber))
             ->when($colors, fn($q) => $q->whereHas('colors', fn($q2) => $q2->whereIn('color', $colors)));
 
-        return $query->first();
+        return $query->get();
     }
 }

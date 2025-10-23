@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\CuttingGLNumber\FilterDTO;
 use App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface;
 use Illuminate\Http\Request;
 
@@ -15,9 +16,7 @@ class CuttingGlNumberController extends Controller
 
     public function index(Request $request)
     {
-        $filters =  $request->only('gl_number', 'color');
-
-
+        $filters = FilterDTO::fromQuery($request);
         return $this->cuttingGlnumberService->findBy($filters);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services\Stockin;
 
+use App\Dto\StockInSummaryReportDTO;
 use App\Models\Stockin;
 use App\Repositories\Stockin\StockinRepositoryInterface;
 use App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface;
@@ -56,35 +57,11 @@ class StockInSummaryService implements StockInSummaryServiceInterface
     }
 
     /** REPORT  */
-    public function reportByGlNumber($filters, $searchTerm, $startDate, $endDate)
+    public function reportByGlNumber(StockInSummaryReportDTO $dto)
     {
 
-        return [$filters, $searchTerm, $startDate, $endDate];
+        $filters = $dto->toFilters();
 
-        $cuttings = $this->cuttingGlSummaryRepository->findBy($filters);
-        $stockInsGrouped = $this->stockinRepository->groupByGlNumberColor($searchTerm, $startDate, $endDate);
-
-        // Merge
-        $result = collect($cuttings)->map(function ($gl) use ($stockInsGrouped) {
-            $glStock = $stockInsGrouped->firstWhere('gl_no', $gl->gl_number);
-
-            return [
-                'gl_number' => $gl->gl_number,
-                'colors' => $gl->colors->map(function ($color) use ($glStock) {
-                    $stockDetail = $glStock
-                        ? collect($glStock['details'])->firstWhere('color', $color->color)
-                        : null;
-
-                    return [
-                        'color' => $color->color,
-                        'sizes' => $color->sizes,
-                        'total_bundle' => $stockDetail['total_bundle'] ?? 0,
-                        'total_pcs' => $stockDetail['total_pcs'] ?? 0,
-                        'line_names' => $stockDetail['line_names'] ?? '',
-                    ];
-                }),
-                'last_updated' => $glStock['last_updated'] ?? null,
-            ];
-        });
+        return $cuttings = $this->cuttingGlSummaryRepository->findBy($filters);
     }
 }

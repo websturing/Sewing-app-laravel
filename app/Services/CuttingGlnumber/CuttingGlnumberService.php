@@ -2,6 +2,7 @@
 
 namespace App\Services\CuttingGlnumber;
 
+use App\DTOs\CuttingGLNumber\FilterDTO;
 use App\Repositories\CuttingGlnumber\CuttingGlnumberRepositoryInterface;
 
 class CuttingGlnumberService implements CuttingGlnumberServiceInterface
@@ -31,12 +32,15 @@ class CuttingGlnumberService implements CuttingGlnumberServiceInterface
         }
     }
 
-    public function findBy($filters)
+    public function findBy(FilterDTO $dto)
     {
 
+        $filters =  $dto->toFilters();
 
         $glNumber = $filters['gl_number'] ?? null;
-        $colors = $filters['color'] ? explode(',', $filters['color']) : null;
+        $colors = $filters['colors'] ?? null;
+
+
 
         $items = $this->cuttingGlnumberRepository->allWithSearching($glNumber, $colors);
 

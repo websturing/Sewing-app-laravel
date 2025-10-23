@@ -2,6 +2,8 @@
 
 namespace App\Services\Stockin;
 
+use App\Dto\StockInSummaryReportDTO;
+
 interface StockInSummaryServiceInterface
 {
     public function chart(array $filters);
@@ -9,5 +11,5 @@ interface StockInSummaryServiceInterface
     public function groupByGlNumber(string $searchTerm);
     public function groupByGlNumberColor(string $searchTerm, $startDate, $endDate);
 
-    public function reportByGlNumber($filters, $searchTerm, $startDate, $endDate);
+    public function reportByGlNumber(StockInSummaryReportDTO $data);
 }

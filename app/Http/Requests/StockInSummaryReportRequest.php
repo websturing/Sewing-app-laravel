@@ -22,6 +22,7 @@ class StockInSummaryReportRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'search' => 'nullable|string',
             'start_date' => 'nullable|date_format:Y-m-d',
             'end_date' => 'nullable|date_format:Y-m-d',
             'gl_number' => 'nullable|string',
