@@ -51,7 +51,7 @@ class StockinRepository implements StockinRepositoryInterface
         return $this->model::query();
     }
 
-    public function groupByGlNumber($searchTerm, $perPage = 10)
+    public function groupByGlNumber($searchTerm, $perPage = 10, $sortBy = null, $sortOrder = 'desc')
     {
         $query = DB::table('stock_ins')
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
@@ -62,8 +62,18 @@ class StockinRepository implements StockinRepositoryInterface
                 DB::raw('MAX(stock_ins.updated_at) as last_updated'),
                 DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names')
             )
-            ->groupBy('stock_ins.gl_no')
-            ->orderByDesc('total_pcs');
+            ->groupBy('stock_ins.gl_no');
+
+        // Jika sortBy tidak diisi, pakai default order by total_pcs desc (seperti code lama)
+        if ($sortBy) {
+            $allowedSortColumns = ['gl_no', 'total_pcs', 'total_bundle', 'last_updated'];
+            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'total_pcs';
+            $sortOrder = in_array(strtolower($sortOrder), ['asc', 'desc']) ? $sortOrder : 'desc';
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            // Default behavior - sama persis dengan code lama
+            $query->orderByDesc('total_pcs');
+        }
 
         if (!empty($searchTerm)) {
             $query->where(function ($q) use ($searchTerm) {

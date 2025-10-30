@@ -19,9 +19,7 @@ class GlNumberController extends Controller
     {
 
         $GlNumbers = $this->glNumberService
-            ->getPaginate(
-                request()->all()
-            );
+            ->glNumberByStockIns();
 
         if (!$GlNumbers) {
             return errorResponse('List Line Not Found', 404);

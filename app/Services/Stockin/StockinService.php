@@ -212,4 +212,15 @@ class StockinService implements StockinServiceInterface
             return $query->get();
         }
     }
+
+    /** GROUP BY
+     * 
+     *  Get paginated list of GL Numbers grouped from StockIns.
+     * @param  $search, $perPage, $sortBy, $sortOrder  $filters
+     * 
+     */
+    public function getGroupByGlNumber($search, $perPage, $sortBy, $sortOrder)
+    {
+        return $this->stockinRepository->groupByGlNumber($search, $perPage, $sortBy, $sortOrder);
+    }
 }
