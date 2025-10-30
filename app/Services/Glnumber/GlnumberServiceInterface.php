@@ -23,7 +23,8 @@ interface GlnumberServiceInterface
         ?string $searchTerm = null,
         int $perPage = 10,
         string $sortBy = 'total_pcs',
-        string $sortOrder = 'desc'
+        string $sortOrder = 'desc',
+        int $page = 1
     );
 
 

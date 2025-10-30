@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AssignmentLineRequest;
+use App\Http\Requests\GLnumberFilterRequest;
 use App\Http\Resources\GlNumberResource;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Glnumber\GlnumberServiceInterface;
@@ -15,11 +16,18 @@ class GlNumberController extends Controller
         private CuttingIntegrationServiceInterface $cuttingIntegrationService,
     ) {}
 
-    public function index()
+    public function index(GLnumberFilterRequest $filters)
     {
 
+
         $GlNumbers = $this->glNumberService
-            ->glNumberByStockIns();
+            ->glNumberByStockIns(
+                $searchTerm = $filters['search'],
+                $perPage = $filters['per_page'] ?? 10,
+                $sortBy = 'gl_no',
+                $sortOrder = 'ASC',
+                $page = $filters['page'] ?? 1
+            );
 
         if (!$GlNumbers) {
             return errorResponse('List Line Not Found', 404);

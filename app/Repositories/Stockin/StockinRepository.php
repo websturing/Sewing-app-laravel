@@ -51,7 +51,7 @@ class StockinRepository implements StockinRepositoryInterface
         return $this->model::query();
     }
 
-    public function groupByGlNumber($searchTerm, $perPage = 10, $sortBy = null, $sortOrder = 'desc')
+    public function groupByGlNumber($searchTerm, $perPage = 10, $sortBy = null, $sortOrder = 'desc', $page = 1)
     {
         $query = DB::table('stock_ins')
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
@@ -83,7 +83,12 @@ class StockinRepository implements StockinRepositoryInterface
         }
 
         // Paginate dengan Laravel Paginator
-        $paginator = $query->paginate($perPage);
+        $paginator = $query->paginate(
+            $perPage,
+            ['*'],
+            'page',
+            $page
+        );
 
         // Transform items
         $paginator->getCollection()->transform(function ($item) {

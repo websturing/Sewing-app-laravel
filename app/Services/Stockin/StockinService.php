@@ -219,8 +219,8 @@ class StockinService implements StockinServiceInterface
      * @param  $search, $perPage, $sortBy, $sortOrder  $filters
      * 
      */
-    public function getGroupByGlNumber($search, $perPage, $sortBy, $sortOrder)
+    public function getGroupByGlNumber($search, $perPage, $sortBy, $sortOrder, $page)
     {
-        return $this->stockinRepository->groupByGlNumber($search, $perPage, $sortBy, $sortOrder);
+        return $this->stockinRepository->groupByGlNumber($search, $perPage, $sortBy, $sortOrder, $page);
     }
 }

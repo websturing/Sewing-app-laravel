@@ -29,7 +29,7 @@ class GlnumberService implements GlnumberServiceInterface
 
     public function getPaginate(array $filters)
     {
-        return $this->stockInService->getGroupByGlNumber("", 5, 'gl_no', 'ASC');
+        return $this->stockInService->getGroupByGlNumber("", 5, 'gl_no', 'ASC', 1);
     }
 
     public function findGlNumber(string $glNumber)
@@ -53,13 +53,15 @@ class GlnumberService implements GlnumberServiceInterface
         ?string $searchTerm = null,
         int $perPage = 10,
         string $sortBy = 'total_pcs',
-        string $sortOrder = 'desc'
+        string $sortOrder = 'desc',
+        int $page = 1
     ) {
         return $this->stockInService->getGroupByGlNumber(
             $searchTerm,
             $perPage,
             $sortBy,
-            $sortOrder
+            $sortOrder,
+            $page
         );
     }
 }
