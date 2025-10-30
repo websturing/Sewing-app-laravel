@@ -60,7 +60,9 @@ class StockinRepository implements StockinRepositoryInterface
                 DB::raw('COUNT(*) as total_bundle'),
                 DB::raw('COALESCE(SUM(pcs), 0) as total_pcs'),
                 DB::raw('MAX(stock_ins.updated_at) as last_updated'),
-                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names')
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
+                DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors'),
+                DB::raw('COUNT(DISTINCT stock_ins.size) as total_sizes')
             )
             ->groupBy('stock_ins.gl_no');
 
@@ -100,6 +102,8 @@ class StockinRepository implements StockinRepositoryInterface
                     ? Carbon::parse($item->last_updated)->isoFormat('MMMM D, YYYY HH:mm')
                     : null,
                 'line_names' => $item->line_names,
+                'total_colors' => $item->total_colors,
+                'total_sizes' => $item->total_sizes,
             ];
         });
 

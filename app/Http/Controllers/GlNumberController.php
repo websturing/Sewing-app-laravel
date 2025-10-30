@@ -19,7 +19,6 @@ class GlNumberController extends Controller
     public function index(GLnumberFilterRequest $filters)
     {
 
-
         $GlNumbers = $this->glNumberService
             ->glNumberByStockIns(
                 $searchTerm = $filters['search'],
