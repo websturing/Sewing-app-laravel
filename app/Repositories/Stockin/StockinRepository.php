@@ -170,8 +170,24 @@ class StockinRepository implements StockinRepositoryInterface
 
     public function groupColorAndSizeBy($filters)
     {
-        return "andi";
+
         $query = Stockin::query();
+
+        foreach ($filters as $column => $value) {
+            if (is_array($value)) {
+                $query->whereIn($column, $value);
+            } else {
+                $query->where($column, $value);
+            }
+        }
+        return $query
+            ->select('color', 'size', DB::raw('COALESCE(SUM(pcs),0) as total_qty'))
+            ->groupBy('color', 'size')
+            ->get()
+            ->map(function ($item) {
+                $item->total_qty = (int)$item->total_qty; // atau (float) jika butuh decimal
+                return $item;
+            });
     }
 
 

@@ -74,15 +74,61 @@ class GlnumberService implements GlnumberServiceInterface
     public function syncCuttingAndSewingSummaries($filters)
     {
 
+        $glnumber = [
+            'gl_no' => $filters['gl_number']
+        ];
 
-
+        $colorStockIns =  $this->stockInService->getGroupBySizeAndColorBy($glnumber);
         $filters = FilterDTO::fromArray($filters);
 
-        $stockInsGroupByGL = $this->cuttingGlnumberService->findBy($filters);
+        $CuttingGLNumber = $this->cuttingGlnumberService->findBy($filters);
 
 
 
+        $colorStockIns = collect($colorStockIns);
+        $colorStockOuts = collect($colorStockOuts ?? []); // <— aman walau [] atau null
 
-        return $stockInsGroupByGL;
+        $cuttingData = $CuttingGLNumber['data'][0]['colors'] ?? [];
+
+        foreach ($cuttingData as &$color) {
+            $totalStockIn = 0;
+            $totalStockOut = 0;
+
+            foreach ($color['sizes'] as &$size) {
+                // cari stock in
+                $foundIn = $colorStockIns->first(function ($stock) use ($color, $size) {
+                    return strtolower(trim($stock['color'])) === strtolower(trim($color['color']))
+                        && strtolower(trim($stock['size'])) === strtolower(trim($size['size']));
+                });
+
+                // cari stock out — tetap aman walau $colorStockOuts kosong
+                $foundOut = $colorStockOuts->first(function ($stock) use ($color, $size) {
+                    return strtolower(trim($stock['color'])) === strtolower(trim($color['color']))
+                        && strtolower(trim($stock['size'])) === strtolower(trim($size['size']));
+                });
+
+                $size['sewing_stockin_qty'] = isset($foundIn['total_qty']) ? (int)$foundIn['total_qty'] : 0;
+                $size['sewing_stockout_qty'] = isset($foundOut['total_qty']) ? (int)$foundOut['total_qty'] : 0;
+
+                $totalStockIn += $size['sewing_stockin_qty'];
+                $totalStockOut += $size['sewing_stockout_qty'];
+            }
+
+            $color['sewing_total_stockin_qty'] = $totalStockIn;
+            $color['sewing_total_stockout_qty'] = $totalStockOut;
+        }
+
+        // Total keseluruhan (opsional)
+        $totalAllStockIns = array_sum(array_column($cuttingData->toArray(), 'sewing_total_stockin_qty'));
+        $totalAllStockOuts = array_sum(array_column($cuttingData->toArray(), 'sewing_total_stockout_qty'));
+
+
+        $CuttingGLNumber['data'][0]['sewing_total_stockin_qty'] = $totalAllStockIns;
+        $CuttingGLNumber['data'][0]['sewing_total_stockout_qty'] = $totalAllStockOuts;
+        $CuttingGLNumber['data'][0]['colors'] = $cuttingData;
+
+
+
+        return $CuttingGLNumber;
     }
 }
