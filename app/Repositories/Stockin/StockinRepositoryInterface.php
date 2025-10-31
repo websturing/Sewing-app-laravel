@@ -12,6 +12,8 @@ interface StockinRepositoryInterface
 
     public function groupByGlNumber(string $searchTerm);
     public function groupByGlNumberColor(string $searchTerm, $startDate, $endDate);
+    public function groupColorAndSizeBy(array $filters);
+
 
     public function findBySerialNumber(string $serialNumber): ?Stockin;
     public function findByLineId(int $lineId): ?Stockin;

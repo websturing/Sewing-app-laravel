@@ -9,7 +9,7 @@ class FilterDTO extends BaseData
 
     public function __construct(
         public string $glNumber,
-        public string $colors,
+        public ?string $colors,
     ) {}
 
     public function toFilters(): array

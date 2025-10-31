@@ -168,6 +168,13 @@ class StockinRepository implements StockinRepositoryInterface
     }
 
 
+    public function groupColorAndSizeBy($filters)
+    {
+        return "andi";
+        $query = Stockin::query();
+    }
+
+
 
 
     public function findByLineId(int $lineId): ?Stockin

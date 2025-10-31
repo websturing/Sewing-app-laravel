@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\CuttingGLNumber\FilterDTO;
 use App\Http\Requests\AssignmentLineRequest;
+use App\Http\Requests\CuttingGLNumber\filterRequest;
 use App\Http\Requests\GLnumberFilterRequest;
+use App\Http\Requests\GLnumberSyncCuttingSewingFilterRequest;
 use App\Http\Resources\GlNumberResource;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Glnumber\GlnumberServiceInterface;
@@ -61,5 +64,16 @@ class GlNumberController extends Controller
         }
 
         return successResponse('Succesfully Retrieved Cutting Summary', $summary);
+    }
+
+
+    /**
+     * SYNC GL NUMBER CUTTING & SEWING
+     */
+
+    public function syncCuttingAndSewingSummaries(filterRequest $request)
+    {
+
+        return $this->glNumberService->syncCuttingAndSewingSummaries($request->all());
     }
 }

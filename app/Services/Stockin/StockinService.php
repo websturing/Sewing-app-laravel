@@ -14,6 +14,11 @@ class StockinService implements StockinServiceInterface
         $this->stockinRepository = $stockinRepository;
     }
 
+    public function getGroupBySizeAndColorBy(array $filters)
+    {
+        return $this->stockinRepository->groupColorAndSizeBy($filters);
+    }
+
     public function getByLineId(int $lineId)
     {
         return $this->stockinRepository->findByLineId($lineId);

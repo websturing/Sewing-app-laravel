@@ -27,6 +27,6 @@ interface GlnumberServiceInterface
         int $page = 1
     );
 
-
+    public function syncCuttingAndSewingSummaries(array $filters);
     public function findGlNumber(string $glNumber);
 }

@@ -44,6 +44,11 @@ Route::prefix('stock-ins')
         Route::get('/', [StockInController::class, 'index']);
         Route::get('/line/last-ticket/{id}', [StockInController::class, 'lastTicketByLine']);
         Route::get('/activity', [StockInController::class, 'activity']);
+
+        Route::get('/find-group-size', [StockInController::class, 'getGroupAndSizeBy']);
+
+
+
         Route::post('/', [StockInController::class, 'store']);
         Route::post('/ticket-number', [StockInController::class, 'storeByTicketNumber']);
         Route::post('/{id}', [StockInController::class, 'update']);
@@ -88,6 +93,7 @@ Route::prefix('gls')
         Route::get('/', [GlNumberController::class, 'index']);
         Route::get('/number/{glNumber}', [GlNumberController::class, 'show']);
         Route::get('/cutting-summary', [GlNumberController::class, 'cuttingSummary']);
+        Route::get('/syncCuttingGlNumber', [GlNumberController::class, 'syncCuttingAndSewingSummaries']);
     });
 
 Route::prefix('assignment')

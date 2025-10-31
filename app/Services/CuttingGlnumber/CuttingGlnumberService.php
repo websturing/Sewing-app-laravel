@@ -36,7 +36,6 @@ class CuttingGlnumberService implements CuttingGlnumberServiceInterface
     {
 
         $filters =  $dto->toFilters();
-
         $glNumber = $filters['gl_number'] ?? null;
         $colors = $filters['colors'] ?? null;
 

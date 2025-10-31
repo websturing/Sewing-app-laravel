@@ -27,4 +27,5 @@ interface StockinServiceInterface
 
     /** GROUP BY */
     public function getGroupByGlNumber($search, $perPage, $sortBy, $sortOrder, $page);
+    public function getGroupBySizeAndColorBy(array $filters);
 }

@@ -36,6 +36,13 @@ class StockInController extends Controller
         ]);
     }
 
+    public function getGroupAndSizeBy(Request $request)
+    {
+
+        return  $this->stockIn->getGroupBySizeAndColorBy($request->all());
+    }
+
+
     public function lastTicketByLine($lineId)
     {
         $items = $this->stockIn->lastStockInTicketByLine($lineId);

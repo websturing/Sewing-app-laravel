@@ -2,8 +2,11 @@
 
 namespace App\Services\Glnumber;
 
+use App\DTOs\CuttingGLNumber\FilterDTO;
 use App\Repositories\Glnumber\GlnumberRepositoryInterface;
 use App\Repositories\Stockin\StockinRepositoryInterface;
+use App\Services\Cutting\CuttingIntegrationService;
+use App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface;
 use App\Services\Stockin\StockinServiceInterface;
 
 class GlnumberService implements GlnumberServiceInterface
@@ -11,15 +14,17 @@ class GlnumberService implements GlnumberServiceInterface
     protected $glnumberRepository;
     protected $stockInService;
     protected $stockInRepository;
+    protected $cuttingIntegration;
+    protected $cuttingGlnumberService;
 
     public function __construct(
         GlnumberRepositoryInterface $glnumberRepository,
         StockinServiceInterface $stockInService,
-        StockinRepositoryInterface $stockInRepository
+        CuttingGlnumberServiceInterface $cuttingGlnumberService
     ) {
         $this->glnumberRepository = $glnumberRepository;
         $this->stockInService = $stockInService;
-        $this->stockInRepository = $stockInRepository;
+        $this->cuttingGlnumberService = $cuttingGlnumberService;
     }
 
     public function getAllGlnumber(array $filters)
@@ -63,5 +68,21 @@ class GlnumberService implements GlnumberServiceInterface
             $sortOrder,
             $page
         );
+    }
+
+
+    public function syncCuttingAndSewingSummaries($filters)
+    {
+
+
+
+        $filters = FilterDTO::fromArray($filters);
+
+        $stockInsGroupByGL = $this->cuttingGlnumberService->findBy($filters);
+
+
+
+
+        return $stockInsGroupByGL;
     }
 }
