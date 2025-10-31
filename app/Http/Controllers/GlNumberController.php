@@ -8,6 +8,7 @@ use App\Http\Requests\CuttingGLNumber\filterRequest;
 use App\Http\Requests\GLnumberFilterRequest;
 use App\Http\Requests\GLnumberSyncCuttingSewingFilterRequest;
 use App\Http\Resources\GlNumberResource;
+use App\Http\Resources\GLNumberSyncCuttingResource;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Glnumber\GlnumberServiceInterface;
 use Illuminate\Http\Request;
@@ -74,6 +75,14 @@ class GlNumberController extends Controller
     public function syncCuttingAndSewingSummaries(filterRequest $request)
     {
 
-        return $this->glNumberService->syncCuttingAndSewingSummaries($request->all());
+        $filters['gl_number'] =   $request['gl_number'] ?? null;
+        $filters['colors'] =   $request['colors'] ?? null;
+
+        $combineData = $this->glNumberService->syncCuttingAndSewingSummaries($filters);
+
+        return GLNumberSyncCuttingResource::make($combineData)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Data'
+        ]);
     }
 }

@@ -129,6 +129,6 @@ class GlnumberService implements GlnumberServiceInterface
 
 
 
-        return $CuttingGLNumber;
+        return $CuttingGLNumber['data'][0];
     }
 }
