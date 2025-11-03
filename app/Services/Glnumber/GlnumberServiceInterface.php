@@ -10,6 +10,22 @@ interface GlnumberServiceInterface
 
 
     /**
+     * Get Matrix grouped stock data by GL Number .
+     *
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @param string $glNumber
+     * @return LengthAwarePaginator
+     */
+
+    public function getMatrixDate(
+        $glNumber,
+        $startDate = null,
+        $endDate = null
+    );
+
+
+    /**
      * Get grouped stock data by GL Number with pagination.
      *
      * @param string|null $searchTerm

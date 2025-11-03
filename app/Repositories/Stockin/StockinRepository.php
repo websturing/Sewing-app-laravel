@@ -4,6 +4,7 @@ namespace App\Repositories\Stockin;
 
 use App\Models\Stockin;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
@@ -287,5 +288,108 @@ class StockinRepository implements StockinRepositoryInterface
         }
 
         return $query;
+    }
+
+
+    /**
+     * MATRIX
+     * Get Matrix grouped stock data by GL Number .
+     *
+     * @param string|null $startDate
+     * @param string $endDate
+     * @param string $glNumber
+     * @return LengthAwarePaginator
+     */
+    public function matrixDateByGLNumber($glNo, $startDate = null, $endDate = null)
+    {
+
+        $now = Carbon::now('Asia/Jakarta');
+
+        // Get the last updated date for specific GL (or globally)
+        $lastDateQuery = DB::table('stock_ins');
+        if ($glNo) {
+            $lastDateQuery->where('gl_no', $glNo);
+        }
+
+        $lastDate = $lastDateQuery->max('updated_at')
+            ?? DB::table('stock_ins')->max('created_at')
+            ?? $now->toDateTimeString();
+
+        $lastDate = Carbon::parse($lastDate, 'Asia/Jakarta');
+        $sevenDaysAgo = $lastDate->copy()->subDays(7);
+
+        // ✅ If startDate & endDate are provided manually, skip auto-range logic
+        if (!$startDate || !$endDate) {
+            // Check if there’s data within the last 7 days
+            $hasRecentData = DB::table('stock_ins')
+                ->when($glNo, fn($q) => $q->where('gl_no', $glNo))
+                ->whereBetween('updated_at', [
+                    $now->copy()->subDays(7)->startOfDay(),
+                    $now->copy()->endOfDay(),
+                ])
+                ->exists();
+
+            if ($hasRecentData) {
+                $startDate = $now->copy()->subDays(7)->startOfDay();
+                $endDate = $now->copy()->endOfDay();
+            } else {
+                $startDate = $sevenDaysAgo->startOfDay();
+                $endDate = $lastDate->copy()->endOfDay();
+            }
+        } else {
+            // Convert provided strings to Carbon instances
+            $startDate = Carbon::parse($startDate)->startOfDay();
+            $endDate = Carbon::parse($endDate)->endOfDay();
+            $hasRecentData = true; // manual range, so treat as "has data"
+        }
+
+        // 🔍 Main Query
+        $query = DB::table('stock_ins')
+            ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
+            ->select(
+                'stock_ins.gl_no',
+                DB::raw('DATE(stock_ins.updated_at) as date'),
+                'stock_ins.size',
+                DB::raw('COUNT(*) as total_bundle'),
+                DB::raw('COALESCE(SUM(stock_ins.pcs), 0) as total_pcs'),
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
+                DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors')
+            )
+            ->when($glNo, fn($q) => $q->where('stock_ins.gl_no', $glNo))
+            ->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
+            ->groupBy('stock_ins.gl_no', DB::raw('DATE(stock_ins.updated_at)'), 'stock_ins.size')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // 📊 Summary (aggregate by size only)
+        $summary = collect($query)
+            ->groupBy('gl_no')
+            ->map(function ($itemsByGl) {
+                return [
+                    'gl_no' => $itemsByGl->first()->gl_no,
+                    'sizes' => $itemsByGl
+                        ->groupBy('size')
+                        ->map(function ($itemsBySize) {
+                            return [
+                                'size' => $itemsBySize->first()->size,
+                                'total_pcs' => $itemsBySize->sum('total_pcs'),
+                                'total_bundle' => $itemsBySize->sum('total_bundle'),
+                                'total_colors' => $itemsBySize->sum('total_colors'),
+                            ];
+                        })
+                        ->values(),
+                ];
+            })
+            ->values();
+
+        return [
+            'gl_no' => $glNo,
+            'hasRecentData' => $hasRecentData,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'count' => $query->count(),
+            'data' => $query,
+            'summary' => $summary,
+        ];
     }
 }

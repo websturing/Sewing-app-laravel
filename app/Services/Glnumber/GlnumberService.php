@@ -7,12 +7,15 @@ use App\Repositories\Glnumber\GlnumberRepositoryInterface;
 use App\Repositories\Stockin\StockinRepositoryInterface;
 use App\Services\Cutting\CuttingIntegrationService;
 use App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface;
+use App\Services\Stockin\StockInGroupService;
+use App\Services\Stockin\StockInGroupServiceInterface;
 use App\Services\Stockin\StockinServiceInterface;
 
 class GlnumberService implements GlnumberServiceInterface
 {
     protected $glnumberRepository;
     protected $stockInService;
+    protected $stockInGroupService;
     protected $stockInRepository;
     protected $cuttingIntegration;
     protected $cuttingGlnumberService;
@@ -20,10 +23,12 @@ class GlnumberService implements GlnumberServiceInterface
     public function __construct(
         GlnumberRepositoryInterface $glnumberRepository,
         StockinServiceInterface $stockInService,
+        StockInGroupServiceInterface $stockInGroupService,
         CuttingGlnumberServiceInterface $cuttingGlnumberService
     ) {
         $this->glnumberRepository = $glnumberRepository;
         $this->stockInService = $stockInService;
+        $this->stockInGroupService = $stockInGroupService;
         $this->cuttingGlnumberService = $cuttingGlnumberService;
     }
 
@@ -40,6 +45,23 @@ class GlnumberService implements GlnumberServiceInterface
     public function findGlNumber(string $glNumber)
     {
         return $this->glnumberRepository->findGlNumber($glNumber);
+    }
+
+    /**
+     * Get Matrix grouped stock data by GL Number .
+     *
+     * @param string|null $startDate
+     * @param string $endDate
+     * @param string $glNumber
+     * @return LengthAwarePaginator
+     */
+
+    public function getMatrixDate(
+        $glNumber,
+        $startDate = null,
+        $endDate = null
+    ) {
+        return $this->stockInGroupService->getMatrixDate($glNumber, $startDate, $endDate);
     }
 
 

@@ -29,6 +29,7 @@ class ServiceServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\Cutting\CuttingIntegrationServiceInterface::class, \App\Services\Cutting\CuttingIntegrationService::class);
         $this->app->bind(\App\Services\Stockin\StockinServiceInterface::class, \App\Services\Stockin\StockinService::class);
         $this->app->bind(\App\Services\Stockin\StockInSummaryServiceInterface::class, \App\Services\Stockin\StockInSummaryService::class);
+        $this->app->bind(\App\Services\Stockin\StockInGroupServiceInterface::class, \App\Services\Stockin\StockInGroupService::class);
 
         $this->app->bind(\App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface::class, \App\Services\CuttingGlnumber\CuttingGlnumberService::class);
 

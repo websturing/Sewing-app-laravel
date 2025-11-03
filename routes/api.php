@@ -91,6 +91,7 @@ Route::prefix('gls')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [GlNumberController::class, 'index']);
+        Route::get('/matrix-date', [GlNumberController::class, 'matrixDate']);
         Route::get('/number/{glNumber}', [GlNumberController::class, 'show']);
         Route::get('/cutting-summary', [GlNumberController::class, 'cuttingSummary']);
         Route::get('/syncCuttingGlNumber', [GlNumberController::class, 'syncCuttingAndSewingSummaries']);
