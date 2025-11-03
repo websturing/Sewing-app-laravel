@@ -385,8 +385,8 @@ class StockinRepository implements StockinRepositoryInterface
         return [
             'gl_no' => $glNo,
             'hasRecentData' => $hasRecentData,
-            'startDate' => $startDate,
-            'endDate' => $endDate,
+            'startDate' => Carbon::parse($startDate)->format("Y-m-d"),
+            'endDate' => Carbon::parse($endDate)->format("Y-m-d"),
             'count' => $query->count(),
             'data' => $query,
             'summary' => $summary,

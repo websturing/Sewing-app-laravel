@@ -8,6 +8,7 @@ use App\Http\Requests\CuttingGLNumber\filterRequest;
 use App\Http\Requests\GLnumberFilterRequest;
 use App\Http\Requests\GLNumberMatrixDateRequest;
 use App\Http\Requests\GLnumberSyncCuttingSewingFilterRequest;
+use App\Http\Resources\GLNumberMatrixResource;
 use App\Http\Resources\GlNumberResource;
 use App\Http\Resources\GLNumberSyncCuttingResource;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
@@ -72,11 +73,16 @@ class GlNumberController extends Controller
     {
         $data = $request->validated();
 
-        return $this->glNumberService->getMatrixDate(
+        $results = $this->glNumberService->getMatrixDate(
             $data['gl_number'],
             $data['start_date'] ?? null,
             $data['end_date'] ?? null
         );
+
+        return GLNumberMatrixResource::make($results)->additional([
+            "status" => true,
+            'message' => 'Succesfully Retrieved Data'
+        ]);
     }
 
 
