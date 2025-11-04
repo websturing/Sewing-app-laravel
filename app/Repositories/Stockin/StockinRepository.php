@@ -411,7 +411,12 @@ class StockinRepository implements StockinRepositoryInterface
             'endDate' => Carbon::parse($endDate)->format('Y-m-d'),
             'count' => $query->count(),
             'data' => $query,
-            'summary' => $summary[0],
+            'summary' => $summary->first() ?? (object)[
+                'gl_no' => $glNo,
+                'sizes' => [],
+                'colors' => [],
+            ],
+
         ];
     }
 }
