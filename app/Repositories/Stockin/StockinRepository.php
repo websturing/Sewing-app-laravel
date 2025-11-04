@@ -349,6 +349,7 @@ class StockinRepository implements StockinRepositoryInterface
             ->select(
                 'stock_ins.gl_no',
                 DB::raw('DATE(stock_ins.updated_at) as date'),
+                'stock_ins.color',
                 'stock_ins.size',
                 DB::raw('COUNT(*) as total_bundle'),
                 DB::raw('COALESCE(SUM(stock_ins.pcs), 0) as total_pcs'),
@@ -357,11 +358,11 @@ class StockinRepository implements StockinRepositoryInterface
             )
             ->when($glNo, fn($q) => $q->where('stock_ins.gl_no', $glNo))
             ->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
-            ->groupBy('stock_ins.gl_no', DB::raw('DATE(stock_ins.updated_at)'), 'stock_ins.size')
+            ->groupBy('stock_ins.gl_no', DB::raw('DATE(stock_ins.updated_at)'), 'stock_ins.color', 'stock_ins.size')
             ->orderBy('date', 'asc')
             ->get();
 
-        // 📊 Summary (aggregate by size only)
+        // 📊 Summary
         $summary = collect($query)
             ->groupBy('gl_no')
             ->map(function ($itemsByGl) {
@@ -374,7 +375,27 @@ class StockinRepository implements StockinRepositoryInterface
                                 'size' => $itemsBySize->first()->size,
                                 'total_pcs' => $itemsBySize->sum('total_pcs'),
                                 'total_bundle' => $itemsBySize->sum('total_bundle'),
-                                'total_colors' => $itemsBySize->sum('total_colors'),
+                                'total_colors' => $itemsBySize->pluck('color')->unique()->count(),
+                            ];
+                        })
+                        ->values(),
+                    'colors' => $itemsByGl
+                        ->groupBy('color')
+                        ->map(function ($itemsByColor) {
+                            $totalPcs = $itemsByColor->sum('total_pcs');
+                            $totalBundle = $itemsByColor->sum('total_bundle');
+
+                            return [
+                                'color' => $itemsByColor->first()->color,
+                                'total_pcs' => $totalPcs,
+                                'total_bundle' => $totalBundle,
+                                'sizes' => $itemsByColor->map(function ($item) {
+                                    return [
+                                        'size' => $item->size,
+                                        'total_pcs' => $item->total_pcs,
+                                        'total_bundle' => $item->total_bundle,
+                                    ];
+                                })->values(),
                             ];
                         })
                         ->values(),
@@ -385,8 +406,8 @@ class StockinRepository implements StockinRepositoryInterface
         return [
             'gl_no' => $glNo,
             'hasRecentData' => $hasRecentData,
-            'startDate' => Carbon::parse($startDate)->format("Y-m-d"),
-            'endDate' => Carbon::parse($endDate)->format("Y-m-d"),
+            'startDate' => Carbon::parse($startDate)->format('Y-m-d'),
+            'endDate' => Carbon::parse($endDate)->format('Y-m-d'),
             'count' => $query->count(),
             'data' => $query,
             'summary' => $summary,
