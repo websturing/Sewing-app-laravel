@@ -389,11 +389,12 @@ class StockinRepository implements StockinRepositoryInterface
                                 'color' => $itemsByColor->first()->color,
                                 'total_pcs' => $totalPcs,
                                 'total_bundle' => $totalBundle,
+                                'total_sizes' => $itemsByColor->pluck('size')->unique()->count(),
                                 'sizes' => $itemsByColor->map(function ($item) {
                                     return [
                                         'size' => $item->size,
-                                        'total_pcs' => $item->total_pcs,
-                                        'total_bundle' => $item->total_bundle,
+                                        'total_pcs' => (int)$item->total_pcs,
+                                        'total_bundle' => (int)$item->total_bundle,
                                     ];
                                 })->values(),
                             ];
@@ -410,7 +411,7 @@ class StockinRepository implements StockinRepositoryInterface
             'endDate' => Carbon::parse($endDate)->format('Y-m-d'),
             'count' => $query->count(),
             'data' => $query,
-            'summary' => $summary,
+            'summary' => $summary[0],
         ];
     }
 }
