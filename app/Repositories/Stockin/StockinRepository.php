@@ -390,6 +390,16 @@ class StockinRepository implements StockinRepositoryInterface
                     'colors' => $itemsByGl
                         ->groupBy('color')
                         ->map(function ($itemsByColor) {
+
+                            // Gabungkan semua line_names dari semua size di color ini
+                            $lineNames = $itemsByColor
+                                ->pluck('line_names')
+                                ->flatMap(fn($names) => explode(', ', $names))
+                                ->unique()
+                                ->sort()
+                                ->values()
+                                ->implode(', ');
+
                             $totalPcs = $itemsByColor->sum('total_pcs');
                             $totalBundle = $itemsByColor->sum('total_bundle');
                             $totalDefect = $itemsByColor->sum('total_defect');
@@ -399,6 +409,7 @@ class StockinRepository implements StockinRepositoryInterface
                                 'total_pcs' => $totalPcs,
                                 'total_bundle' => $totalBundle,
                                 'total_defect' => $totalDefect,
+                                'line_names' => $lineNames,
                                 'total_sizes' => $itemsByColor->pluck('size')->unique()->count(),
                                 'sizes' => $itemsByColor->map(function ($item) {
                                     return [
@@ -406,6 +417,7 @@ class StockinRepository implements StockinRepositoryInterface
                                         'total_pcs' => (int)$item->total_pcs,
                                         'total_bundle' => (int)$item->total_bundle,
                                         'total_defect' => (int)$item->total_defect,
+                                        'line_names' => $item->line_names,
                                     ];
                                 })->values(),
                             ];
