@@ -343,8 +343,14 @@ class StockinRepository implements StockinRepositoryInterface
             $hasRecentData = true; // manual range, so treat as "has data"
         }
 
+        // 🔍 Subquery defect per stockin_id
+        $defectSub = DB::table('stock_in_defects')
+            ->select('stockin_id', DB::raw('SUM(qty) as total_defect'))
+            ->groupBy('stockin_id');
+
         // 🔍 Main Query
         $query = DB::table('stock_ins')
+            ->leftJoinSub($defectSub, 'defects', 'stock_ins.id', '=', 'defects.stockin_id')
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
             ->select(
                 'stock_ins.gl_no',
@@ -352,7 +358,8 @@ class StockinRepository implements StockinRepositoryInterface
                 'stock_ins.color',
                 'stock_ins.size',
                 DB::raw('COUNT(*) as total_bundle'),
-                DB::raw('COALESCE(SUM(stock_ins.pcs), 0) as total_pcs'),
+                DB::raw('COALESCE(SUM(stock_ins.pcs - COALESCE(defects.total_defect, 0)), 0) as total_pcs'),
+                DB::raw('COALESCE(SUM(defects.total_defect), 0) as total_defect'),
                 DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
                 DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors')
             )
@@ -375,6 +382,7 @@ class StockinRepository implements StockinRepositoryInterface
                                 'size' => $itemsBySize->first()->size,
                                 'total_pcs' => $itemsBySize->sum('total_pcs'),
                                 'total_bundle' => $itemsBySize->sum('total_bundle'),
+                                'total_defect' => (int)$itemsBySize->sum('total_defect'),
                                 'total_colors' => $itemsBySize->pluck('color')->unique()->count(),
                             ];
                         })
@@ -384,17 +392,20 @@ class StockinRepository implements StockinRepositoryInterface
                         ->map(function ($itemsByColor) {
                             $totalPcs = $itemsByColor->sum('total_pcs');
                             $totalBundle = $itemsByColor->sum('total_bundle');
+                            $totalDefect = $itemsByColor->sum('total_defect');
 
                             return [
                                 'color' => $itemsByColor->first()->color,
                                 'total_pcs' => $totalPcs,
                                 'total_bundle' => $totalBundle,
+                                'total_defect' => $totalDefect,
                                 'total_sizes' => $itemsByColor->pluck('size')->unique()->count(),
                                 'sizes' => $itemsByColor->map(function ($item) {
                                     return [
                                         'size' => $item->size,
                                         'total_pcs' => (int)$item->total_pcs,
                                         'total_bundle' => (int)$item->total_bundle,
+                                        'total_defect' => (int)$item->total_defect,
                                     ];
                                 })->values(),
                             ];
@@ -404,6 +415,7 @@ class StockinRepository implements StockinRepositoryInterface
             })
             ->values();
 
+        // 📦 Final Return
         return [
             'gl_no' => $glNo,
             'hasRecentData' => $hasRecentData,
@@ -416,7 +428,6 @@ class StockinRepository implements StockinRepositoryInterface
                 'sizes' => [],
                 'colors' => [],
             ],
-
         ];
     }
 }
