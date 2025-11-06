@@ -99,4 +99,43 @@ class LineRepository implements LineRepositoryInterface
 
         return $grouped;
     }
+
+    /**
+     * LINES
+     * Get Line with last GL Number Transactions .
+     *
+     * @param string|null $sortBy
+     * @param integer|null $perPage
+     * @param integer|null $page
+     * @param string $search
+     * @return LengthAwarePaginator
+     */
+
+    public function linesWithLastGlTransactions($filters)
+    {
+        $sortBy   = $filters['sort_by']   ?? 'name';
+        $perPage  = (int)($filters['per_page'] ?? 10);
+        $page     = (int)($filters['page'] ?? 1);
+        $search   = $filters['search'] ?? null;
+        $query = Line::with('latestStockin');
+
+        // 🔍 Filter by search
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('lines.name', 'like', "%{$search}%")
+                    ->orWhereHas('latestStockin', function ($subQuery) use ($search) {
+                        $subQuery->where('gl_no', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // 🔢 Sorting
+        $query->orderBy($sortBy, 'asc');
+
+        // 📄 Pagination
+        $results = $query->paginate($perPage, ['*'], 'page', $page);
+
+
+        return $results;
+    }
 }

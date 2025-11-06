@@ -40,4 +40,10 @@ class LineService implements LineServiceInterface
     {
         return $this->lineRepository->groupByLineGlNumber($searchTerm, $startDate, $endDate);
     }
+
+    public function linesWithLastGlTransactions(array $filters)
+    {
+
+        return $this->lineRepository->linesWithLastGlTransactions($filters);
+    }
 }

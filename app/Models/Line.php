@@ -15,4 +15,9 @@ class Line extends Model
     {
         return $this->hasMany(Stockin::class, 'line_id');
     }
+
+    public function latestStockin()
+    {
+        return $this->hasOne(Stockin::class, 'line_id')->latestOfMany();
+    }
 }

@@ -9,5 +9,6 @@ interface LineServiceInterface
     public function getLinesWithStockin();
     public function getLinePaginate(array $filters);
 
+    public function linesWithLastGlTransactions(array $filters);
     public function groupByLineGlNumber(string $searchTerm, $startDate, $endDate);
 }

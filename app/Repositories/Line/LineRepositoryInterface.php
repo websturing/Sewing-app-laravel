@@ -9,4 +9,5 @@ interface LineRepositoryInterface
     public function linesWithStockin();
 
     public function groupByLineGlNumber(string $searchTerm, $startDate, $endDate);
+    public function linesWithLastGlTransactions(array $filters);
 }
