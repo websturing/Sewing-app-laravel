@@ -32,7 +32,6 @@ class Line extends Model
             ->map(function ($groupedByGl) {
                 return [
                     'gl_no' => $groupedByGl->first()->gl_no,
-                    'line_names' => $groupedByGl->first()->line_names,
                     'total_colors' => $groupedByGl->groupBy('color')->count(),
                     'total_pcs' => $groupedByGl->sum('total_pcs'),
                     'colors' => $groupedByGl

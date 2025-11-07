@@ -156,6 +156,9 @@ class LineRepository implements LineRepositoryInterface
     {
         $line =  Line::find($filters['line_id']);
         $grouped = $line->groupedStockIns($filters['start_date'], $filters['end_date']);
-        return $grouped;
+        return [
+            'line' => $line,
+            'stockin_summary' => $grouped
+        ];
     }
 }
