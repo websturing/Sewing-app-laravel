@@ -113,10 +113,11 @@ class LineRepository implements LineRepositoryInterface
 
     public function linesWithLastGlTransactions($filters)
     {
-        $sortBy   = $filters['sort_by']   ?? 'name';
+        $sortBy   = $filters['sort_by'] ?? 'name';
         $perPage  = (int)($filters['per_page'] ?? 10);
         $page     = (int)($filters['page'] ?? 1);
         $search   = $filters['search'] ?? null;
+
         $query = Line::with('latestStockin');
 
         // 🔍 Filter by search
@@ -130,12 +131,16 @@ class LineRepository implements LineRepositoryInterface
         }
 
         // 🔢 Sorting
-        $query->orderBy($sortBy, 'asc');
+        if ($sortBy === 'name') {
+            $query->orderByRaw("
+            REGEXP_REPLACE(lines.name, '[0-9]', '') ASC,
+            CAST(REGEXP_REPLACE(lines.name, '[^0-9]', '') AS UNSIGNED) ASC
+        ");
+        } else {
+            $query->orderBy($sortBy, 'asc');
+        }
 
         // 📄 Pagination
-        $results = $query->paginate($perPage, ['*'], 'page', $page);
-
-
-        return $results;
+        return $query->paginate($perPage, ['*'], 'page', $page);
     }
 }
