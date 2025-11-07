@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\Auditable;
+use Illuminate\Support\Facades\DB;
 
 class Stockin extends Model
 {
@@ -40,5 +41,32 @@ class Stockin extends Model
     function line()
     {
         return $this->belongsTo(Line::class, 'line_id');
+    }
+
+    public function scopeSummaryGroupedByGlNo($query, $startDate, $endDate, $glNo = null)
+    {
+        $defectSub = DB::table('stock_in_defects')
+            ->select('stockin_id', DB::raw('SUM(qty) as total_defect'))
+            ->groupBy('stockin_id');
+
+        $query->leftJoinSub($defectSub, 'defects', 'stock_ins.id', '=', 'defects.stockin_id')
+            ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
+            ->select(
+                'stock_ins.gl_no',
+                DB::raw('DATE(stock_ins.updated_at) as date'),
+                'stock_ins.color',
+                'stock_ins.size',
+                DB::raw('COUNT(*) as total_bundle'),
+                DB::raw('COALESCE(SUM(stock_ins.pcs - COALESCE(defects.total_defect, 0)), 0) as total_pcs'),
+                DB::raw('COALESCE(SUM(defects.total_defect), 0) as total_defect'),
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
+                DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors')
+            )
+            ->when($glNo, fn($q) => $q->where('stock_ins.gl_no', $glNo))
+            ->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
+            ->groupBy('stock_ins.gl_no', DB::raw('DATE(stock_ins.updated_at)'), 'stock_ins.color', 'stock_ins.size')
+            ->orderBy('date', 'asc');
+
+        return $query;
     }
 }

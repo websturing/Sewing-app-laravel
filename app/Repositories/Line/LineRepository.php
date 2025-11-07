@@ -143,4 +143,19 @@ class LineRepository implements LineRepositoryInterface
         // 📄 Pagination
         return $query->paginate($perPage, ['*'], 'page', $page);
     }
+
+    /**
+     * LINES GET BY
+     * Get Line with last GL Number Transactions .
+     *
+     * @param integer|null $lineId
+     * @return LengthAwarePaginator
+     */
+
+    public function findById($filters)
+    {
+        $line =  Line::find($filters['line_id']);
+        $grouped = $line->groupedStockIns($filters['start_date'], $filters['end_date']);
+        return $grouped;
+    }
 }

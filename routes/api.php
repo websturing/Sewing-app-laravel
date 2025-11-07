@@ -36,6 +36,7 @@ Route::prefix('lines')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [lineController::class, 'index']);
+        Route::get('/{id}', [lineController::class, 'getById']);
     });
 
 Route::prefix('stock-ins')
@@ -101,6 +102,7 @@ Route::prefix('assignment')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/lines', [AssignmentLineController::class, 'index']);
+        Route::get('/lines/{id}', [AssignmentLineController::class, 'getById']);
         Route::post('/line', [AssignmentLineController::class, 'store']);
     });
 

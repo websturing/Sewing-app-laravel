@@ -34,4 +34,20 @@ class lineController extends Controller
             'message' => 'Succesfully Retrieved Lines'
         ]);
     }
+
+    public function getById(Request $request, $lineId)
+    {
+        $filters = array_merge($request->all(), ['line_id' => $lineId]);
+
+        $line = $this->lineService->getById($filters);
+
+        if (!$line) {
+            return errorResponse('Line Not Found', 404);
+        }
+
+        return (new LineResource($line))->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Line'
+        ]);
+    }
 }
