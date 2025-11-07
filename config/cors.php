@@ -28,6 +28,7 @@ return [
         'https://starter-vueapp-vo75-obhs7ks86-afriandis-projects.vercel.app',
         'https://attendances-vue.vercel.app',
         'http://vue.sewing.localhost',
+        'http://sewing.glaindonesia.lan',
     ],
 
     // Tidak perlu pakai pattern, kecuali kamu pakai regex
