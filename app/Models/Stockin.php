@@ -53,7 +53,6 @@ class Stockin extends Model
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
             ->select(
                 'stock_ins.gl_no',
-                DB::raw('DATE(stock_ins.updated_at) as date'),
                 'stock_ins.color',
                 'stock_ins.size',
                 DB::raw('COUNT(*) as total_bundle'),
@@ -64,8 +63,8 @@ class Stockin extends Model
             )
             ->when($glNo, fn($q) => $q->where('stock_ins.gl_no', $glNo))
             ->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
-            ->groupBy('stock_ins.gl_no', DB::raw('DATE(stock_ins.updated_at)'), 'stock_ins.color', 'stock_ins.size')
-            ->orderBy('date', 'asc');
+            ->groupBy('stock_ins.gl_no', 'stock_ins.color', 'stock_ins.size')
+            ->orderBy('stock_ins.gl_no', 'asc');
 
         return $query;
     }
