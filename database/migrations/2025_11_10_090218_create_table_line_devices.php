@@ -11,8 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('table_line_devices', function (Blueprint $table) {
+        Schema::create('line_devices', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('line_id')
+                ->nullable()
+                ->constrained()
+                ->onDelete('cascade');
+            $table->foreignId('device_id')
+                ->nullable()
+                ->constrained()
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -22,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('table_line_devices');
+        Schema::dropIfExists('line_devices');
     }
 };
