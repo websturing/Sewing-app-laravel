@@ -14,6 +14,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GlNumberController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\lineController;
+use App\Http\Controllers\lineDeviceController;
 use App\Http\Controllers\StockInController;
 use App\Http\Controllers\StockInSummaryController;
 use App\Http\Controllers\StockInTicketController;
@@ -37,6 +38,9 @@ Route::prefix('lines')
     ->group(function () {
         Route::get('/', [lineController::class, 'index']);
         Route::get('/{id}', [lineController::class, 'getById']);
+
+        // Line Devices
+        Route::get('/{id}/devices', [lineDeviceController::class, 'getLineDevices']);
     });
 
 Route::prefix('stock-ins')

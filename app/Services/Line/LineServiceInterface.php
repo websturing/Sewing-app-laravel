@@ -10,6 +10,8 @@ interface LineServiceInterface
     public function getLinePaginate(array $filters);
 
     public function getById(array $filters);
+    public function getLineDevices(int $lineId);
+
 
     public function linesWithLastGlTransactions(array $filters);
     public function groupByLineGlNumber(string $searchTerm, $startDate, $endDate);
