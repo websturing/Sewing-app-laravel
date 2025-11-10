@@ -20,6 +20,7 @@ class lineDeviceResource extends JsonResource
             'device_id' => $this->device->id,
             'device_name' => $this->device->name,
             'device_mac_address' => $this->device->mac_address,
+            'device_description' => $this->device->description,
             'updated_at' => $this->updated_at,
         ];
     }
