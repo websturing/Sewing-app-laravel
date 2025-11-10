@@ -123,8 +123,6 @@ class AttendanceService implements AttendanceServiceInterface
             'shift_average' => $shiftAverage,
             'items' => $attendances
         ];
-
-
     }
 
     public function getAttendanceShiftSummary()
@@ -266,4 +264,8 @@ class AttendanceService implements AttendanceServiceInterface
         return $result;
     }
 
+    public function getAttendanceByLineId(int $lineId)
+    {
+        return $this->attendanceRepository->byLineId($lineId);
+    }
 }

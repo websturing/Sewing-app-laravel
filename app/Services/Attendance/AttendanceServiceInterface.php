@@ -9,4 +9,6 @@ interface AttendanceServiceInterface
     public function getAttendanceGroupDate();
     public function getAttendanceToday();
     public function getAttendanceShiftSummary();
+
+    public function getAttendanceByLineId(int $lineId);
 }

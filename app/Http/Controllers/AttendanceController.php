@@ -11,8 +11,7 @@ class AttendanceController extends Controller
 {
     public function __construct(
         private AttendanceServiceInterface $attendanceService
-    ) {
-    }
+    ) {}
 
     public function index()
     {
@@ -53,5 +52,18 @@ class AttendanceController extends Controller
     {
         $result = $this->attendanceService->getAttendanceShiftSummary();
         return successResponse($result);
+    }
+
+    /**
+     * Group
+     * Get Attendance By Line .
+     *
+     * @param integer $lineId
+     * @return LengthAwarePaginator
+     */
+
+    public function getByLineId(int $lineId)
+    {
+        return $this->attendanceService->getAttendanceByLineId($lineId);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repositories\Attendance;
 
 use App\Models\Attendance;
+use App\Models\AttendanceLog;
 use Carbon\Carbon;
 
 class AttendanceRepository implements AttendanceRepositoryInterface
@@ -27,6 +28,12 @@ class AttendanceRepository implements AttendanceRepositoryInterface
         return Attendance::with(['logs', 'user', 'user.shiftAssignments.shift'])
             ->whereDate('attendance_date', Carbon::today())
             ->withCount('logs')
+            ->get();
+    }
+
+    public function byLineId(int $lineId)
+    {
+        return AttendanceLog::GroupByLineToday($lineId)
             ->get();
     }
 }
