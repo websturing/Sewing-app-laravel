@@ -22,6 +22,7 @@ class AttendanceLog extends Model
             ->join('devices as d', 'attendance_logs.device_id', '=', 'd.id')
             ->join('line_devices as ld', 'd.id', '=', 'ld.device_id')
             ->join('lines as l', 'ld.line_id', '=', 'l.id')
+            ->join('employees as e', 'u.id', '=', 'e.user_id')
             ->select(
                 'attendance_logs.id as log_id',
                 'attendance_logs.log_type',
@@ -36,7 +37,8 @@ class AttendanceLog extends Model
                 'l.id as line_id',
                 'l.name as line_name',
                 'd.id as device_id',
-                'd.name as device_name'
+                'd.name as device_name',
+                'e.employee_code'
             )
             ->when($lineId, fn($q) => $q->where('l.id', $lineId))
             ->when(
