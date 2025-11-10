@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Employee;
 use Illuminate\Support\Str;
+use Faker\Factory as Faker;
 
 class EmployeeSeeder extends Seeder
 {
@@ -33,17 +34,20 @@ class EmployeeSeeder extends Seeder
             'Logistics Coordinator'
         ];
 
+        $faker = Faker::create('id_ID');
+
         for ($i = 1; $i <= 200; $i++) {
             // Buat user untuk setiap karyawan
             $user = User::factory()->create([
-                'name' => 'Pegawai ' . $i,
-                'email' => 'pegawai' . $i . '@example.com',
+                'name' => $faker->name,
+                'email' => $faker->name . '@ghimli.com',
                 'password' => bcrypt('password'), // password default
             ]);
 
             // Buat data karyawan
             Employee::create([
                 'user_id' => $user->id,
+                'name' => $user->name,
                 'employee_code' => 'EMP' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'position' => fake()->randomElement($positions),
                 'department' => fake()->randomElement($departments),
