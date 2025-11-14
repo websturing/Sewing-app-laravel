@@ -45,4 +45,5 @@ interface GlnumberServiceInterface
 
     public function syncCuttingAndSewingSummaries(array $filters);
     public function findGlNumber(string $glNumber);
+    public function glNumberWithColor(?string $glNumber);
 }

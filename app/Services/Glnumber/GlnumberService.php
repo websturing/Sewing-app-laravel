@@ -153,4 +153,9 @@ class GlnumberService implements GlnumberServiceInterface
 
         return $CuttingGLNumber['data'][0];
     }
+
+    public function glNumberWithColor(?string $glNumber)
+    {
+        return $this->glnumberRepository->glNumberWithColor($glNumber);
+    }
 }

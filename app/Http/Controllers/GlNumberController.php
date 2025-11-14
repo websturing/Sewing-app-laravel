@@ -104,8 +104,10 @@ class GlNumberController extends Controller
         ]);
     }
 
-    public function getList()
+    public function getList(Request $request)
     {
-        return "list GL Number";
+        $glNumber = $request->get('gl_number') ?? null;
+
+        return $this->glNumberService->glNumberWithColor($glNumber);
     }
 }

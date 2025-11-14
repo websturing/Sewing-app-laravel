@@ -11,4 +11,9 @@ class GlNumber extends Model
     protected $fillable = [
         'gl_number',
     ];
+
+    public function stockIns()
+    {
+        return $this->hasMany(StockIn::class, 'gl_no', 'gl_number');
+    }
 }
