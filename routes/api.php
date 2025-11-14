@@ -41,6 +41,7 @@ Route::prefix('lines')
 
         // Line Devices
         Route::get('/{id}/devices', [lineDeviceController::class, 'getLineDevices']);
+        Route::get('/{id}/history-glnumber', [lineDeviceController::class, 'getHistoryGlNumberByLine']);
     });
 
 Route::prefix('stock-ins')

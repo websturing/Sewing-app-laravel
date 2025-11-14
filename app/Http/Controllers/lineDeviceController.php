@@ -22,4 +22,14 @@ class lineDeviceController extends Controller
             'message' => 'Succesfully Retrieved Line Devices'
         ]);
     }
+    public function getHistoryGlNumberByLine(int $lineId)
+    {
+        $results = $this->lineService->getHistoryGlNumberByLine($lineId);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Successfully Retrieved GL Number History',
+            'data' => $results
+        ]);
+    }
 }

@@ -11,6 +11,7 @@ interface LineServiceInterface
 
     public function getById(array $filters);
     public function getLineDevices(int $lineId);
+    public function getHistoryGlNumberByLine(int $lineId);
 
 
     public function linesWithLastGlTransactions(array $filters);

@@ -174,4 +174,10 @@ class LineRepository implements LineRepositoryInterface
             ->where('line_id', $lineId)
             ->get();
     }
+
+    public function historyGlNumberByLine($lineId)
+    {
+        return Line::find($lineId)
+            ->HistoryGLNumberByStockIns();
+    }
 }
