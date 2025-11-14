@@ -103,4 +103,9 @@ class GlNumberController extends Controller
             'message' => 'Succesfully Retrieved Data'
         ]);
     }
+
+    public function getList()
+    {
+        return "list GL Number";
+    }
 }

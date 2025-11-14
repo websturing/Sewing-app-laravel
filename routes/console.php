@@ -14,3 +14,9 @@ Schedule::command('sync:cutting-summary')
     ->onOneServer()
     ->withoutOverlapping()
     ->runInBackground();
+
+Schedule::command('sync:glnumbers')
+    ->hourly()
+    ->onOneServer()
+    ->withoutOverlapping()
+    ->runInBackground();
