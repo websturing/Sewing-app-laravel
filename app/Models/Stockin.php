@@ -67,6 +67,10 @@ class Stockin extends Model
                 fn($q) =>
                 $q->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
             )
+            ->when(
+                $glNo,
+                fn($q) => $q->where('stock_ins.gl_no', $glNo)
+            )
             ->groupBy('stock_ins.gl_no', 'stock_ins.color', 'stock_ins.size')
             ->orderBy('stock_ins.gl_no', 'asc');
 

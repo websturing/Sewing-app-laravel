@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTOs\CuttingGLNumber\FilterDTO;
 use App\Http\Requests\AssignmentLineRequest;
+use App\Http\Requests\CompletionReportGlRequest;
 use App\Http\Requests\CuttingGLNumber\filterRequest;
 use App\Http\Requests\GLnumberFilterRequest;
 use App\Http\Requests\GLNumberMatrixDateRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\GLnumberSyncCuttingSewingFilterRequest;
 use App\Http\Resources\GLNumberMatrixResource;
 use App\Http\Resources\GlNumberResource;
 use App\Http\Resources\GLNumberSyncCuttingResource;
+use App\Models\GlNumber;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Glnumber\GlnumberServiceInterface;
 use Illuminate\Http\Request;
@@ -116,8 +118,17 @@ class GlNumberController extends Controller
         ]);
     }
 
-    public function pdfCompletionReport(Request $request)
+    public function pdfCompletionReport(CompletionReportGlRequest $request)
     {
-        return $request;
+
+
+        $start = $request->start_date;
+        $end   = $request->end_date;
+        $glNumber = $request->gl_number;
+
+        $glResult  =  GlNumber::where('gl_number', $glNumber)->first();
+        $grouped = $glResult->glNumberByStockIns($start, $end);
+
+        return $grouped;
     }
 }
