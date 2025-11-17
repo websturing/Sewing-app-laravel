@@ -55,6 +55,7 @@ class Stockin extends Model
                 'stock_ins.gl_no',
                 'stock_ins.color',
                 DB::raw('MAX(stock_ins.updated_at) as updated_at'),
+                DB::raw('MIN(stock_ins.updated_at) as start_updated_at'),
                 'stock_ins.size',
                 DB::raw('COUNT(*) as total_bundle'),
                 DB::raw('COALESCE(SUM(stock_ins.pcs - COALESCE(defects.total_defect, 0)), 0) as total_pcs'),

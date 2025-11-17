@@ -102,6 +102,8 @@ Route::prefix('gls')
         Route::get('/cutting-summary', [GlNumberController::class, 'cuttingSummary']);
         Route::get('/syncCuttingGlNumber', [GlNumberController::class, 'syncCuttingAndSewingSummaries']);
         Route::get('/list', [GlNumberController::class, 'getList']);
+
+        Route::get('/report/completion', [GlNumberController::class, 'getCompletionByGLNumber']);
     });
 
 Route::prefix('assignment')

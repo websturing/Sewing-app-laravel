@@ -118,17 +118,13 @@ class GlNumberController extends Controller
         ]);
     }
 
+    public function getCompletionByGLNumber(CompletionReportGlRequest $request)
+    {
+        return $this->glNumberService->getCompletionGL($request->validated());
+    }
+
     public function pdfCompletionReport(CompletionReportGlRequest $request)
     {
-
-
-        $start = $request->start_date;
-        $end   = $request->end_date;
-        $glNumber = $request->gl_number;
-
-        $glResult  =  GlNumber::where('gl_number', $glNumber)->first();
-        $grouped = $glResult->glNumberByStockIns($start, $end);
-
-        return $grouped;
+        return $this->glNumberService->getCompletionGL($request->validated());
     }
 }

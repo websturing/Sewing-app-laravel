@@ -59,4 +59,17 @@ class GlnumberRepository implements GlnumberRepositoryInterface
             });
         }
     }
+
+    public function getGlNumberGroup(array $filters)
+    {
+
+        $start = $filters['start_date'] ?? null;
+        $end   = $filters['end_date'] ?? null;
+        $glNumber = $filters['gl_number'];
+
+        $glResult  =  GlNumber::where('gl_number', $glNumber)->first();
+        $grouped = $glResult->glNumberByStockIns($start, $end);
+
+        return $grouped;
+    }
 }

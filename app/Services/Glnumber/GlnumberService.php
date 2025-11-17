@@ -158,4 +158,49 @@ class GlnumberService implements GlnumberServiceInterface
     {
         return $this->glnumberRepository->glNumberWithColor($glNumber);
     }
+
+    public function getCompletionGL(array $filters)
+    {
+
+        $startDate = $filters['start_date'] ?? null;
+        $endDate = $filters['end_date'] ?? null;
+        $records = $this->glnumberRepository->getGlNumberGroup($filters);
+        return $records
+            ->groupBy('gl_no')
+            ->map(function ($groupedByGl) use ($startDate, $endDate) {
+
+                $colors = $groupedByGl
+                    ->groupBy('color')
+                    ->map(function ($byColor) use ($startDate, $endDate) {
+                        return [
+                            'color' => $byColor->first()->color,
+                            'total_bundle' => $byColor->sum('total_bundle'),
+                            'total_pcs' => $byColor->sum('total_pcs'),
+                            'total_defect' => $byColor->sum('total_defect'),
+                            'first_updated_at' => $startDate ?? $byColor->min('start_updated_at'),
+                            'last_updated_at' => $endDate ?? $byColor->max('updated_at'),
+                            'sizes' => $byColor->map(fn($r) => [
+                                'size' => $r->size,
+                                'bundle' => $r->total_bundle,
+                                'pcs' => $r->total_pcs,
+                                'defect' => $r->total_defect,
+                            ])->values()
+                        ];
+                    })
+                    ->values();
+
+                $globalFirst = $colors->min('first_updated_at');
+                $globalLast  = $colors->max('last_updated_at');
+
+                return [
+                    'gl_no' => $groupedByGl->first()->gl_no,
+                    'total_colors' => $groupedByGl->groupBy('color')->count(),
+                    'total_pcs' => $groupedByGl->sum('total_pcs'),
+                    'first_updated_at' => $globalFirst ? \Carbon\Carbon::parse($globalFirst)->format('Y-m-d') : null,
+                    'last_updated_at'  => $globalLast  ? \Carbon\Carbon::parse($globalLast)->format('Y-m-d')  : null,
+                    'colors' => $colors,
+                ];
+            })
+            ->first();
+    }
 }

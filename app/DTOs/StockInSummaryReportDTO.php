@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto;
+namespace App\DTOs;
 
 class StockInSummaryReportDTO extends BaseData
 {
