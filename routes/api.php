@@ -215,6 +215,17 @@ Route::prefix('application')
         });
     });
 
+/**
+ * REPORT PDF
+ */
+
+Route::prefix('pdf')
+    ->middleware(['api'])
+    ->group(function () {
+        Route::get('/completion-report', [GlNumberController::class, 'pdfCompletionReport']);
+    });
+
+
 
 /**
  * CUTTING DATA

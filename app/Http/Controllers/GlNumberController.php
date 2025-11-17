@@ -107,7 +107,17 @@ class GlNumberController extends Controller
     public function getList(Request $request)
     {
         $glNumber = $request->get('gl_number') ?? null;
+        $results = $this->glNumberService->glNumberWithColor($glNumber);
 
-        return $this->glNumberService->glNumberWithColor($glNumber);
+        return response()->json([
+            'status' => true,
+            'message' => 'Successfully Retrived Data',
+            'data' => $results
+        ]);
+    }
+
+    public function pdfCompletionReport(Request $request)
+    {
+        return $request;
     }
 }
