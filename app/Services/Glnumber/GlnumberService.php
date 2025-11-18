@@ -24,12 +24,14 @@ class GlnumberService implements GlnumberServiceInterface
         GlnumberRepositoryInterface $glnumberRepository,
         StockinServiceInterface $stockInService,
         StockInGroupServiceInterface $stockInGroupService,
-        CuttingGlnumberServiceInterface $cuttingGlnumberService
+        CuttingGlnumberServiceInterface $cuttingGlnumberService,
+        CuttingIntegrationService  $cuttingIntegration,
     ) {
         $this->glnumberRepository = $glnumberRepository;
         $this->stockInService = $stockInService;
         $this->stockInGroupService = $stockInGroupService;
         $this->cuttingGlnumberService = $cuttingGlnumberService;
+        $this->cuttingIntegration = $cuttingIntegration;
     }
 
     public function getAllGlnumber(array $filters)
@@ -161,46 +163,109 @@ class GlnumberService implements GlnumberServiceInterface
 
     public function getCompletionGL(array $filters)
     {
+        $gl = $filters['gl_number'];
 
-        $startDate = $filters['start_date'] ?? null;
-        $endDate = $filters['end_date'] ?? null;
-        $records = $this->glnumberRepository->getGlNumberGroup($filters);
-        return $records
-            ->groupBy('gl_no')
-            ->map(function ($groupedByGl) use ($startDate, $endDate) {
+        // ---------------------------
+        // 1) Ambil Cutting
+        // ---------------------------
+        $cuttingApi = $this->cuttingIntegration->summaryGlNumber([
+            'gl_number' => $gl
+        ]);
 
-                $colors = $groupedByGl
-                    ->groupBy('color')
-                    ->map(function ($byColor) use ($startDate, $endDate) {
-                        return [
-                            'color' => $byColor->first()->color,
-                            'total_bundle' => $byColor->sum('total_bundle'),
-                            'total_pcs' => $byColor->sum('total_pcs'),
-                            'total_defect' => $byColor->sum('total_defect'),
-                            'first_updated_at' => $startDate ?? $byColor->min('start_updated_at'),
-                            'last_updated_at' => $endDate ?? $byColor->max('updated_at'),
-                            'sizes' => $byColor->map(fn($r) => [
-                                'size' => $r->size,
-                                'bundle' => $r->total_bundle,
-                                'pcs' => $r->total_pcs,
-                                'defect' => $r->total_defect,
-                            ])->values()
+        $cutting = collect($cuttingApi['data']['summary_by_gl'][0]['laying_plannings'] ?? []);
+        $cuttingApiGrandTotal = collect($cuttingApi['data']['grand_total']);
+        // ---------------------------
+        // 2) Ambil Sewing Lookup
+        // ---------------------------
+        $sewing = $this->glnumberRepository->getGlNumberGroup($filters);
+
+        $sewingLookup = [];
+        foreach ($sewing as $r) {
+            $sewingLookup[$r->color][$r->size] = [
+                'bundle' => (int) $r->total_bundle,
+                'pcs'    => (int) $r->total_pcs,
+                'defect' => (int) $r->total_defect,
+                'first_updated_at' => $r->start_updated_at,
+                'last_updated_at' => $r->updated_at,
+            ];
+        }
+
+        // ---------------------------
+        // 3) Map Cutting → per color → per size
+        // ---------------------------
+        $colors = $cutting
+            ->groupBy('color')
+            ->map(function ($items, $color) use ($sewingLookup) {
+
+                $sizes = collect();
+
+                foreach ($items as $item) {
+                    foreach ($item['size_breakdown'] as $sb) {
+
+                        $size = $sb['size'] ?? null;
+
+                        // Sewing data
+                        $sewing = $sewingLookup[$color][$size] ?? [
+                            'bundle' => 0,
+                            'pcs'    => 0,
+                            'defect' => 0,
+                            'first_updated_at' => null,
+                            'last_updated_at' => null,
                         ];
-                    })
-                    ->values();
 
-                $globalFirst = $colors->min('first_updated_at');
-                $globalLast  = $colors->max('last_updated_at');
+                        // Push size
+                        $sizes->push([
+                            'size' => $size,
+
+                            // Sewing
+                            'bundle' => $sewing['bundle'],
+                            'pcs'    => $sewing['pcs'],
+                            'defect' => $sewing['defect'],
+
+                            'first_updated_at' => $sewing['first_updated_at'],
+                            'last_updated_at'  => $sewing['last_updated_at'],
+
+                            // Cutting
+                            'order_qty'       => (int) ($sb['order_qty'] ?? 0),
+                            'cut_qty'         => (int) ($sb['cut_qty'] ?? 0),
+                            'stock_out_qty'   => (int) ($sb['stock_out_qty'] ?? 0),
+                            'replacement_qty' => (int) ($sb['replacement_qty'] ?? 0),
+                        ]);
+                    }
+                }
+
+
 
                 return [
-                    'gl_no' => $groupedByGl->first()->gl_no,
-                    'total_colors' => $groupedByGl->groupBy('color')->count(),
-                    'total_pcs' => $groupedByGl->sum('total_pcs'),
-                    'first_updated_at' => $globalFirst ? \Carbon\Carbon::parse($globalFirst)->format('Y-m-d') : null,
-                    'last_updated_at'  => $globalLast  ? \Carbon\Carbon::parse($globalLast)->format('Y-m-d')  : null,
-                    'colors' => $colors,
+                    'color' => $color,
+                    // Sewing total
+                    'total_bundle' => $sizes->sum('bundle'),
+                    'total_pcs'    => $sizes->sum('pcs'),
+                    'total_defect' => $sizes->sum('defect'),
+                    // Cutting totals
+                    'total_order_qty' => $sizes->sum('order_qty'),
+                    'first_updated_at' => $sizes->min('first_updated_at'),
+                    'last_updated_at'  => $sizes->max('last_updated_at'),
+                    'sizes' => $sizes->values(),
                 ];
             })
-            ->first();
+            ->values();
+
+        $globalFirst = $colors->min('first_updated_at');
+        $globalLast = $colors->max('last_updated_at');
+
+        // ---------------------------
+        // 4) Return GL level
+        // ---------------------------
+        return [
+            'gl_no' => $gl,
+            'total_colors' => $colors->count(),
+            'total_pcs' => $colors->sum('total_pcs'),
+            'total_output' => 0,
+            'mi_order' => $cuttingApiGrandTotal['order_qty'],
+            'first_updated_at' => $globalFirst,
+            'last_updated_at' => $globalLast ? \Carbon\Carbon::parse($globalLast)->format('Y-m-d') : null,
+            'colors' => $colors,
+        ];
     }
 }

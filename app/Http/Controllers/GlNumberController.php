@@ -16,6 +16,7 @@ use App\Models\GlNumber;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Glnumber\GlnumberServiceInterface;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class GlNumberController extends Controller
 {
@@ -125,6 +126,49 @@ class GlNumberController extends Controller
 
     public function pdfCompletionReport(CompletionReportGlRequest $request)
     {
-        return $this->glNumberService->getCompletionGL($request->validated());
+        $filters = $request->validated();
+        $glNumber = $filters['gl_number'] ?? '-';
+
+
+        $results = $this->glNumberService->getCompletionGL($filters);
+        $title = 'Completion Report GL-' . $glNumber;
+        $startDate = $filters['start_date'] ?? $results['first_updated_at'];
+        $endDate = $filters['end_date'] ?? $results['last_updated_at'];
+
+        $diffStockIn = $results['total_pcs'] - $results['mi_order'] >  0 ? '+' : '' . $results['total_pcs'] - $results['mi_order'];
+        $diffStockOutput = $results['total_output'] - $results['mi_order'] >  0 ? '+' : '' . $results['total_output'] - $results['mi_order'];
+        $pdf = Pdf::loadView('completionReportGLPDF', compact(
+            'title',
+            'startDate',
+            'endDate',
+            'glNumber',
+            'results',
+            'diffStockIn',
+            'diffStockOutput'
+
+        ))
+            ->setPaper('A4', 'landscape')
+            ->setOption('isHtml5ParserEnabled', true);
+
+        // 2️⃣ Ambil DomPDF instance dan render dulu sebelum kasih nomor halaman
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // 3️⃣ Tambahkan teks halaman di tengah bawah
+        $canvas = $dompdf->getCanvas();
+        $w = $canvas->get_width();
+        $h = $canvas->get_height();
+
+        $text = "Page {PAGE_NUM} of {PAGE_COUNT}";
+        $font = $dompdf->getFontMetrics()->get_font("helvetica", "normal");
+        $size = 9;
+        $textWidth = $dompdf->getFontMetrics()->getTextWidth($text, $font, $size);
+        $x = ($w - $textWidth) + 80;
+        $y = $h - 25;
+
+        $canvas->page_text($x, $y, $text, $font, $size, [0, 0, 0]);
+
+        // 4️⃣ Stream hasil
+        return $pdf->stream('completion_report_' . $glNumber . '.pdf');
     }
 }

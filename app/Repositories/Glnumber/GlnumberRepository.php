@@ -62,7 +62,6 @@ class GlnumberRepository implements GlnumberRepositoryInterface
 
     public function getGlNumberGroup(array $filters)
     {
-
         $start = $filters['start_date'] ?? null;
         $end   = $filters['end_date'] ?? null;
         $glNumber = $filters['gl_number'];
