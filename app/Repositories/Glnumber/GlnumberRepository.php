@@ -64,10 +64,11 @@ class GlnumberRepository implements GlnumberRepositoryInterface
     {
         $start = $filters['start_date'] ?? null;
         $end   = $filters['end_date'] ?? null;
+        $color = $filters['color'] ?? null;
         $glNumber = $filters['gl_number'];
 
         $glResult  =  GlNumber::where('gl_number', $glNumber)->first();
-        $grouped = $glResult->glNumberByStockIns($start, $end);
+        $grouped = $glResult->glNumberByStockIns($start, $end, $color);
 
         return $grouped;
     }

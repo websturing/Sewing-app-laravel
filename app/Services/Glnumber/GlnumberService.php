@@ -163,6 +163,125 @@ class GlnumberService implements GlnumberServiceInterface
 
     public function getCompletionGL(array $filters)
     {
+        if ($filters['color'] == 'all') {
+            return $this->getCompletionGLColorAll($filters);
+        } else {
+            return $this->getCompletionGLSelecetdColor($filters);
+        }
+    }
+
+    public function getCompletionGLSelecetdColor(array $filters)
+    {
+        $gl = $filters['gl_number'];
+        $startDate = $filters['start_date'] ?? null;
+        $endDate = $filters['end_date'] ?? null;
+
+        $cuttingApi = $this->cuttingIntegration->summaryGlNumber([
+            'gl_number' => $gl
+        ]);
+        $layingPlannings = collect($cuttingApi['data']['summary_by_gl'][0]['laying_plannings'] ?? []);
+        $cuttingApiGrandTotal = collect($cuttingApi['data']['grand_total']);
+
+        $sewingRecords = $this->glnumberRepository->getGlNumberGroup($filters);
+
+        $cuttingLookup = collect($layingPlannings)
+            ->mapWithKeys(function ($item) {
+
+                $sizes = collect($item['size_breakdown'])
+                    ->mapWithKeys(function ($size) {
+                        return [
+                            $size['size'] => [
+                                'order_qty'       => (int)$size['order_qty'],
+                                'cut_qty'         => $size['cut_qty'],
+                                'stock_out_qty'   => $size['stock_out_qty'],
+                                'replacement_qty' => $size['replacement_qty'],
+                            ]
+                        ];
+                    });
+
+                return [
+                    $item['color'] => [
+                        'sizes'   => $sizes,
+                        'summary' => [
+                            'order_qty'       => $item['summary']['order_qty'],
+                            'cut_qty'         => $item['summary']['cut_qty'],
+                            'stock_out_qty'   => $item['summary']['stock_out_qty'],
+                            'replacement_qty' => $item['summary']['replacement_qty'],
+                        ]
+                    ]
+                ];
+            });
+
+        return $sewingRecords
+            ->groupBy('gl_no')
+            ->map(function ($groupedByGl) use ($startDate, $endDate, $cuttingLookup, $cuttingApiGrandTotal) {
+
+                $colors = $groupedByGl
+                    ->groupBy('color')
+                    ->map(function ($byColor) use ($startDate, $endDate, $cuttingLookup) {
+
+                        $sizes = $byColor->map(function ($r) use ($cuttingLookup) {
+
+                            // Cutting data lookup
+                            $cutting = $cuttingLookup[$r->color]['sizes'][$r->size] ?? [
+                                'order_qty'       => 0,
+                                'cut_qty'         => 0,
+                                'stock_out_qty'   => 0,
+                                'replacement_qty' => 0,
+                            ];
+
+                            return [
+                                'size'   => $r->size,
+                                'bundle' => $r->total_bundle,
+                                'pcs'    => $r->total_pcs,
+                                'defect' => $r->total_defect,
+
+                                // Inject cutting data
+                                'order_qty'       => $cutting['order_qty'],
+                                'cut_qty'         => $cutting['cut_qty'],
+                                'stock_out_qty'   => $cutting['stock_out_qty'],
+                                'replacement_qty' => $cutting['replacement_qty'],
+                            ];
+                        })->values();
+
+                        return [
+                            'color' => $byColor->first()->color,
+                            'total_bundle' => $byColor->sum('total_bundle'),
+                            'total_pcs' => $byColor->sum('total_pcs'),
+                            'total_defect' => $byColor->sum('total_defect'),
+                            'total_order_qty' => $sizes->sum('order_qty'),
+                            'mi_order' => $cuttingLookup[$byColor->first()->color]['summary']['order_qty'] ?? 0,
+                            'first_updated_at' => $startDate ?? $byColor->min('start_updated_at'),
+                            'last_updated_at'  => $endDate ?? $byColor->max('updated_at'),
+
+                            // updated sizes array
+                            'sizes' => $sizes
+                        ];
+                    })
+                    ->values();
+
+                $globalFirst = $colors->min('first_updated_at');
+                $globalLast  = $colors->max('last_updated_at');
+
+                return [
+                    'gl_no' => $groupedByGl->first()->gl_no,
+                    'total_colors' => $groupedByGl->groupBy('color')->count(),
+                    'total_pcs' => $groupedByGl->sum('total_pcs'),
+                    'total_output' => 0,
+                    'mi_order' => $colors->sum('mi_order'),
+                    'first_updated_at' => $globalFirst ? \Carbon\Carbon::parse($globalFirst)->format('Y-m-d') : null,
+                    'last_updated_at'  => $globalLast  ? \Carbon\Carbon::parse($globalLast)->format('Y-m-d')  : null,
+                    'colors' => $colors,
+                ];
+            })
+            ->first();
+
+        return $cutting;
+    }
+
+
+    public function getCompletionGLColorAll(array $filters)
+    {
         $gl = $filters['gl_number'];
 
         // ---------------------------

@@ -88,7 +88,7 @@
             {{-- table colors  --}}
 
             @foreach ($results['colors'] as $i => $color)
-                <div class="box">
+                <div class="{{ count($results['colors']) > 1 ? 'box' : '' }}">
                     <table id="table">
                         <thead>
                             <tr>
@@ -113,7 +113,7 @@
                                 <td class="text-center">{{ $color['total_order_qty'] }}</td>
                             </tr>
                             <tr>
-                                <td>STOCK IN QTY</td>
+                                <td>RECEIVED QTY</td>
                                 @foreach ($color['sizes'] as $size)
                                     <td class="text-center">{{ $size['pcs'] }}</td>
                                 @endforeach
@@ -127,7 +127,7 @@
                                 <td class="text-center">0</td>
                             </tr>
                             <tr>
-                                <td>DIFF (STOCKIN - MI )</td>
+                                <td>DIFF (RECEIVED - MI )</td>
                                 @foreach ($color['sizes'] as $size)
                                     @php
                                         $result = (int) $size['pcs'] - (int) $size['order_qty'];
