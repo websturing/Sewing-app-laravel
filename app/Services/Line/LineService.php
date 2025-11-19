@@ -43,7 +43,6 @@ class LineService implements LineServiceInterface
 
     public function linesWithLastGlTransactions(array $filters)
     {
-
         return $this->lineRepository->linesWithLastGlTransactions($filters);
     }
 

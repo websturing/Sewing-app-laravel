@@ -13,7 +13,7 @@ class DefectRepository implements DefectRepositoryInterface
         return StockinDefect::all();
     }
 
-    public function groupLines()
+    public function SummaryByGLLineSize()
     {
         $records = DB::table('stock_in_defects')
             ->leftJoin('stock_ins', 'stock_ins.id', '=', 'stock_in_defects.stockin_id')
@@ -33,8 +33,7 @@ class DefectRepository implements DefectRepositoryInterface
                 'color',
                 'size',
                 'line_id'
-            )
-            ->get();
+            )->get();
 
         return $records;
     }

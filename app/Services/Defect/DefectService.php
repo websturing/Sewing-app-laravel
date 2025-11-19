@@ -15,6 +15,19 @@ class DefectService implements DefectServiceInterface
 
     public function getAllDefect()
     {
-        return $this->defectRepository->groupLines();
+        return $this->getDefectsGroupedByLine();
+    }
+
+    public function getDefectsGroupedByLine()
+    {
+        return $this->defectRepository->SummaryByGLLineSize()
+            ->groupBy('line_name')
+            ->map(function ($items, $line) {
+                return [
+                    'line_name' => $line,
+                    'items' => $items->values()
+                ];
+            })
+            ->values();
     }
 }

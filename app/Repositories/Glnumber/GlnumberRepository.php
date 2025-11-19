@@ -17,7 +17,6 @@ class GlnumberRepository implements GlnumberRepositoryInterface
             fn($q, $name) => $q->where('gl_number', 'LIKE', "%{$name}%")
         );
 
-
         return $query;
     }
 
