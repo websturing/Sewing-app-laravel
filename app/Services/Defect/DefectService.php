@@ -15,6 +15,6 @@ class DefectService implements DefectServiceInterface
 
     public function getAllDefect()
     {
-        return $this->defectRepository->all();
+        return $this->defectRepository->groupLines();
     }
 }

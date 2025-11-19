@@ -5,6 +5,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\AssignmentLineController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CuttingGlNumberController;
+use App\Http\Controllers\DefectController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RoleController;
@@ -42,6 +43,13 @@ Route::prefix('lines')
         // Line Devices
         Route::get('/{id}/devices', [lineDeviceController::class, 'getLineDevices']);
         Route::get('/{id}/history-glnumber', [lineDeviceController::class, 'getHistoryGlNumberByLine']);
+    });
+
+
+Route::prefix('defect')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [DefectController::class, 'index']);
     });
 
 Route::prefix('stock-ins')
