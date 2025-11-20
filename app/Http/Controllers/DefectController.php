@@ -19,6 +19,13 @@ class DefectController extends Controller
 
     public function summaryLines()
     {
-        return $this->defectService->getSummaryGroupByLines();
+
+        $results = $this->defectService->getSummaryGroupByLines();
+
+        return response()->json([
+            "status" => true,
+            'message' => 'Data retrieved successfully',
+            'data' => $results
+        ], 200);
     }
 }
