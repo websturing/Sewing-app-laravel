@@ -18,6 +18,19 @@ class DefectService implements DefectServiceInterface
         return $this->getDefectsGroupedByLine();
     }
 
+
+    public function getSummaryGroupByLines()
+    {
+
+        $groupedLines = $this->getDefectsGroupedByLine();
+
+        return [
+            "total_lines"  => $groupedLines->count(),
+            "total_defect" => $groupedLines->sum('total_defect'),
+            "lines"        => $groupedLines
+        ];
+    }
+
     public function getDefectsGroupedByLine()
     {
         $groupLines =  $this->defectRepository->SummaryByGLLineSize()

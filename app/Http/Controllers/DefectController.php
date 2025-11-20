@@ -16,4 +16,9 @@ class DefectController extends Controller
     {
         return $this->defectService->getAllDefect();
     }
+
+    public function summaryLines()
+    {
+        return $this->defectService->getSummaryGroupByLines();
+    }
 }
