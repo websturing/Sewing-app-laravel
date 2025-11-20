@@ -14,13 +14,30 @@ class DefectController extends Controller
 
     public function index()
     {
-        return $this->defectService->getAllDefect();
+        $results = $this->defectService->getAllDefect();
+
+        return response()->json([
+            "status" => true,
+            'message' => 'Data retrieved successfully',
+            'data' => $results
+        ], 200);
     }
 
     public function summaryLines()
     {
 
         $results = $this->defectService->getSummaryGroupByLines();
+
+        return response()->json([
+            "status" => true,
+            'message' => 'Data retrieved successfully',
+            'data' => $results
+        ], 200);
+    }
+
+    public function getGroupGlNumber()
+    {
+        $results = $this->defectService->getGroupGlNumber();
 
         return response()->json([
             "status" => true,

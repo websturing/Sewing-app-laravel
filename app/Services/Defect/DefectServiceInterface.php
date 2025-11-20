@@ -6,4 +6,5 @@ interface DefectServiceInterface
 {
     public function getAllDefect();
     public function getSummaryGroupByLines();
+    public function getGroupGlNumber();
 }
