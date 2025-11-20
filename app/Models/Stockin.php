@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Traits\Auditable;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\SizeHelper;
 
 class Stockin extends Model
 {
@@ -73,7 +74,10 @@ class Stockin extends Model
                 fn($q) => $q->where('stock_ins.gl_no', $glNo)
             )
             ->groupBy('stock_ins.gl_no', 'stock_ins.color', 'stock_ins.size')
-            ->orderBy('stock_ins.gl_no', 'asc');
+            ->orderBy('stock_ins.gl_no', 'asc')
+            ->orderBy('stock_ins.color', 'asc') // Tambahkan ini
+            ->orderByRaw(SizeHelper::getSizeOrderSql());
+
 
         return $query;
     }

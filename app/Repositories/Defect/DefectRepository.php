@@ -5,6 +5,8 @@ namespace App\Repositories\Defect;
 use App\Models\Defect;
 use App\Models\StockinDefect;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\SizeHelper;
+
 
 class DefectRepository implements DefectRepositoryInterface
 {
@@ -33,7 +35,9 @@ class DefectRepository implements DefectRepositoryInterface
                 'color',
                 'size',
                 'line_id'
-            )->get();
+            )
+            ->orderByRaw(SizeHelper::getSizeOrderSql())
+            ->get();
 
         return $records;
     }
