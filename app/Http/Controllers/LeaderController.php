@@ -20,13 +20,13 @@ class LeaderController extends Controller
             $result = $this->leaderService->createAssign($request->validated());
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'data' => $result,
                 'message' => 'Leader assigned successfully'
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => false,
                 'message' => 'Failed to assign leader',
                 'error' => $e->getMessage()
             ], 500);
@@ -39,13 +39,13 @@ class LeaderController extends Controller
             $result = $this->leaderService->createUnassign($request->validated());
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'data' => $result,
                 'message' => 'Leader unassigned successfully'
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => false,
                 'message' => 'Failed to unassign leader',
                 'error' => $e->getMessage()
             ], 500);
@@ -54,18 +54,17 @@ class LeaderController extends Controller
 
     public function getAssignmentByUser()
     {
-
         try {
             $result = $this->leaderService->getAssignmentSummaryByLeader();
 
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'data' => $result,
                 'message' => 'Leader unassigned successfully'
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'status' => false,
                 'message' => 'Failed to unassign leader',
                 'error' => $e->getMessage()
             ], 500);
