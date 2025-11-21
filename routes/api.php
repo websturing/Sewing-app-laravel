@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GlNumberController;
 use App\Http\Controllers\IntegrationController;
+use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\lineController;
 use App\Http\Controllers\lineDeviceController;
 use App\Http\Controllers\StockInController;
@@ -34,6 +35,16 @@ Route::prefix('auth')
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });
 
+Route::prefix('leader')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [LeaderController::class, 'getAssignmentByUser']);
+
+        Route::post('/assign', [LeaderController::class, 'createAssign']);
+        Route::post('/unassign', [LeaderController::class, 'createUnassign']);
+    });
+
+
 Route::prefix('lines')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
@@ -44,7 +55,6 @@ Route::prefix('lines')
         Route::get('/{id}/devices', [lineDeviceController::class, 'getLineDevices']);
         Route::get('/{id}/history-glnumber', [lineDeviceController::class, 'getHistoryGlNumberByLine']);
     });
-
 
 Route::prefix('defect')
     ->middleware(['api', 'auth:sanctum'])

@@ -29,6 +29,7 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->bind(\App\Repositories\CuttingGlnumber\CuttingGlnumberRepositoryInterface::class, \App\Repositories\CuttingGlnumber\CuttingGlnumberRepository::class);
         $this->app->bind(\App\Repositories\Defect\DefectRepositoryInterface::class, \App\Repositories\Defect\DefectRepository::class);
+        $this->app->bind(\App\Repositories\Leaders\LeadersRepositoryInterface::class, \App\Repositories\Leaders\LeadersRepository::class);
 
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
         $this->app->bind(ActivityRepositoryInterface::class, ActivityRepository::class);
