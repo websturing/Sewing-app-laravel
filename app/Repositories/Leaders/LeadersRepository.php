@@ -55,7 +55,7 @@ class LeadersRepository implements LeadersRepositoryInterface
             ->get();
     }
 
-    public function getAssignmentByUser()
+    public function summaryByLeader()
     {
         return Leader::with(['user', 'line', 'userCreated', 'userUpdated'])->get();
     }

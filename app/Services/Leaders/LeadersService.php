@@ -34,49 +34,44 @@ class LeadersService implements LeadersServiceInterface
         return $this->leadersRepository->unassign($assignmentId, $actor);
     }
 
-    public function getAssignmentByUser()
+    public function getAssignmentSummaryByLeader()
     {
-        $assignments = $this->leadersRepository->getAssignmentByUser();
-        $results = $assignments->groupBy('user.name')
-            ->map(function ($item, $leader) {
+        $assignments = $this->leadersRepository->summaryByLeader();
 
-                $activeLines = $item
-                    ->where('is_active', true) // atau nama kolom status kamu
+        return $assignments
+            ->groupBy('user.name')
+            ->map(function ($records, $leaderName) {
+
+                $active = $records->where('is_active', true);
+                $inactive = $records->where('is_active', false);
+
+                $activeLinesString = $active
                     ->pluck('line.name')
-                    ->implode(','); // jadikan string
-                $lineActives = $item->where('is_active', true)->map(function ($i) {
-                    return [
-                        "assign_at" => $i->assigned_at,
-                        "unassigned_at" => $i->assigned_at,
-                        "line_id" => $i->line->id ?? null,
-                        "line_name" => $i->line->name ?? null,
-                        "created_by" => $i->userCreated->name,
-                        "updated_by" => $i->userUpdated->name ?? null,
-                        'last_updated' => $i->updated_at
-                    ];
-                })->values();
+                    ->implode(', ');
 
-                $lineInactives = $item->where('is_active', false)->map(function ($i) {
+                $mapLine = function ($item) {
                     return [
-                        "assign_at" => $i->assigned_at,
-                        "unassigned_at" => $i->assigned_at,
-                        "line_id" => $i->line->id ?? null,
-                        "line_name" => $i->line->name ?? null,
-                        "created_by" => $i->userCreated->name,
-                        "updated_by" => $i->userUpdated->name ?? null,
-                        'last_updated' => $i->updated_at
+                        "assign_at"      => $item->assigned_at,
+                        "unassign_at"    => $item->unassigned_at,
+                        "line_id"        => $item->line->id ?? null,
+                        "line_name"      => $item->line->name ?? null,
+                        "created_by"     => $item->userCreated->name,
+                        "updated_by"     => $item->userUpdated->name ?? null,
+                        "last_updated"   => $item->updated_at,
                     ];
-                })->values();
+                };
+
+                $activeDetails = $active->map($mapLine)->values();
+                $inactiveDetails = $inactive->map($mapLine)->values();
 
                 return [
-                    "leader" => $leader,
-                    "line_active" => $activeLines,
-                    'last_updated' => $lineActives->max('last_updated'),
-                    "line_actives" => $lineActives,
-                    "line_inactives" => $lineInactives,
+                    "leader"        => $leaderName,
+                    "active_lines"  => $activeLinesString,
+                    "last_updated"  => $activeDetails->max('last_updated'),
+                    "active_detail" => $activeDetails,
+                    "inactive_detail" => $inactiveDetails,
                 ];
-            })->values();
-
-        return $results;
+            })
+            ->values();
     }
 }

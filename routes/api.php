@@ -35,7 +35,7 @@ Route::prefix('auth')
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });
 
-Route::prefix('leader')
+Route::prefix('leaders')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [LeaderController::class, 'getAssignmentByUser']);

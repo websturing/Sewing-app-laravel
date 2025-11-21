@@ -56,7 +56,7 @@ class LeaderController extends Controller
     {
 
         try {
-            $result = $this->leaderService->getAssignmentByUser();
+            $result = $this->leaderService->getAssignmentSummaryByLeader();
 
             return response()->json([
                 'success' => true,

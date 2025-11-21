@@ -8,5 +8,5 @@ interface LeadersRepositoryInterface
     public function assign(int $userId, int $lineId, int $actor);
     public function unassign(int $assignmentId, int $actor);
     public function getActiveAssignments();
-    public function getAssignmentByUser();
+    public function summaryByLeader();
 }
