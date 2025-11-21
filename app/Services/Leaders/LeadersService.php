@@ -4,6 +4,7 @@ namespace App\Services\Leaders;
 
 use App\Repositories\Leaders\LeadersRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 
 class LeadersService implements LeadersServiceInterface
 {
@@ -45,30 +46,36 @@ class LeadersService implements LeadersServiceInterface
                 $active = $records->where('is_active', true);
                 $inactive = $records->where('is_active', false);
 
+                // active line names for string summary
                 $activeLinesString = $active
                     ->pluck('line.name')
                     ->implode(', ');
 
-                $mapLine = function ($item) {
-                    return [
-                        "assign_at"      => $item->assigned_at,
-                        "unassign_at"    => $item->unassigned_at,
-                        "line_id"        => $item->line->id ?? null,
-                        "line_name"      => $item->line->name ?? null,
-                        "created_by"     => $item->userCreated->name,
-                        "updated_by"     => $item->userUpdated->name ?? null,
-                        "last_updated"   => $item->updated_at,
-                    ];
-                };
+                // reusable local mapper (compact & readable)
+                $mapLine = fn($item) => [
+                    "assign_at"      => Carbon::parse($item->assigned_at)->format("F d, Y H:i"),
+                    "unassign_at"    => $item->unassigned_at,
+                    "line_id"        => $item->line->id ?? null,
+                    "line_name"      => $item->line->name ?? null,
+                    "created_by"     => $item->userCreated->name,
+                    "updated_by"     => $item->userUpdated->name ?? null,
+                    "last_updated"   => Carbon::parse($item->updated_at)->format("F d, Y H:i"),
+                ];
 
                 $activeDetails = $active->map($mapLine)->values();
                 $inactiveDetails = $inactive->map($mapLine)->values();
 
+                // prevent Carbon parse error if no active record
+                $lastUpdated = $activeDetails->max('last_updated');
+                $lastUpdated = $lastUpdated
+                    ? Carbon::parse($lastUpdated)->format("F d, Y H:i")
+                    : null;
+
                 return [
-                    "leader"        => $leaderName,
-                    "active_lines"  => $activeLinesString,
-                    "last_updated"  => $activeDetails->max('last_updated'),
-                    "active_detail" => $activeDetails,
+                    "leader"          => $leaderName,
+                    "active_lines"    => $activeLinesString,
+                    "last_updated"    => $lastUpdated,
+                    "active_detail"   => $activeDetails,
                     "inactive_detail" => $inactiveDetails,
                 ];
             })

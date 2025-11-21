@@ -60,12 +60,12 @@ class LeaderController extends Controller
             return response()->json([
                 'status' => true,
                 'data' => $result,
-                'message' => 'Leader unassigned successfully'
+                'message' => 'Retrived Data successfully'
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Failed to unassign leader',
+                'message' => 'Failed to Retrive leader',
                 'error' => $e->getMessage()
             ], 500);
         }
