@@ -13,30 +13,37 @@ class LeadersRepository implements LeadersRepositoryInterface
         return Leader::all();
     }
 
-    public function assign(int $userId, int $lineId, int $actor)
+    public function assign(int $userId, array $lineIds, int $actor)
     {
-        return DB::transaction(function () use ($userId, $lineId, $actor) {
+        return DB::transaction(function () use ($userId, $lineIds, $actor) {
 
-            // nonaktifkan assignment lama kalau ada
-            Leader::where('user_id', $userId)
-                ->where('line_id', $lineId)
-                ->whereNull('unassigned_at')
-                ->update([
-                    'unassigned_at' => now(),
-                    'is_active' => false,
-                    'updated_by' => $actor
+            $results = [];
+
+            foreach ($lineIds as $lineId) {
+                // nonaktifkan assignment lama kalau ada
+                Leader::where('user_id', $userId)
+                    ->where('line_id', $lineId)
+                    ->whereNull('unassigned_at')
+                    ->update([
+                        'unassigned_at' => now(),
+                        'is_active' => false,
+                        'updated_by' => $actor
+                    ]);
+
+                // buat assignment baru
+                $results[] = Leader::create([
+                    'user_id' => $userId,
+                    'line_id' => $lineId,
+                    'assigned_at' => now(),
+                    'is_active' => true,
+                    'created_by' => $actor
                 ]);
+            }
 
-            // create assignment baru
-            return Leader::create([
-                'user_id' => $userId,
-                'line_id' => $lineId,
-                'assigned_at' => now(),
-                'is_active' => true,
-                'created_by' => $actor
-            ]);
+            return $results;
         });
     }
+
 
     public function unassign(int $assignmentId, int $actor)
     {

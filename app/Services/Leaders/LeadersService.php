@@ -25,6 +25,8 @@ class LeadersService implements LeadersServiceInterface
         $userId = $request['user_id'];
         $lineId = $request['line_id'];
         $actor = Auth::id();
+
+
         return $this->leadersRepository->assign($userId, $lineId, $actor);
     }
 

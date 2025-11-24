@@ -23,7 +23,7 @@ class AssignLeaderRequest extends FormRequest
     {
         return [
             "user_id" => "required|integer",
-            "line_id" => "required|integer"
+            "line_id" => "required|array"
         ];
     }
 }
