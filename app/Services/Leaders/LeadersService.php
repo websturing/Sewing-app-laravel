@@ -59,6 +59,7 @@ class LeadersService implements LeadersServiceInterface
 
                 // reusable local mapper (compact & readable)
                 $mapLine = fn($item) => [
+                    "assign_id"      => $item->id,
                     "assign_at"      => Carbon::parse($item->assigned_at)->format("F d, Y H:i"),
                     "unassign_at"    => $item->unassigned_at,
                     "line_id"        => $item->line->id ?? null,
