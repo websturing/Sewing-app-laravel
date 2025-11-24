@@ -53,6 +53,10 @@ class LeadersService implements LeadersServiceInterface
                     ->pluck('line.name')
                     ->implode(', ');
 
+                $activeLinesIds = $active
+                    ->pluck('line.id')
+                    ->implode(', ');
+
                 // reusable local mapper (compact & readable)
                 $mapLine = fn($item) => [
                     "assign_at"      => Carbon::parse($item->assigned_at)->format("F d, Y H:i"),
@@ -75,7 +79,10 @@ class LeadersService implements LeadersServiceInterface
 
                 return [
                     "leader"          => $leaderName,
+                    "leader_id"       => $records->first()->user_id,
+                    "is_active"       => (bool)$records->first()->is_active,
                     "active_lines"    => $activeLinesString,
+                    "active_line_ids"  => $activeLinesIds,
                     "last_updated"    => $lastUpdated,
                     "active_detail"   => $activeDetails,
                     "inactive_detail" => $inactiveDetails,
