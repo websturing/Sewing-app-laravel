@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Line;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Services\Permissions\PermissionServiceInterface;
 use App\Services\User\UserServiceInterface;
 use App\Models\User;
+use App\Services\Leaders\LeadersServiceInterface;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Contracts\Role;
 
@@ -17,11 +19,16 @@ class AuthController extends Controller
 
     protected $permissionService;
     protected $userService;
+    protected $leaderService;
 
-    public function __construct(PermissionServiceInterface $permissionService, UserServiceInterface $userService)
-    {
+    public function __construct(
+        PermissionServiceInterface $permissionService,
+        UserServiceInterface $userService,
+        LeadersServiceInterface $leaderService
+    ) {
         $this->permissionService = $permissionService;
         $this->userService = $userService;
+        $this->leaderService = $leaderService;
     }
 
 
@@ -101,6 +108,22 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        $isLineAll = false;
+        $assignmentLines = [];
+
+        $assignment = $this->leaderService->getActiveAssignmentsByUserId(10);
+        $assignmentLines = [];
+
+        if ($assignment && !empty($assignment['active_line_ids'])) {
+            $assignmentLines = array_filter(
+                array_map('intval', explode(',', $assignment['active_line_ids']))
+            );
+        }
+
+        if (empty($assignmentLines)) {
+            $assignmentLines = Line::pluck('id')->toArray();
+        }
+
         $activities = $this->userService->getUserActivities(1);
         $menus = $this->permissionService->getStructuredMenuForUser($user, $request->user()->getAllPermissions()->pluck('name')->toArray());
 
@@ -111,6 +134,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'roles' => $user->getRoleNames(),
                 'menu' => $menus,
+                'assignment_line' => $assignmentLines,
                 'permissions' => $request->user()->getAllPermissions()->pluck('name'),
                 'activities' =>   $activities
             ]

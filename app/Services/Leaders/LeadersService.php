@@ -143,6 +143,6 @@ class LeadersService implements LeadersServiceInterface
                     "inactive_detail" => $inactiveDetails,
                 ];
             })
-            ->values();
+            ->values()->first();
     }
 }
