@@ -39,6 +39,7 @@ Route::prefix('leaders')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [LeaderController::class, 'getAssignmentByUser']);
+        Route::get('/user/{id}', [LeaderController::class, 'getAssignmentByUserId']);
 
         Route::post('/assign', [LeaderController::class, 'createAssign']);
         Route::post('/unassign', [LeaderController::class, 'createUnassign']);

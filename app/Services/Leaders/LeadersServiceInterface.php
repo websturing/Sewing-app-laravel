@@ -9,4 +9,5 @@ interface LeadersServiceInterface
     public function createUnassign(array $request);
 
     public function getAssignmentSummaryByLeader();
+    public function getActiveAssignmentsByUserId(int $userId);
 }

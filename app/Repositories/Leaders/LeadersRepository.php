@@ -62,6 +62,13 @@ class LeadersRepository implements LeadersRepositoryInterface
             ->get();
     }
 
+    public function getActiveAssignmentsByUserId(int $userId)
+    {
+        return Leader::with(['user', 'line', 'userCreated', 'userUpdated'])
+            ->where('user_id', $userId)
+            ->get();
+    }
+
     public function summaryByLeader()
     {
         return Leader::with(['user', 'line', 'userCreated', 'userUpdated'])->get();

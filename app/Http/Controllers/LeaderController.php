@@ -70,4 +70,23 @@ class LeaderController extends Controller
             ], 500);
         }
     }
+
+    public function getAssignmentByUserId($userId)
+    {
+        try {
+            $result = $this->leaderService->getActiveAssignmentsByUserId($userId);
+
+            return response()->json([
+                'status' => true,
+                'data' => $result,
+                'message' => 'Retrived Data successfully'
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Retrive leader',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
