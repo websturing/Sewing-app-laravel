@@ -54,14 +54,22 @@ class DefectService implements DefectServiceInterface
         $grouped = $this->defectRepository->SummaryByGLLineSize()
             ->groupBy('gl_no')
             ->map(function ($items, $glNo) {
+
+                $groupByColor = $items->groupBy('color')->map(function ($item, $color) {
+                    return [
+                        "color" => $color,
+                        "items" => $item
+                    ];
+                });
+
                 return [
                     'gl_number' => $glNo,
-                    'color' => $items->first()->color,
+                    'color' => $items->pluck('color')->unique()->implode(', '),
                     'total_size' => count($items),
                     'total_defect' => $items->sum('total_defect'),
                     'total_pcs' => $items->sum('total_pcs'),
                     'line_names'    => $items->pluck('line_name')->unique()->implode(', '),
-                    'items' => $items->values()
+                    'items' => $groupByColor->values()
                 ];
             })->values();
 
