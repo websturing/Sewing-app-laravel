@@ -17,4 +17,8 @@ class ReplacementService implements ReplacementServiceInterface
     {
         return $this->replacementRepository->all();
     }
+    public function getDefectByGLNumber()
+    {
+        return "defectBundle";
+    }
 }

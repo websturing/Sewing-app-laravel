@@ -58,6 +58,8 @@ class DefectService implements DefectServiceInterface
                 $groupByColor = $items->groupBy('color')->map(function ($item, $color) {
                     return [
                         "color" => $color,
+                        'total_defect' => $item->sum('total_defect'),
+                        'total_pcs' => $item->sum('total_pcs'),
                         "items" => $item
                     ];
                 });
