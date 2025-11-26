@@ -55,25 +55,34 @@ class DefectService implements DefectServiceInterface
             ->groupBy('gl_no')
             ->map(function ($items, $glNo) {
 
+                $totalDefect = $items->sum('total_defect');
+
+                // Jika 0, return null untuk dibuang nanti
+                if ($totalDefect == 0) {
+                    return null;
+                }
+
                 $groupByColor = $items->groupBy('color')->map(function ($item, $color) {
                     return [
-                        "color" => $color,
-                        'total_defect' => $item->sum('total_defect'),
-                        'total_pcs' => $item->sum('total_pcs'),
-                        "items" => $item
+                        "color"        => $color,
+                        "total_defect" => $item->sum('total_defect'),
+                        "total_pcs"    => $item->sum('total_pcs'),
+                        "items"        => $item
                     ];
                 });
 
                 return [
-                    'gl_number' => $glNo,
-                    'color' => $items->pluck('color')->unique()->implode(', '),
-                    'total_size' => count($items),
-                    'total_defect' => $items->sum('total_defect'),
-                    'total_pcs' => $items->sum('total_pcs'),
+                    'gl_number'     => $glNo,
+                    'color'         => $items->pluck('color')->unique()->implode(', '),
+                    'total_size'    => count($items),
+                    'total_defect'  => $totalDefect,
+                    'total_pcs'     => $items->sum('total_pcs'),
                     'line_names'    => $items->pluck('line_name')->unique()->implode(', '),
-                    'items' => $groupByColor->values()
+                    'items'         => $groupByColor->values()
                 ];
-            })->values();
+            })
+            ->filter()         // hapus null result
+            ->values();        // reindex array
 
         return $grouped;
     }
