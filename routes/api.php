@@ -17,6 +17,7 @@ use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\lineController;
 use App\Http\Controllers\lineDeviceController;
+use App\Http\Controllers\ReplacementRequestController;
 use App\Http\Controllers\StockInController;
 use App\Http\Controllers\StockInSummaryController;
 use App\Http\Controllers\StockInTicketController;
@@ -79,6 +80,12 @@ Route::prefix('replacement')
         Route::get('/', [DefectController::class, 'index']);
         Route::get('/summary/lines', [DefectController::class, 'summaryLines']);
         Route::get('/group/gl-number', [DefectController::class, 'getGroupGlNumber']);
+    });
+
+Route::prefix('replacement-request')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
     });
 
 Route::prefix('stock-ins')
