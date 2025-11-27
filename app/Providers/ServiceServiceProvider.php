@@ -7,6 +7,10 @@ use App\Services\Activity\ActivityServiceInterface;
 use Illuminate\Support\ServiceProvider;
 use App\Services\Permissions\PermissionServiceInterface;
 use App\Services\Permissions\PermissionService;
+use App\Services\Replacement\ReplacementService;
+use App\Services\Replacement\ReplacementServiceInterface;
+use App\Services\Workflow\WorkflowService;
+use App\Services\Workflow\WorkflowServiceInterface;
 
 class ServiceServiceProvider extends ServiceProvider
 {
@@ -38,6 +42,9 @@ class ServiceServiceProvider extends ServiceProvider
 
         $this->app->bind(PermissionServiceInterface::class, PermissionService::class);
         $this->app->bind(ActivityServiceInterface::class, ActivityService::class);
+
+        $this->app->bind(WorkflowServiceInterface::class, WorkflowService::class);
+        $this->app->bind(ReplacementServiceInterface::class, ReplacementService::class);
     }
 
     public function boot() {}

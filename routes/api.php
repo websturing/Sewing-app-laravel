@@ -21,6 +21,7 @@ use App\Http\Controllers\StockInController;
 use App\Http\Controllers\StockInSummaryController;
 use App\Http\Controllers\StockInTicketController;
 use App\Http\Controllers\UserShiftAssignmentController;
+use App\Http\Controllers\WorkflowController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Models\Setting;
@@ -34,6 +35,13 @@ Route::prefix('auth')
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });
+
+Route::prefix('workflows')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/step/{id}', [WorkflowController::class, 'getWorkflowByStep']);
+    });
+
 
 Route::prefix('leaders')
     ->middleware(['api', 'auth:sanctum'])
