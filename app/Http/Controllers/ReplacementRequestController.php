@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ReplacementFiltersRequest;
+use App\Http\Resources\ReplacementPaginationResource;
 use App\Services\Replacement\ReplacementServiceInterface;
 use Illuminate\Http\Request;
 
@@ -33,7 +34,20 @@ class ReplacementRequestController extends Controller
 
     public function getReplacementListWithPagination(ReplacementFiltersRequest $request)
     {
-        return $this->replacementService->getReplacementListWithPagination($request->validated());
+        try {
+            $results = $this->replacementService->getReplacementListWithPagination($request->validated());
+
+            return ReplacementPaginationResource::collection($results)->additional([
+                'status' => true,
+                'message' => "Successfully Retrived Ticket Replacements"
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Get Ticket Replacement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function createTicketReplacement(Request $request)
