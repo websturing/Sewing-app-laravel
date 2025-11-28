@@ -14,4 +14,9 @@ class ReplacementRequest extends Model
         'created_by',
         'status'
     ];
+
+    function replacementDetail()
+    {
+        return $this->hasMany(ReplacementRequestDetail::class, 'replacement_request_id');
+    }
 }

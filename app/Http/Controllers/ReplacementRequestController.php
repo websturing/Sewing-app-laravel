@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReplacementFiltersRequest;
 use App\Services\Replacement\ReplacementServiceInterface;
 use Illuminate\Http\Request;
 
@@ -10,6 +11,30 @@ class ReplacementRequestController extends Controller
     public function __construct(
         private ReplacementServiceInterface $replacementService,
     ) {}
+
+    public function index(Request $request)
+    {
+        try {
+            $result = $this->replacementService->getReplacementList();
+
+            return response()->json([
+                'status' => true,
+                'data' => $result,
+                'message' => 'Successfully Retrived Ticket Replacements '
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Get Ticket Replacement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getReplacementListWithPagination(ReplacementFiltersRequest $request)
+    {
+        return $this->replacementService->getReplacementListWithPagination($request->validated());
+    }
 
     public function createTicketReplacement(Request $request)
     {

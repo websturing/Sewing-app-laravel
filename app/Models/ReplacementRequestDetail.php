@@ -17,4 +17,9 @@ class ReplacementRequestDetail extends Model
         'description',
         'replacement_request_id'
     ];
+
+    function line()
+    {
+        return $this->belongsTo(Line::class, 'line_id');
+    }
 }

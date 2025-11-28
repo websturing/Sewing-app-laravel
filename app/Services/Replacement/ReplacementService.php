@@ -20,6 +20,16 @@ class ReplacementService implements ReplacementServiceInterface
         return $this->replacementRepository->all();
     }
 
+    public function getReplacementList()
+    {
+        return $this->replacementRepository->replacmentList();
+    }
+
+    public function getReplacementListWithPagination(array $filters)
+    {
+        return $this->replacementRepository->replacmentListWithPagination($filters);
+    }
+
     public function createReplacementRequest(array $data)
     {
         $replacementRequest = [

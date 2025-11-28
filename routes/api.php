@@ -85,6 +85,9 @@ Route::prefix('replacement')
 Route::prefix('replacement-request')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
+        Route::get('/', [ReplacementRequestController::class, 'index']);
+        Route::get('/pagination', [ReplacementRequestController::class, 'getReplacementListWithPagination']);
+
         Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
     });
 
