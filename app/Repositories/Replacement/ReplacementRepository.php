@@ -31,6 +31,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
                     return [
                         "color" => $color,
                         "laying_planning_id" => $d->pluck('laying_planning_id')->unique()->first(),
+                        "total_defect" => $d->sum('pcs'),
                         "size_list" => $sizeList
                     ];
                 });
@@ -83,6 +84,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
                     return [
                         "color" => $color,
                         "laying_planning_id" => $d->pluck('laying_planning_id')->unique()->first(),
+                        "total_defect" => $d->sum('pcs'),
                         "size_list" => $sizeList
                     ];
                 })->values();
