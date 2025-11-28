@@ -17,33 +17,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
     {
         return ReplacementRequest::with(['replacementDetail', 'replacementDetail.line'])
             ->get()
-            ->map(function ($e) {
-
-                $defectList = $e->replacementDetail->groupBy('color')->map(function ($d, $color) {
-
-                    $sizeList = $d->map(function ($s) {
-                        return [
-                            "size" => $s->size,
-                            "defect_qty" => $s->pcs
-                        ];
-                    });
-
-                    return [
-                        "color" => $color,
-                        "laying_planning_id" => $d->pluck('laying_planning_id')->unique()->first(),
-                        "total_defect" => $d->sum('pcs'),
-                        "size_list" => $sizeList
-                    ];
-                });
-
-                return [
-                    "serial_number" => $e->serial_number,
-                    "gl_no" => $e->replacementDetail->first()->gl_no,
-                    "line_name" => $e->replacementDetail->pluck('line.name')->unique(),
-                    "defect_list" => $defectList,
-                    "is_approval" => false
-                ];
-            });
+            ->map(fn($e) => $this->transform($e));
     }
 
 
@@ -70,33 +44,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
         return $results
             ->paginate($perPage, ['*'], 'page', $page)
-            ->through(function ($e) {
-
-                $defectList = $e->replacementDetail->groupBy('color')->map(function ($d, $color) {
-
-                    $sizeList = $d->map(function ($s) {
-                        return [
-                            "size" => $s->size,
-                            "defect_qty" => $s->pcs
-                        ];
-                    });
-
-                    return [
-                        "color" => $color,
-                        "laying_planning_id" => $d->pluck('laying_planning_id')->unique()->first(),
-                        "total_defect" => $d->sum('pcs'),
-                        "size_list" => $sizeList
-                    ];
-                })->values();
-
-                return [
-                    "serial_number" => $e->serial_number,
-                    "gl_no" => $e->replacementDetail->first()->gl_no,
-                    "line_name" => $e->replacementDetail->pluck('line.name')->unique(),
-                    "defect_list" => $defectList,
-                    "is_approval" => false
-                ];
-            });
+            ->through(fn($e) => $this->transform($e));
     }
 
 
@@ -117,5 +65,32 @@ class ReplacementRepository implements ReplacementRepositoryInterface
                 "description" => ""
             ]);
         }
+    }
+
+    private function transform($e)
+    {
+        $defectList = $e->replacementDetail
+            ->groupBy('color')
+            ->map(function ($d, $color) {
+
+                return [
+                    "color" => $color,
+                    "laying_planning_id" => $d->first()->laying_planning_id,
+                    "total_defect" => $d->sum('pcs'),
+                    "size_list" => $d->map(fn($s) => [
+                        "size" => $s->size,
+                        "defect_qty" => $s->pcs
+                    ])
+                ];
+            })->values();
+
+        return [
+            "serial_number" => $e->serial_number,
+            "gl_no" => $e->replacementDetail->first()->gl_no,
+            "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
+            "defect_list" => $defectList,
+            "defect_total" => $defectList->sum('total_defect'),
+            "is_approval" => false
+        ];
     }
 }
