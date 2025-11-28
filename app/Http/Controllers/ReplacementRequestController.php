@@ -34,6 +34,7 @@ class ReplacementRequestController extends Controller
 
     public function getReplacementListWithPagination(ReplacementFiltersRequest $request)
     {
+
         try {
             $results = $this->replacementService->getReplacementListWithPagination($request->validated());
 

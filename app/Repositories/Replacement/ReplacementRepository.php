@@ -89,6 +89,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
             "serial_number" => $e->serial_number,
             "gl_no" => $e->replacementDetail->first()->gl_no,
             "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
+            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(","),
             "defect_list" => $defectList,
             "defect_total" => $defectList->sum('total_defect'),
             "is_approval" => false,
