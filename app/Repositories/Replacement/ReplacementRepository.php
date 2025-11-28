@@ -5,6 +5,7 @@ namespace App\Repositories\Replacement;
 use App\Models\Replacement;
 use App\Models\ReplacementRequest;
 use App\Models\ReplacementRequestDetail;
+use Carbon\Carbon;
 
 class ReplacementRepository implements ReplacementRepositoryInterface
 {
@@ -90,7 +91,9 @@ class ReplacementRepository implements ReplacementRepositoryInterface
             "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
             "defect_list" => $defectList,
             "defect_total" => $defectList->sum('total_defect'),
-            "is_approval" => false
+            "is_approval" => false,
+            "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
+            "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i")
         ];
     }
 }
