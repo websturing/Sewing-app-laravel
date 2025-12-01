@@ -83,6 +83,21 @@ class ReplacementService implements ReplacementServiceInterface
                 ];
             })->values();
 
+        switch ($e->status) {
+            case "in_progress":
+                $statusName = "In Progress";
+                $statusType = "warning";
+                break;
+            case "rejected":
+                $statusName = "'Rejected";
+                $statusType = "error";
+                break;
+            case "completed":
+                $statusName = "'Completed";
+                $statusType = "success";
+                break;
+        }
+
         return [
             "serial_number" => $e->serial_number,
             "gl_no" => $e->replacementDetail->first()->gl_no,
@@ -92,7 +107,8 @@ class ReplacementService implements ReplacementServiceInterface
             "defect_total" => $defectList->sum('total_defect'),
             "total_size" => $e->replacementDetail->count('total_size'),
             "is_approval" => false,
-            "step" => $e->current_step_id,
+            "status_name" => $statusName,
+            "status_type" => $statusType,
             "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
             "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
