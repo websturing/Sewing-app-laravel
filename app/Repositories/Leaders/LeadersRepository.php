@@ -66,6 +66,7 @@ class LeadersRepository implements LeadersRepositoryInterface
     {
         return Leader::with(['user', 'line', 'userCreated', 'userUpdated'])
             ->where('user_id', $userId)
+            ->where('is_active', true)
             ->get();
     }
 

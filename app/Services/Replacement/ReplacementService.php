@@ -39,7 +39,7 @@ class ReplacementService implements ReplacementServiceInterface
     {
         $assignment = $this->leaderService->getLineActive(Auth::id());
 
-        return $replacement = $this->replacementRepository
+        $replacement = $this->replacementRepository
             ->replacmentListWithPagination($filters, $assignment);
 
         if ($replacement->isEmpty()) {
