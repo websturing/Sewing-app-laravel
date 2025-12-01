@@ -107,6 +107,7 @@ class ReplacementService implements ReplacementServiceInterface
             "defect_total" => $defectList->sum('total_defect'),
             "total_size" => $e->replacementDetail->count('total_size'),
             "is_approval" => false,
+            "current_step" => $e->current_step_id,
             "status_name" => $statusName,
             "status_type" => $statusType,
             "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',

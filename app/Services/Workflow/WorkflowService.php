@@ -32,7 +32,8 @@ class WorkflowService implements WorkflowServiceInterface
                 "id" => $e->id,
                 "name" => $e->name,
                 "role" => $e->role->name ?? '-',
-                "is_final" => $e->is_final
+                "step" => $e->step_order,
+                "is_final" => (bool)$e->is_final
             ];
         });
 
