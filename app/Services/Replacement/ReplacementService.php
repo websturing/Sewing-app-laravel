@@ -95,14 +95,17 @@ class ReplacementService implements ReplacementServiceInterface
         switch ($e->status) {
             case "in_progress":
                 $statusName = "In Progress";
+                $statusClass = "!bg-amber-100";
                 $statusType = "warning";
                 break;
             case "rejected":
                 $statusName = "'Rejected";
+                $statusClass = "!bg-red-100";
                 $statusType = "error";
                 break;
             case "completed":
                 $statusName = "'Completed";
+                $statusClass = "!bg-green-100";
                 $statusType = "success";
                 break;
         }
@@ -119,6 +122,7 @@ class ReplacementService implements ReplacementServiceInterface
             "current_step" => $e->current_step_id,
             "status_name" => $statusName,
             "status_type" => $statusType,
+            "status_class" => $statusClass,
             "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
             "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
