@@ -4,15 +4,21 @@ namespace App\Services\Replacement;
 
 use App\Repositories\Replacement\ReplacementRepositoryInterface;
 use App\Helpers\ReplacementSerialGenerator;
+use App\Services\Workflow\WorkflowServiceInterface;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ReplacementService implements ReplacementServiceInterface
 {
     protected $replacementRepository;
+    protected $workflowService;
 
-    public function __construct(ReplacementRepositoryInterface $replacementRepository)
-    {
+    public function __construct(
+        ReplacementRepositoryInterface $replacementRepository,
+        WorkflowServiceInterface $workflowService,
+    ) {
         $this->replacementRepository = $replacementRepository;
+        $this->workflowService = $workflowService;
     }
 
     public function getAllReplacement()
@@ -28,7 +34,14 @@ class ReplacementService implements ReplacementServiceInterface
     public function getReplacementListWithPagination(array $filters)
     {
 
-        return $this->replacementRepository->replacmentListWithPagination($filters);
+        $replacement = $this->replacementRepository
+            ->replacmentListWithPagination($filters)
+            ->through(function ($e) {
+                $workflow = $this->workflowService->getWorkflowByStep($e->current_step_id);
+                return    $this->transform($e, $workflow);
+            });
+
+        return $replacement;
     }
 
     public function createReplacementRequest(array $data)
@@ -49,5 +62,45 @@ class ReplacementService implements ReplacementServiceInterface
     public function getDefectByGLNumber()
     {
         return "defectBundle";
+    }
+
+    /** Transfrom Replacement List */
+    private function transform($e, $workflow = null)
+    {
+        $defectList = $e->replacementDetail
+            ->groupBy('color')
+            ->map(function ($d, $color) {
+
+                return [
+                    "color" => $color,
+                    "laying_planning_id" => $d->first()->laying_planning_id,
+                    "total_defect" => $d->sum('pcs'),
+                    "total_size" => $d->count('size'),
+                    "size_list" => $d->map(fn($s) => [
+                        "size" => $s->size,
+                        "defect_qty" => $s->pcs
+                    ])
+                ];
+            })->values();
+
+        return [
+            "serial_number" => $e->serial_number,
+            "gl_no" => $e->replacementDetail->first()->gl_no,
+            "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
+            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(","),
+            "defect_list" => $defectList,
+            "defect_total" => $defectList->sum('total_defect'),
+            "total_size" => $e->replacementDetail->count('total_size'),
+            "is_approval" => false,
+            "step" => $e->current_step_id,
+            "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
+            "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
+            "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
+            "workflow" => $workflow ? [
+                "current" => $workflow['current']?->name,
+                "next" => $workflow['step_after']?->name,
+                "previous" => $workflow['step_before']?->name,
+            ] : null,
+        ];
     }
 }

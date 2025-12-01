@@ -16,9 +16,8 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
     public function replacmentList()
     {
-        return ReplacementRequest::with(['replacementDetail', 'replacementDetail.line'])
-            ->get()
-            ->map(fn($e) => $this->transform($e));
+        return ReplacementRequest::with(['replacementDetail', 'replacementDetail.line', 'requestedBy'])
+            ->get();
     }
 
 
@@ -29,7 +28,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
         $perPage = $filters['per_page'] ?? 10;
         $page = $filters['page'] ?? 1;
 
-        $results =  ReplacementRequest::with(['replacementDetail', 'replacementDetail.line']);
+        $results =  ReplacementRequest::with(['replacementDetail', 'replacementDetail.line', 'requestedBy']);
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -44,8 +43,7 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
 
         return $results
-            ->paginate($perPage, ['*'], 'page', $page)
-            ->through(fn($e) => $this->transform($e));
+            ->paginate($perPage, ['*'], 'page', $page);
     }
 
 
@@ -66,35 +64,5 @@ class ReplacementRepository implements ReplacementRepositoryInterface
                 "description" => ""
             ]);
         }
-    }
-
-    private function transform($e)
-    {
-        $defectList = $e->replacementDetail
-            ->groupBy('color')
-            ->map(function ($d, $color) {
-
-                return [
-                    "color" => $color,
-                    "laying_planning_id" => $d->first()->laying_planning_id,
-                    "total_defect" => $d->sum('pcs'),
-                    "size_list" => $d->map(fn($s) => [
-                        "size" => $s->size,
-                        "defect_qty" => $s->pcs
-                    ])
-                ];
-            })->values();
-
-        return [
-            "serial_number" => $e->serial_number,
-            "gl_no" => $e->replacementDetail->first()->gl_no,
-            "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
-            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(","),
-            "defect_list" => $defectList,
-            "defect_total" => $defectList->sum('total_defect'),
-            "is_approval" => false,
-            "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
-            "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i")
-        ];
     }
 }
