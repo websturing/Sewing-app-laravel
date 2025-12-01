@@ -6,4 +6,5 @@ interface WorkflowRepositoryInterface
 {
     public function all();
     public function findByStep(int $stepNumber);
+    public function findById(int $id);
 }

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Workflow;
 
+use App\Models\WorkflowDefinition;
 use App\Models\WorkflowStep;
 
 
@@ -25,5 +26,11 @@ class WorkflowRepository implements WorkflowRepositoryInterface
             "current"      => $steps[$stepNumber] ?? null,
             "step_after"   => $steps[$stepNumber + 1] ?? null,
         ];
+    }
+
+    public function findById(int $id)
+    {
+
+        return WorkflowDefinition::with(['steps', 'steps.role'])->find($id);
     }
 }

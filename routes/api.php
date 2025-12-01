@@ -40,6 +40,7 @@ Route::prefix('auth')
 Route::prefix('workflows')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
+        Route::get('/{id}', [WorkflowController::class, 'getWorkflowById']);
         Route::get('/step/{id}', [WorkflowController::class, 'getWorkflowByStep']);
     });
 

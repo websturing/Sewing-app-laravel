@@ -12,4 +12,9 @@ class WorkflowStep extends Model
     {
         return $this->belongsTo(WorkflowDefinition::class, 'workflow_definition_id');
     }
+
+    function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id_responsible');
+    }
 }
