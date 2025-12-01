@@ -22,13 +22,17 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
 
 
-    public function replacmentListWithPagination(array $filters)
+    public function replacmentListWithPagination(array $filters, array $lines)
     {
-
         $perPage = $filters['per_page'] ?? 10;
         $page = $filters['page'] ?? 1;
 
-        $results =  ReplacementRequest::with(['replacementDetail', 'replacementDetail.line', 'requestedBy']);
+        $results = ReplacementRequest::with([
+            'replacementDetail.line',
+            'requestedBy'
+        ])->whereHas('replacementDetail', function ($rd) use ($lines) {
+            $rd->whereIn('line_id', $lines);
+        });
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
@@ -41,10 +45,9 @@ class ReplacementRepository implements ReplacementRepositoryInterface
             });
         }
 
-
-        return $results
-            ->paginate($perPage, ['*'], 'page', $page);
+        return $results->paginate($perPage, ['*'], 'page', $page);
     }
+
 
 
     public function create(array $replacementRequest, array $replacementDetail)

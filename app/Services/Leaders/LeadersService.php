@@ -5,6 +5,7 @@ namespace App\Services\Leaders;
 use App\Repositories\Leaders\LeadersRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use App\Models\Line;
 
 class LeadersService implements LeadersServiceInterface
 {
@@ -144,5 +145,24 @@ class LeadersService implements LeadersServiceInterface
                 ];
             })
             ->values()->first();
+    }
+
+    public function getLineActive(int $userId)
+    {
+        $assignment = $this->getActiveAssignmentsByUserId($userId);
+
+        $assignmentLines = [];
+
+        if ($assignment && !empty($assignment['active_line_ids'])) {
+            $assignmentLines = array_filter(
+                array_map('intval', explode(',', $assignment['active_line_ids']))
+            );
+        }
+
+        if (empty($assignmentLines)) {
+            $assignmentLines = Line::pluck('id')->toArray();
+        }
+
+        return $assignmentLines;
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services\Replacement;
 
 use App\Repositories\Replacement\ReplacementRepositoryInterface;
 use App\Helpers\ReplacementSerialGenerator;
+use App\Services\Leaders\LeadersServiceInterface;
 use App\Services\Workflow\WorkflowServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -12,13 +13,16 @@ class ReplacementService implements ReplacementServiceInterface
 {
     protected $replacementRepository;
     protected $workflowService;
+    protected $leaderService;
 
     public function __construct(
         ReplacementRepositoryInterface $replacementRepository,
         WorkflowServiceInterface $workflowService,
+        LeadersServiceInterface $leaderService,
     ) {
         $this->replacementRepository = $replacementRepository;
         $this->workflowService = $workflowService;
+        $this->leaderService = $leaderService;
     }
 
     public function getAllReplacement()
@@ -33,16 +37,21 @@ class ReplacementService implements ReplacementServiceInterface
 
     public function getReplacementListWithPagination(array $filters)
     {
+        $assignment = $this->leaderService->getLineActive(Auth::id());
 
-        $replacement = $this->replacementRepository
-            ->replacmentListWithPagination($filters)
-            ->through(function ($e) {
-                $workflow = $this->workflowService->getWorkflowByStep($e->current_step_id);
-                return    $this->transform($e, $workflow);
-            });
+        return $replacement = $this->replacementRepository
+            ->replacmentListWithPagination($filters, $assignment);
 
-        return $replacement;
+        if ($replacement->isEmpty()) {
+            return $replacement;
+        }
+
+        return $replacement->through(function ($e) {
+            $workflow = $this->workflowService->getWorkflowByStep($e->current_step_id);
+            return $this->transform($e, $workflow);
+        });
     }
+
 
     public function createReplacementRequest(array $data)
     {

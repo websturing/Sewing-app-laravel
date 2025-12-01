@@ -8,5 +8,5 @@ interface ReplacementRepositoryInterface
     public function create(array $replacementRequest, array $replacementDetail);
 
     public function replacmentList();
-    public function replacmentListWithPagination(array $filters);
+    public function replacmentListWithPagination(array $filters, array $lines);
 }

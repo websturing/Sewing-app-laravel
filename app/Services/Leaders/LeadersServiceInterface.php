@@ -10,4 +10,5 @@ interface LeadersServiceInterface
 
     public function getAssignmentSummaryByLeader();
     public function getActiveAssignmentsByUserId(int $userId);
+    public function getLineActive(int $userId);
 }
