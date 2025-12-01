@@ -111,7 +111,7 @@ class AuthController extends Controller
         $isLineAll = false;
         $assignmentLines = [];
 
-        $assignment = $this->leaderService->getActiveAssignmentsByUserId(10);
+        $assignment = $this->leaderService->getActiveAssignmentsByUserId(Auth::id());
         $assignmentLines = [];
 
         if ($assignment && !empty($assignment['active_line_ids'])) {
