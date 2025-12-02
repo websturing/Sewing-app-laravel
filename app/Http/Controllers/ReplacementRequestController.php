@@ -55,7 +55,7 @@ class ReplacementRequestController extends Controller
     { {
 
             try {
-                return $results = $this->replacementService->getApprovalWithPagination($request->validated());
+                $results = $this->replacementService->getApprovalWithPagination($request->validated());
 
                 return ReplacementPaginationResource::collection($results)->additional([
                     'status' => true,

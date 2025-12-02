@@ -5,6 +5,7 @@ namespace App\Services\Replacement;
 use App\Repositories\Replacement\ReplacementRepositoryInterface;
 use App\Helpers\ReplacementSerialGenerator;
 use App\Services\Leaders\LeadersServiceInterface;
+use App\Services\Role\RoleServiceInterface;
 use App\Services\Workflow\WorkflowServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -14,15 +15,18 @@ class ReplacementService implements ReplacementServiceInterface
     protected $replacementRepository;
     protected $workflowService;
     protected $leaderService;
+    protected $roleService;
 
     public function __construct(
         ReplacementRepositoryInterface $replacementRepository,
         WorkflowServiceInterface $workflowService,
         LeadersServiceInterface $leaderService,
+        RoleServiceInterface $roleService,
     ) {
         $this->replacementRepository = $replacementRepository;
         $this->workflowService = $workflowService;
         $this->leaderService = $leaderService;
+        $this->roleService = $roleService;
     }
 
     public function getAllReplacement()
@@ -56,6 +60,12 @@ class ReplacementService implements ReplacementServiceInterface
     public function getApprovalWithPagination(array $filters)
     {
         $roles = Auth::user()->roles->pluck('id')->toArray();
+        $minIdRole = min($roles);
+        if ($minIdRole <= 1) {
+            $roles = $this->roleService->getAllRole()->pluck('id')->toArray();
+        }
+
+
         $assignment = $this->leaderService->getLineActive(Auth::id());
 
         $replacement = $this->replacementRepository->replacementApprovalListWithPagination($filters, $assignment, $roles);
