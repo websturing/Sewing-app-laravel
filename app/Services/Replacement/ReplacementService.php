@@ -55,7 +55,19 @@ class ReplacementService implements ReplacementServiceInterface
 
     public function getApprovalWithPagination(array $filters)
     {
-        return $this->replacementRepository->replacementApprovalListWithPagination($filters);
+        $roles = Auth::user()->roles->pluck('id')->toArray();
+        $assignment = $this->leaderService->getLineActive(Auth::id());
+        return $replacement = $this->replacementRepository->replacementApprovalListWithPagination($filters, $assignment, $roles);
+
+        if ($replacement->isEmpty()) {
+            return $replacement;
+        }
+
+        return $replacement->through(function ($e) {
+            $stepOrder = $this->workflowService->getWorkflowByStepId($e->current_step_id);
+            $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order);
+            return $this->transform($e, $workflow);
+        });
     }
 
     public function createReplacementRequest(array $data)

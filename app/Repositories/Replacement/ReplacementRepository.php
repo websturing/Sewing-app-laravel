@@ -56,33 +56,35 @@ class ReplacementRepository implements ReplacementRepositoryInterface
         return $results->paginate($perPage, ['*'], 'page', $page);
     }
 
-    public function replacementApprovalListWithPagination(array $filters)
+    public function replacementApprovalListWithPagination(array $filters, array $lines, array $roles)
     {
         $perPage = $filters['per_page'] ?? 10;
         $page = $filters['page'] ?? 1;
 
-        return Auth::user()->roles;
 
-        // $results = ReplacementRequest::with([
-        //     'replacementDetail.line',
-        //     'requestedBy',
-        //     'workflowStep'
-        // ])->whereHas('workflowStep', function ($rd) use ($lines) {
-        //     $rd->where('line_id', $lines);
-        // });
 
-        // if (!empty($filters['search'])) {
-        //     $search = $filters['search'];
+        $results = ReplacementRequest::with([
+            'replacementDetail.line',
+            'requestedBy',
+            'workflowStep'
+        ])->whereHas('workflowStep', function ($rd) use ($roles) {
+            $rd->whereIn('role_id_responsible', $roles);
+        })->whereHas('replacementDetail', function ($rd) use ($lines) {
+            $rd->whereIn('line_id', $lines);
+        });
 
-        //     $results->where(function ($q) use ($search) {
-        //         $q->where('serial_number', 'like', "%{$search}%")
-        //             ->orWhereHas('replacementDetail', function ($q2) use ($search) {
-        //                 $q2->where('color', 'like', "%{$search}%");
-        //             });
-        //     });
-        // }
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
 
-        // return $results->paginate($perPage, ['*'], 'page', $page);
+            $results->where(function ($q) use ($search) {
+                $q->where('serial_number', 'like', "%{$search}%")
+                    ->orWhereHas('replacementDetail', function ($q2) use ($search) {
+                        $q2->where('color', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $results->paginate($perPage, ['*'], 'page', $page);
     }
 
 
