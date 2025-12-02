@@ -6,6 +6,7 @@ use App\Models\Replacement;
 use App\Models\ReplacementRequest;
 use App\Models\ReplacementRequestDetail;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class ReplacementRepository implements ReplacementRepositoryInterface
 {
@@ -53,6 +54,35 @@ class ReplacementRepository implements ReplacementRepositoryInterface
         }
 
         return $results->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    public function replacementApprovalListWithPagination(array $filters)
+    {
+        $perPage = $filters['per_page'] ?? 10;
+        $page = $filters['page'] ?? 1;
+
+        return Auth::user()->roles;
+
+        // $results = ReplacementRequest::with([
+        //     'replacementDetail.line',
+        //     'requestedBy',
+        //     'workflowStep'
+        // ])->whereHas('workflowStep', function ($rd) use ($lines) {
+        //     $rd->where('line_id', $lines);
+        // });
+
+        // if (!empty($filters['search'])) {
+        //     $search = $filters['search'];
+
+        //     $results->where(function ($q) use ($search) {
+        //         $q->where('serial_number', 'like', "%{$search}%")
+        //             ->orWhereHas('replacementDetail', function ($q2) use ($search) {
+        //                 $q2->where('color', 'like', "%{$search}%");
+        //             });
+        //     });
+        // }
+
+        // return $results->paginate($perPage, ['*'], 'page', $page);
     }
 
 

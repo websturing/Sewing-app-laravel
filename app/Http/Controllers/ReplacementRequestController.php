@@ -51,6 +51,26 @@ class ReplacementRequestController extends Controller
         }
     }
 
+    public function getApprovalListPagination(ReplacementFiltersRequest $request)
+    { {
+
+            try {
+                return $results = $this->replacementService->getApprovalWithPagination($request->validated());
+
+                return ReplacementPaginationResource::collection($results)->additional([
+                    'status' => true,
+                    'message' => "Successfully Retrived Ticket Replacements"
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Failed to Get Ticket Replacement',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
+    }
+
     public function createTicketReplacement(Request $request)
     {
         try {

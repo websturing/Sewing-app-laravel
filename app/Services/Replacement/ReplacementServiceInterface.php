@@ -8,5 +8,6 @@ interface ReplacementServiceInterface
     public function getDefectByGLNumber(string $glNumber);
     public function getReplacementList();
     public function getReplacementListWithPagination(array $filters);
+    public function getApprovalWithPagination(array $filters);
     public function createReplacementRequest(array $data);
 }

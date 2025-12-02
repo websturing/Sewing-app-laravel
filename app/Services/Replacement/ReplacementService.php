@@ -52,6 +52,10 @@ class ReplacementService implements ReplacementServiceInterface
         });
     }
 
+    public function getApprovalWithPagination(array $filters)
+    {
+        return $this->replacementRepository->replacementApprovalListWithPagination($filters);
+    }
 
     public function createReplacementRequest(array $data)
     {

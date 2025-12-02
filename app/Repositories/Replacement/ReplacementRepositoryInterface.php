@@ -10,4 +10,5 @@ interface ReplacementRepositoryInterface
     public function replacmentList();
     public function replacementGlNumber(string $glNumber);
     public function replacmentListWithPagination(array $filters, array $lines);
+    public function replacementApprovalListWithPagination(array $filters);
 }
