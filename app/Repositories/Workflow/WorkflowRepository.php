@@ -28,6 +28,11 @@ class WorkflowRepository implements WorkflowRepositoryInterface
         ];
     }
 
+    public function findByStepId(int $stepId)
+    {
+        return WorkflowStep::find($stepId);
+    }
+
     public function findById(int $id)
     {
 

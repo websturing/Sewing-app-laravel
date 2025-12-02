@@ -47,7 +47,8 @@ class ReplacementService implements ReplacementServiceInterface
         }
 
         return $replacement->through(function ($e) {
-            $workflow = $this->workflowService->getWorkflowByStep($e->current_step_id);
+            $stepOrder = $this->workflowService->getWorkflowByStepId($e->current_step_id);
+            $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order);
             return $this->transform($e, $workflow);
         });
     }
@@ -124,7 +125,7 @@ class ReplacementService implements ReplacementServiceInterface
             "defect_total" => $defectList->sum('total_defect'),
             "total_size" => $e->replacementDetail->count('total_size'),
             "is_approval" => false,
-            "current_step" => $e->current_step_id,
+            "current_step" => $workflow['current']['step_order'] ?? 0,
             "status_name" => $statusName,
             "status_type" => $statusType,
             "status_class" => $statusClass,
