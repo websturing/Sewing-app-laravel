@@ -8,4 +8,5 @@ interface WorkflowServiceInterface
     public function getWorkflowByStep(int $stepNumber);
     public function getWorkflowById(int $stepNumber);
     public function getWorkflowByStepId(int $stepNumber);
+    public function getWorkflowStepByRoleId(int $roleId);
 }

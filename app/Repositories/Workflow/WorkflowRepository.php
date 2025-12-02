@@ -28,6 +28,13 @@ class WorkflowRepository implements WorkflowRepositoryInterface
         ];
     }
 
+    public function findStepByRoleId(int $roleId)
+    {
+        $workFlowStep = WorkflowStep::where('role_id_responsible', $roleId)->first();
+
+        return $this->findByStep($workFlowStep->step_order);
+    }
+
     public function findByStepId(int $stepId)
     {
         return WorkflowStep::find($stepId);

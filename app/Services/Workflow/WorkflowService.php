@@ -47,4 +47,9 @@ class WorkflowService implements WorkflowServiceInterface
             "steps" => $steps
         ];
     }
+
+    public function getWorkflowStepByRoleId(int $roleId)
+    {
+        return $this->workflowRepository->findStepByRoleId($roleId);
+    }
 }

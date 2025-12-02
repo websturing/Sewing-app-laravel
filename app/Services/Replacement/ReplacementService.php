@@ -57,7 +57,8 @@ class ReplacementService implements ReplacementServiceInterface
     {
         $roles = Auth::user()->roles->pluck('id')->toArray();
         $assignment = $this->leaderService->getLineActive(Auth::id());
-        return $replacement = $this->replacementRepository->replacementApprovalListWithPagination($filters, $assignment, $roles);
+
+        $replacement = $this->replacementRepository->replacementApprovalListWithPagination($filters, $assignment, $roles);
 
         if ($replacement->isEmpty()) {
             return $replacement;
@@ -72,9 +73,18 @@ class ReplacementService implements ReplacementServiceInterface
 
     public function createReplacementRequest(array $data)
     {
+        $roles = Auth::user()->roles->pluck('id')->toArray();
+        $stepIds = [];
+        foreach ($roles as $role) {
+            $step  = $this->workflowService->getWorkflowStepByRoleId($role);
+            $stepIds[] = $step['step_after']['id'] ?? null;
+        }
+        $stepId = max($stepIds) + 1;
+
+
         $replacementRequest = [
             "workflow_definition_id" => 1,
-            "current_step_id" => 1,
+            "current_step_id" => $stepId,
             "serial_number" => ReplacementSerialGenerator::generate($data[0]['gl_no']),
             "created_by" => Auth::id(),
             "status" => "in_progress"

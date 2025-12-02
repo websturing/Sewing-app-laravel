@@ -8,4 +8,5 @@ interface WorkflowRepositoryInterface
     public function findByStep(int $stepNumber);
     public function findByStepId(int $stepId);
     public function findById(int $id);
+    public function findStepByRoleId(int $id);
 }
