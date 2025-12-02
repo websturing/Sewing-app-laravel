@@ -3,14 +3,19 @@
 namespace App\Services\Defect;
 
 use App\Repositories\Defect\DefectRepositoryInterface;
+use App\Services\Replacement\ReplacementServiceInterface;
 
 class DefectService implements DefectServiceInterface
 {
     protected $defectRepository;
+    protected $replacementService;
 
-    public function __construct(DefectRepositoryInterface $defectRepository)
-    {
+    public function __construct(
+        DefectRepositoryInterface $defectRepository,
+        ReplacementServiceInterface $replacementService
+    ) {
         $this->defectRepository = $defectRepository;
+        $this->replacementService = $replacementService;
     }
 
     public function getAllDefect()
@@ -51,9 +56,40 @@ class DefectService implements DefectServiceInterface
 
     public function getGroupGlNumber()
     {
+
         $grouped = $this->defectRepository->SummaryByGLLineSize()
             ->groupBy('gl_no')
             ->map(function ($items, $glNo) {
+                $replacement = $this->replacementService->getDefectByGLNumber($glNo)
+                    ->groupBy('color')
+                    ->map(function ($repItems) {
+                        return $repItems->keyBy('size');  // akses cepat dengan ['color']['size']
+                    });
+
+
+                $groupByColor = $items->groupBy('color')->map(function ($item, $color) use ($replacement) {
+
+                    $itemsAfterReplace = $item->map(function ($sizeItem) use ($replacement, $color) {
+                        $rep = $replacement->get($color)?->get($sizeItem->size);
+
+
+                        $sizeItem->replacement_pcs = $rep ? $rep->pcs : 0;
+                        $sizeItem->total_defect = $sizeItem->total_defect - $sizeItem->replacement_pcs;
+                        $sizeItem->balance_pcs     = $sizeItem->total_pcs - $sizeItem->replacement_pcs;
+
+                        return $sizeItem;
+                    });
+
+                    return [
+                        "color"        => $color,
+                        "total_defect" => $item->sum('total_defect'),
+                        "total_pcs"    => $itemsAfterReplace->sum('total_pcs'),
+                        "total_replacement" => $itemsAfterReplace->sum('replacement_pcs'),
+                        "balance_pcs"  => $itemsAfterReplace->sum('balance_pcs'),
+                        "items"        => $itemsAfterReplace
+                    ];
+                });
+
 
                 $totalDefect = $items->sum('total_defect');
 
@@ -62,14 +98,6 @@ class DefectService implements DefectServiceInterface
                     return null;
                 }
 
-                $groupByColor = $items->groupBy('color')->map(function ($item, $color) {
-                    return [
-                        "color"        => $color,
-                        "total_defect" => $item->sum('total_defect'),
-                        "total_pcs"    => $item->sum('total_pcs'),
-                        "items"        => $item
-                    ];
-                });
 
                 return [
                     'gl_number'     => $glNo,

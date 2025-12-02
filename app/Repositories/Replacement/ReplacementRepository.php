@@ -20,6 +20,13 @@ class ReplacementRepository implements ReplacementRepositoryInterface
             ->get();
     }
 
+    public function replacementGlNumber(string $glNumber)
+    {
+        return ReplacementRequestDetail::selectRaw('gl_no, color, size, SUM(pcs) as pcs')
+            ->where('gl_no', $glNumber)
+            ->groupBy('gl_no', 'color', 'size')
+            ->get();
+    }
 
 
     public function replacmentListWithPagination(array $filters, array $lines)

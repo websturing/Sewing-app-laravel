@@ -69,4 +69,9 @@ class ReplacementRequestController extends Controller
             ], 500);
         }
     }
+
+    public function getReplacementGroupGlNumber(Request $request)
+    {
+        return $this->replacementService->getDefectByGLNumber($request->get('gl_number'));
+    }
 }

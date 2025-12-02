@@ -88,6 +88,7 @@ Route::prefix('replacement-request')
     ->group(function () {
         Route::get('/', [ReplacementRequestController::class, 'index']);
         Route::get('/pagination', [ReplacementRequestController::class, 'getReplacementListWithPagination']);
+        Route::get('/group/gl-number', [ReplacementRequestController::class, 'getReplacementGroupGlNumber']);
 
         Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
     });
