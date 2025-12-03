@@ -167,6 +167,7 @@ class ReplacementService implements ReplacementServiceInterface
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
             "workflow" => $workflow ? [
                 "id" => $workflow['current']['workflow_definition_id'] ?? 0,
+                "color" => $workflow['current']['role']['color'] ?? '#000',
                 "current" => $workflow['current']?->name,
                 "next" => $workflow['step_after']?->name,
                 "previous" => $workflow['step_before']?->name,

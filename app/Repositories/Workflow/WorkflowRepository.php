@@ -15,7 +15,7 @@ class WorkflowRepository implements WorkflowRepositoryInterface
 
     public function findByStep(int $stepNumber)
     {
-        $steps = WorkflowStep::with(['definition'])->whereIn('step_order', [
+        $steps = WorkflowStep::with(['definition', 'role'])->whereIn('step_order', [
             $stepNumber - 1,
             $stepNumber,
             $stepNumber + 1,
