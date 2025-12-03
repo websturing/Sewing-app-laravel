@@ -158,9 +158,10 @@ class ReplacementService implements ReplacementServiceInterface
             "total_size" => $e->replacementDetail->count('total_size'),
             "is_approval" => false,
             "current_step" => $workflow['current']['step_order'] ?? 0,
-            "status_name" => $statusName,
-            "status_type" => $statusType,
-            "status_class" => $statusClass,
+            "status" => [
+                "name" => $statusName,
+                "type" => $statusType
+            ],
             "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
             "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
