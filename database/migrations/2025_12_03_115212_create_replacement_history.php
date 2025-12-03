@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('replacement_history', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('workflow_step_id');
+            $table->unsignedBigInteger('approved_by');
+            $table->boolean('is_approved')->default(false);
             $table->timestamps();
+
+            // FK
+            $table->foreign('workflow_step_id')->references('id')->on('workflow_steps');
+            $table->foreign('approved_by')->references('id')->on('users');
         });
     }
 
