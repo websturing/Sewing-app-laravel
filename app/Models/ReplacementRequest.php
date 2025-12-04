@@ -29,4 +29,9 @@ class ReplacementRequest extends Model
     {
         return $this->belongsTo(WorkflowStep::class, 'current_step_id');
     }
+
+    function histories()
+    {
+        return $this->hasMany(ReplacementRequestHistory::class, 'replacement_request_id');
+    }
 }

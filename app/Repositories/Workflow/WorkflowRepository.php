@@ -41,7 +41,8 @@ class WorkflowRepository implements WorkflowRepositoryInterface
 
     public function findByStepId(int $stepId)
     {
-        return WorkflowStep::find($stepId);
+        $step = WorkflowStep::find($stepId);
+        return $this->findByStep($step->id, $step->workflow_definition_id);
     }
 
     public function findById(int $id)
@@ -74,5 +75,10 @@ class WorkflowRepository implements WorkflowRepositoryInterface
             "current" => $currentStep,
             "step_after" => $nextOrder
         ];
+    }
+
+    public function findStepsByDefinitionId(int $definitionId)
+    {
+        return WorkflowStep::with(['role'])->where('workflow_definition_id', $definitionId)->get();
     }
 }

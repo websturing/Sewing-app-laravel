@@ -8,7 +8,7 @@ use App\Services\Leaders\LeadersServiceInterface;
 use App\Services\Role\RoleServiceInterface;
 use App\Services\Workflow\WorkflowServiceInterface;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 
 class ReplacementService implements ReplacementServiceInterface
 {
@@ -37,6 +37,28 @@ class ReplacementService implements ReplacementServiceInterface
     public function getReplacementList()
     {
         return $this->replacementRepository->replacmentList();
+    }
+
+    public function getHistoriesByReplacementId($replacementId)
+    {
+        $histories = $this->replacementRepository->findHistoriesByReplacementId($replacementId)
+            ->keyBy('workflow_step_id'); // index by step_id untuk O(1) lookup
+
+        $workflowSteps = $this->workflowService->getStepsByDefinitionId(1);
+
+        return $workflowSteps->map(function ($step) use ($histories) {
+            $history = $histories->get($step->id);
+
+            return [
+                "workflow_name" => $step->name,
+                "created_by" => $history->createdBy->name ?? '-',
+                "note" => $history->note ?? '',
+                "is_final" => $step->is_final,
+                "is_approved" => $history->is_approved ?? false,
+                "created_at" => $history->formatted_created_at ?? null,
+                "updated_at" => $history->formatted_update_at ?? null,
+            ];
+        });
     }
 
     public function getReplacementListWithPagination(array $filters)

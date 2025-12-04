@@ -90,6 +90,7 @@ Route::prefix('replacement-request')
         Route::get('/pagination', [ReplacementRequestController::class, 'getReplacementListWithPagination']);
         Route::get('/role/pagination', [ReplacementRequestController::class, 'getApprovalListPagination']);
         Route::get('/group/gl-number', [ReplacementRequestController::class, 'getReplacementGroupGlNumber']);
+        Route::get('/histories/{requestId}', [ReplacementRequestController::class, 'getReplacementHistoriesByReplacementId']);
 
         Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
     });

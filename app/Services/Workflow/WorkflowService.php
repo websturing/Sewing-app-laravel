@@ -57,4 +57,9 @@ class WorkflowService implements WorkflowServiceInterface
     {
         return $this->workflowRepository->findWorkflowStepContext($stepId);
     }
+
+    public function getStepsByDefinitionId(int $definitionId)
+    {
+        return $this->workflowRepository->findStepsByDefinitionId($definitionId);
+    }
 }

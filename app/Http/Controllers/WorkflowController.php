@@ -14,7 +14,7 @@ class WorkflowController extends Controller
     public function getWorkflowByStep(int $stepNumber)
     {
         try {
-            $result = $this->workflowService->getWorkflowByStep($stepNumber);
+            $result = $this->workflowService->getWorkflowByStepId($stepNumber);
 
             return response()->json([
                 'status' => true,

@@ -94,4 +94,11 @@ class ReplacementRequestController extends Controller
     {
         return $this->replacementService->getDefectByGLNumber($request->get('gl_number'));
     }
+
+    public function getReplacementHistoriesByReplacementId($replacementRequestId)
+    {
+        return $this->replacementService->getHistoriesByReplacementId(
+            $replacementRequestId
+        );
+    }
 }

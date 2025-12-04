@@ -10,4 +10,5 @@ interface ReplacementServiceInterface
     public function getReplacementListWithPagination(array $filters);
     public function getApprovalWithPagination(array $filters);
     public function createReplacementRequest(array $data);
+    public function getHistoriesByReplacementId(int $replacementId);
 }

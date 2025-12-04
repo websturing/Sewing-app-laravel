@@ -89,7 +89,12 @@ class ReplacementRepository implements ReplacementRepositoryInterface
         return $results->paginate($perPage, ['*'], 'page', $page);
     }
 
-
+    public function findHistoriesByReplacementId($replacementId)
+    {
+        return ReplacementRequestHistory::where('replacement_request_id', $replacementId)
+            ->with(['workflowStep', 'createdBy'])
+            ->get();
+    }
 
     public function create(array $replacementRequest)
     {

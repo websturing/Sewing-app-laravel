@@ -10,4 +10,5 @@ interface WorkflowRepositoryInterface
     public function findById(int $id);
     public function findStepByRoleId(int $id);
     public function findWorkflowStepContext(int $stepId);
+    public function findStepsByDefinitionId(int $definitionId);
 }
