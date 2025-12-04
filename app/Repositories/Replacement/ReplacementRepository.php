@@ -39,7 +39,9 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
         $results = ReplacementRequest::with([
             'replacementDetail.line',
-            'requestedBy'
+            'requestedBy',
+            'notes',
+            'notes.createdBy'
         ])->whereHas('replacementDetail', function ($rd) use ($lines) {
             $rd->whereIn('line_id', $lines);
         });

@@ -198,6 +198,16 @@ class ReplacementService implements ReplacementServiceInterface
                 break;
         }
 
+        $notes  = $e->notes->map(function ($note) {
+            return [
+                "id" => $note->id,
+                "note" => $note->description,
+                "created_by" => $note->createdBy->name,
+                "created_at" => $note->formatted_created_at,
+                "updated_at" => $note->formatted_updated_at,
+            ];
+        });
+
         return [
             "id" => $e->id,
             "serial_number" => $e->serial_number,
@@ -216,6 +226,7 @@ class ReplacementService implements ReplacementServiceInterface
             "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
             "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
+            "notes" => $notes,
             "workflow" => $workflow ? [
                 "id" => $workflow['current']['workflow_definition_id'] ?? 0,
                 "color" => $workflow['current']['role']['color'] ?? '#000',

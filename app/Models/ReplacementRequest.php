@@ -34,4 +34,9 @@ class ReplacementRequest extends Model
     {
         return $this->hasMany(ReplacementRequestHistory::class, 'replacement_request_id');
     }
+
+    function notes()
+    {
+        return $this->hasMany(ReplacementRequestNote::class, 'replacement_request_id');
+    }
 }
