@@ -74,7 +74,7 @@ class ReplacementRequestController extends Controller
     public function createTicketReplacement(Request $request)
     {
         try {
-            return $result = $this->replacementService->createReplacementRequest($request->get('data'));
+            $result = $this->replacementService->createReplacementRequest($request->get('data'));
 
             return response()->json([
                 'status' => true,
@@ -97,8 +97,22 @@ class ReplacementRequestController extends Controller
 
     public function getReplacementHistoriesByReplacementId($replacementRequestId)
     {
-        return $this->replacementService->getHistoriesByReplacementId(
-            $replacementRequestId
-        );
+        try {
+            $result = $this->replacementService->getHistoriesByReplacementId(
+                $replacementRequestId
+            );
+
+            return response()->json([
+                'status' => true,
+                'data' => $result,
+                'message' => 'Retrived Histories Replacement Successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Retrived Histories Replacement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('replacement_request_id');
             $table->unsignedBigInteger('created_by');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
 
             // FK

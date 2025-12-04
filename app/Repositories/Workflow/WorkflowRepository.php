@@ -41,7 +41,8 @@ class WorkflowRepository implements WorkflowRepositoryInterface
 
     public function findByStepId(int $stepId)
     {
-        $step = WorkflowStep::find($stepId);
+
+        return WorkflowStep::find($stepId);
         return $this->findByStep($step->id, $step->workflow_definition_id);
     }
 

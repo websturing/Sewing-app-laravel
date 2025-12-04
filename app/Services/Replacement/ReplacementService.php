@@ -51,9 +51,11 @@ class ReplacementService implements ReplacementServiceInterface
 
             return [
                 "workflow_name" => $step->name,
-                "created_by" => $history->createdBy->name ?? '-',
+                "created_by" => $history ? $history->createdBy->name . '(' . $history->createdBy->email . ')' :  '-',
+                "step_order" => $step->step_order,
                 "note" => $history->note ?? '',
                 "is_final" => $step->is_final,
+                "role" => $step->role->name ?? '-',
                 "is_approved" => $history->is_approved ?? false,
                 "created_at" => $history->formatted_created_at ?? null,
                 "updated_at" => $history->formatted_update_at ?? null,
@@ -64,7 +66,6 @@ class ReplacementService implements ReplacementServiceInterface
     public function getReplacementListWithPagination(array $filters)
     {
         $assignment = $this->leaderService->getLineActive(Auth::id());
-
         $replacement = $this->replacementRepository
             ->replacmentListWithPagination($filters, $assignment);
 
@@ -198,6 +199,7 @@ class ReplacementService implements ReplacementServiceInterface
         }
 
         return [
+            "id" => $e->id,
             "serial_number" => $e->serial_number,
             "gl_no" => $e->replacementDetail->first()->gl_no,
             "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
