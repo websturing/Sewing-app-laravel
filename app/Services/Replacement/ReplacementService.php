@@ -202,7 +202,7 @@ class ReplacementService implements ReplacementServiceInterface
             return [
                 "id" => $note->id,
                 "note" => $note->description,
-                "created_by" => $note->createdBy->name,
+                "created_by" => $note->createdBy->name ? $note->createdBy->name . ' (' . $note->createdBy->email . ')' : "-",
                 "created_at" => $note->formatted_created_at,
                 "updated_at" => $note->formatted_updated_at,
             ];
