@@ -5,6 +5,8 @@ namespace App\Repositories\Replacement;
 use App\Models\Replacement;
 use App\Models\ReplacementRequest;
 use App\Models\ReplacementRequestDetail;
+use App\Models\ReplacementRequestHistory;
+use App\Models\ReplacementRequestNote;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
@@ -89,22 +91,23 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
 
 
-    public function create(array $replacementRequest, array $replacementDetail)
+    public function create(array $replacementRequest)
     {
 
-        $replacement = ReplacementRequest::create($replacementRequest);
+        return ReplacementRequest::create($replacementRequest);
+    }
 
-        foreach ($replacementDetail as $detail) {
-            ReplacementRequestDetail::create([
-                'gl_no' => $detail['gl_no'],
-                'size' => $detail['size'],
-                'color' => $detail['color'],
-                'pcs' => $detail['total_defect'],
-                'line_id' => $detail['line_id'],
-                'laying_planning_id' => $detail['laying_planning_id'],
-                'replacement_request_id' => $replacement->id,
-                "description" => ""
-            ]);
-        }
+    public function createReplacementDetail(array $data)
+    {
+        return ReplacementRequestDetail::create($data);
+    }
+    public function createReplacementNote(array $data)
+    {
+        return ReplacementRequestNote::create($data);
+    }
+
+    public function createReplacementHistory(array $data)
+    {
+        return ReplacementRequestHistory::create($data);
     }
 }

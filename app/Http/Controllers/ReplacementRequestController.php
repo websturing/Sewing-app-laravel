@@ -74,7 +74,7 @@ class ReplacementRequestController extends Controller
     public function createTicketReplacement(Request $request)
     {
         try {
-            $result = $this->replacementService->createReplacementRequest($request->get('data'));
+            return $result = $this->replacementService->createReplacementRequest($request->get('data'));
 
             return response()->json([
                 'status' => true,

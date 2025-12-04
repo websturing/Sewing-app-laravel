@@ -18,9 +18,9 @@ class WorkflowService implements WorkflowServiceInterface
         return $this->workflowRepository->all();
     }
 
-    public function getWorkflowByStep(int $stepNumber)
+    public function getWorkflowByStep(int $stepNumber, int $workflowId)
     {
-        return $this->workflowRepository->findByStep($stepNumber);
+        return $this->workflowRepository->findByStep($stepNumber, $workflowId);
     }
     public function getWorkflowByStepId(int $stepId)
     {
@@ -51,5 +51,10 @@ class WorkflowService implements WorkflowServiceInterface
     public function getWorkflowStepByRoleId(int $roleId)
     {
         return $this->workflowRepository->findStepByRoleId($roleId);
+    }
+
+    public function getWorkflowStepContext(int $stepId)
+    {
+        return $this->workflowRepository->findWorkflowStepContext($stepId);
     }
 }
