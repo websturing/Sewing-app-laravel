@@ -93,6 +93,7 @@ Route::prefix('replacement-request')
         Route::get('/histories/replacement/{requestId}', [ReplacementRequestController::class, 'getReplacementHistoriesByReplacementId']);
 
         Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
+        Route::post('/approval', [ReplacementRequestController::class, 'createApprovalTicketReplacement']);
     });
 
 Route::prefix('stock-ins')

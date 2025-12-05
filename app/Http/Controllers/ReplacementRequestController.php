@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReplacementApprovalDBRequest;
 use App\Http\Requests\ReplacementFiltersRequest;
 use App\Http\Resources\ReplacementPaginationResource;
 use App\Services\Replacement\ReplacementServiceInterface;
@@ -85,6 +86,29 @@ class ReplacementRequestController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to Create Ticket Replacement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createApprovalTicketReplacement(ReplacementApprovalDBRequest $request)
+    {
+        try {
+            $requestValidated = $request->validated();
+            $note = $requestValidated['note'] ?? null;
+            $action = $requestValidated['action'];
+            $replacementRequestId = $requestValidated['replacement_request_id'];
+            $results = $this->replacementService->createApprovalByRole($replacementRequestId, $action, $note);
+
+            return  response()->json([
+                'status' => true,
+                'message' => "Successfully Created Approval Replacements",
+                'data' => $results
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Create Approval Replacment',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -9,6 +9,7 @@ use App\Services\Role\RoleServiceInterface;
 use App\Services\Workflow\WorkflowServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReplacementService implements ReplacementServiceInterface
 {
@@ -16,6 +17,8 @@ class ReplacementService implements ReplacementServiceInterface
     protected $workflowService;
     protected $leaderService;
     protected $roleService;
+
+    const REPLACEMENT_ID = 1;
 
     public function __construct(
         ReplacementRepositoryInterface $replacementRepository,
@@ -28,6 +31,74 @@ class ReplacementService implements ReplacementServiceInterface
         $this->leaderService = $leaderService;
         $this->roleService = $roleService;
     }
+
+    public function createApprovalByRole(int $replacementRequestId, string $action, ?string $note)
+    {
+        return DB::transaction(function () use ($replacementRequestId, $action, $note) {
+
+            $userId     = Auth::id();
+            $isApproved = $action === 'approved';
+
+            // Single fetch
+            $request = $this->replacementRepository->findReplacementRequestId($replacementRequestId);
+
+            // Workflow
+            $workflowCurrent = $this->workflowService->getWorkflowByStepId($request->current_step_id, 1);
+            $workflowSteps   = $this->workflowService->getWorkflowByStep($workflowCurrent->step_order, 1);
+
+            $nextStepId = $workflowSteps['step_after']['id'] ?? $workflowSteps['current']['id'];
+
+            /** Record workflow approval */
+            $this->replacementRepository->createReplacementHistory([
+                'note'                   => $note,
+                'action_by'              => $userId,
+                'is_approved'            => $isApproved,
+                'workflow_step_id'       => $workflowSteps['current']['id'],
+                'replacement_request_id' => $replacementRequestId,
+            ]);
+
+            /** If step has next stage, record progress */
+            if (!empty($workflowSteps['step_after'])) {
+                $this->replacementRepository->createReplacementHistory([
+                    'note'                   => $note,
+                    'action_by'              => $userId,
+                    'is_approved'            => $isApproved,
+                    'workflow_step_id'       => $workflowSteps['step_after']['id'],
+                    'replacement_request_id' => $replacementRequestId,
+                ]);
+            }
+
+            /** Add note only if meaningful */
+            if (!empty(trim($note))) {
+                $this->replacementRepository->createReplacementNote([
+                    'replacement_request_id' => $replacementRequestId,
+                    'created_by'             => $userId,
+                    'description'            => $note
+                ]);
+            }
+
+            /** Determine new status */
+            $status = match (true) {
+                !$isApproved                         => 'rejected',
+                $workflowSteps['current']['is_final'] => 'completed',
+                default                              => 'in_progress',
+            };
+
+            /** Update main replacement request */
+            $this->replacementRepository->updateReplacementRequest($replacementRequestId, [
+                'current_step_id' => $nextStepId,
+                'status'          => $status
+            ]);
+
+            return [
+                "success"  => true,
+                "message"  => "Approval processed",
+                "status"   => $status,
+                "next_step_id" => $nextStepId
+            ];
+        });
+    }
+
 
     public function getAllReplacement()
     {
@@ -188,12 +259,12 @@ class ReplacementService implements ReplacementServiceInterface
                 $statusType = "warning";
                 break;
             case "rejected":
-                $statusName = "'Rejected";
+                $statusName = "Rejected";
                 $statusClass = "bg-red-100";
                 $statusType = "error";
                 break;
             case "completed":
-                $statusName = "'Completed";
+                $statusName = "Completed";
                 $statusClass = "bg-green-100";
                 $statusType = "success";
                 break;

@@ -9,6 +9,7 @@ use App\Models\ReplacementRequestHistory;
 use App\Models\ReplacementRequestNote;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReplacementRepository implements ReplacementRepositoryInterface
 {
@@ -98,6 +99,11 @@ class ReplacementRepository implements ReplacementRepositoryInterface
             ->get();
     }
 
+    public function findReplacementRequestId(int $id)
+    {
+        return ReplacementRequest::findOrFail($id);
+    }
+
     public function create(array $replacementRequest)
     {
 
@@ -116,5 +122,18 @@ class ReplacementRepository implements ReplacementRepositoryInterface
     public function createReplacementHistory(array $data)
     {
         return ReplacementRequestHistory::create($data);
+    }
+
+    public function updateReplacementRequest(int $replacementRequestId, array $payload)
+    {
+        return DB::transaction(function () use ($replacementRequestId, $payload) {
+
+            $request = ReplacementRequest::findOrFail($replacementRequestId);
+
+            $request->fill($payload);
+            $request->save();
+
+            return $request->fresh();
+        });
     }
 }
