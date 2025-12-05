@@ -173,6 +173,7 @@ class ReplacementService implements ReplacementServiceInterface
                     "laying_planning_id" => $d->first()->laying_planning_id,
                     "total_defect" => $d->sum('pcs'),
                     "total_size" => $d->count('size'),
+                    "sizes" => $d->pluck('size')->unique()->implode(" • "),
                     "size_list" => $d->map(fn($s) => [
                         "size" => $s->size,
                         "defect_qty" => $s->pcs
@@ -183,17 +184,17 @@ class ReplacementService implements ReplacementServiceInterface
         switch ($e->status) {
             case "in_progress":
                 $statusName = "In Progress";
-                $statusClass = "!bg-amber-100";
+                $statusClass = "bg-yellow-100";
                 $statusType = "warning";
                 break;
             case "rejected":
                 $statusName = "'Rejected";
-                $statusClass = "!bg-red-100";
+                $statusClass = "bg-red-100";
                 $statusType = "error";
                 break;
             case "completed":
                 $statusName = "'Completed";
-                $statusClass = "!bg-green-100";
+                $statusClass = "bg-green-100";
                 $statusType = "success";
                 break;
         }
@@ -202,7 +203,7 @@ class ReplacementService implements ReplacementServiceInterface
             return [
                 "id" => $note->id,
                 "note" => $note->description,
-                "created_by" => $note->createdBy->name ? $note->createdBy->name . ' (' . $note->createdBy->email . ')' : "-",
+                "created_by" => $note->createdBy->name ? $note->createdBy->email : "-",
                 "created_at" => $note->formatted_created_at,
                 "updated_at" => $note->formatted_updated_at,
             ];
@@ -213,7 +214,8 @@ class ReplacementService implements ReplacementServiceInterface
             "serial_number" => $e->serial_number,
             "gl_no" => $e->replacementDetail->first()->gl_no,
             "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
-            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(","),
+            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(" • "),
+            "defect_sizes" => $e->replacementDetail->pluck('size')->unique()->implode(" • "),
             "defect_list" => $defectList,
             "defect_total" => $defectList->sum('total_defect'),
             "total_size" => $e->replacementDetail->count('total_size'),
@@ -221,9 +223,10 @@ class ReplacementService implements ReplacementServiceInterface
             "current_step" => $workflow['current']['step_order'] ?? 0,
             "status" => [
                 "name" => $statusName,
-                "type" => $statusType
+                "type" => $statusType,
+                "class" => $statusClass
             ],
-            "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
+            "requested_by" => $e->requestedBy ? $e->requestedBy->email : '-',
             "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
             "notes" => $notes,
