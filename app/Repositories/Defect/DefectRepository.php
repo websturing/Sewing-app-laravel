@@ -5,6 +5,8 @@ namespace App\Repositories\Defect;
 use App\Models\Defect;
 use App\Models\StockinDefect;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\SizeHelper;
+
 
 class DefectRepository implements DefectRepositoryInterface
 {
@@ -13,7 +15,7 @@ class DefectRepository implements DefectRepositoryInterface
         return StockinDefect::all();
     }
 
-    public function groupLines()
+    public function SummaryByGLLineSize()
     {
         $records = DB::table('stock_in_defects')
             ->leftJoin('stock_ins', 'stock_ins.id', '=', 'stock_in_defects.stockin_id')
@@ -34,6 +36,7 @@ class DefectRepository implements DefectRepositoryInterface
                 'size',
                 'line_id'
             )
+            ->orderByRaw(SizeHelper::getSizeOrderSql())
             ->get();
 
         return $records;

@@ -215,7 +215,6 @@ class GlnumberService implements GlnumberServiceInterface
         return $sewingRecords
             ->groupBy('gl_no')
             ->map(function ($groupedByGl) use ($startDate, $endDate, $cuttingLookup, $cuttingApiGrandTotal) {
-
                 $colors = $groupedByGl
                     ->groupBy('color')
                     ->map(function ($byColor) use ($startDate, $endDate, $cuttingLookup) {
@@ -317,7 +316,6 @@ class GlnumberService implements GlnumberServiceInterface
             ->map(function ($items, $color) use ($sewingLookup) {
 
                 $sizes = collect();
-
                 foreach ($items as $item) {
                     foreach ($item['size_breakdown'] as $sb) {
 

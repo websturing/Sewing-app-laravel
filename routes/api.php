@@ -50,6 +50,8 @@ Route::prefix('defect')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [DefectController::class, 'index']);
+        Route::get('/summary/lines', [DefectController::class, 'summaryLines']);
+        Route::get('/group/gl-number', [DefectController::class, 'getGroupGlNumber']);
     });
 
 Route::prefix('stock-ins')
