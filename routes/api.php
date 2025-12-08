@@ -92,6 +92,8 @@ Route::prefix('replacement-request')
         Route::get('/group/gl-number', [ReplacementRequestController::class, 'getReplacementGroupGlNumber']);
         Route::get('/histories/replacement/{requestId}', [ReplacementRequestController::class, 'getReplacementHistoriesByReplacementId']);
 
+        Route::get('/status/serial-number/{requestId}', [ReplacementRequestController::class, 'getTicketTrackingBySerial']);
+
         Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
         Route::post('/approval', [ReplacementRequestController::class, 'createApprovalTicketReplacement']);
     });

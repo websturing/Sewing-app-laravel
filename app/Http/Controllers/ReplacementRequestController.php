@@ -72,6 +72,38 @@ class ReplacementRequestController extends Controller
         }
     }
 
+
+    public function getReplacementGroupGlNumber(Request $request)
+    {
+        return $this->replacementService->getDefectByGLNumber($request->get('gl_number'));
+    }
+
+    public function getReplacementHistoriesByReplacementId($replacementRequestId)
+    {
+        try {
+            $result = $this->replacementService->getHistoriesByReplacementId(
+                $replacementRequestId
+            );
+
+            return response()->json([
+                'status' => true,
+                'data' => $result,
+                'message' => 'Retrived Histories Replacement Successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Retrived Histories Replacement',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getTicketTrackingBySerial($serialNumber)
+    {
+        return $this->replacementService->getTicketTrackingBySerial($serialNumber);
+    }
+
     public function createTicketReplacement(Request $request)
     {
         try {
@@ -109,32 +141,6 @@ class ReplacementRequestController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to Create Approval Replacment',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function getReplacementGroupGlNumber(Request $request)
-    {
-        return $this->replacementService->getDefectByGLNumber($request->get('gl_number'));
-    }
-
-    public function getReplacementHistoriesByReplacementId($replacementRequestId)
-    {
-        try {
-            $result = $this->replacementService->getHistoriesByReplacementId(
-                $replacementRequestId
-            );
-
-            return response()->json([
-                'status' => true,
-                'data' => $result,
-                'message' => 'Retrived Histories Replacement Successfully'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to Retrived Histories Replacement',
                 'error' => $e->getMessage()
             ], 500);
         }

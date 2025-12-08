@@ -104,6 +104,12 @@ class ReplacementRepository implements ReplacementRepositoryInterface
         return ReplacementRequest::findOrFail($id);
     }
 
+    public function findTicketTrackingBySerial(string $serialNumber)
+    {
+        return ReplacementRequest::with(['replacementDetail', 'requestedBy', 'histories'])
+            ->where('serial_number', $serialNumber)->firstOrFail();
+    }
+
     public function create(array $replacementRequest)
     {
 

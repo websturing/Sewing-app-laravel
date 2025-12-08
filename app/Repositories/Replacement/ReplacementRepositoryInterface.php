@@ -12,6 +12,7 @@ interface ReplacementRepositoryInterface
     public function updateReplacementRequest(int $replacementRequestId, array $payload);
 
     public function findReplacementRequestId(int $id);
+    public function findTicketTrackingBySerial(string $serialNumber);
 
     public function replacmentList();
     public function findHistoriesByReplacementId(int $replacementId);

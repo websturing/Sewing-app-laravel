@@ -10,6 +10,8 @@ interface ReplacementServiceInterface
     public function getReplacementList();
     public function getReplacementListWithPagination(array $filters);
     public function getApprovalWithPagination(array $filters);
+    public function getTicketTrackingBySerial(string $serialNumber);
+
     public function createReplacementRequest(array $data);
     public function getHistoriesByReplacementId(int $replacementId);
 }

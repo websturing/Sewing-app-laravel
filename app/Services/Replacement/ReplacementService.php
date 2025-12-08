@@ -32,74 +32,6 @@ class ReplacementService implements ReplacementServiceInterface
         $this->roleService = $roleService;
     }
 
-    public function createApprovalByRole(int $replacementRequestId, string $action, ?string $note)
-    {
-        return DB::transaction(function () use ($replacementRequestId, $action, $note) {
-
-            $userId     = Auth::id();
-            $isApproved = $action === 'approved';
-
-            // Single fetch
-            $request = $this->replacementRepository->findReplacementRequestId($replacementRequestId);
-
-            // Workflow
-            $workflowCurrent = $this->workflowService->getWorkflowByStepId($request->current_step_id, 1);
-            $workflowSteps   = $this->workflowService->getWorkflowByStep($workflowCurrent->step_order, 1);
-
-            $nextStepId = $workflowSteps['step_after']['id'] ?? $workflowSteps['current']['id'];
-
-            /** Record workflow approval */
-            $this->replacementRepository->createReplacementHistory([
-                'note'                   => $note,
-                'action_by'              => $userId,
-                'is_approved'            => $isApproved,
-                'workflow_step_id'       => $workflowSteps['current']['id'],
-                'replacement_request_id' => $replacementRequestId,
-            ]);
-
-            /** If step has next stage, record progress */
-            if (!empty($workflowSteps['step_after'])) {
-                $this->replacementRepository->createReplacementHistory([
-                    'note'                   => $note,
-                    'action_by'              => $userId,
-                    'is_approved'            => $isApproved,
-                    'workflow_step_id'       => $workflowSteps['step_after']['id'],
-                    'replacement_request_id' => $replacementRequestId,
-                ]);
-            }
-
-            /** Add note only if meaningful */
-            if (!empty(trim($note))) {
-                $this->replacementRepository->createReplacementNote([
-                    'replacement_request_id' => $replacementRequestId,
-                    'created_by'             => $userId,
-                    'description'            => $note
-                ]);
-            }
-
-            /** Determine new status */
-            $status = match (true) {
-                !$isApproved                         => 'rejected',
-                $workflowSteps['current']['is_final'] => 'completed',
-                default                              => 'in_progress',
-            };
-
-            /** Update main replacement request */
-            $this->replacementRepository->updateReplacementRequest($replacementRequestId, [
-                'current_step_id' => $nextStepId,
-                'status'          => $status
-            ]);
-
-            return [
-                "success"  => true,
-                "message"  => "Approval processed",
-                "status"   => $status,
-                "next_step_id" => $nextStepId
-            ];
-        });
-    }
-
-
     public function getAllReplacement()
     {
         return $this->replacementRepository->all();
@@ -174,6 +106,96 @@ class ReplacementService implements ReplacementServiceInterface
         });
     }
 
+
+    public function getDefectByGLNumber(string $glNumber)
+    {
+        $replacement = $this->replacementRepository->replacementGlNumber($glNumber);
+        return $replacement;
+    }
+
+    public function getTicketTrackingBySerial(string $serialNumber)
+    {
+
+        $ticketRequest = $this->replacementRepository->findTicketTrackingBySerial($serialNumber);
+        $stepOrder = $this->workflowService->getWorkflowByStepId($ticketRequest->current_step_id);
+        $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order, 1);
+        $timelineHistories = $this->getHistoriesByReplacementId($ticketRequest->id);
+        $results = $this->transform($ticketRequest, $workflow);
+
+        $results['timeline'] = $timelineHistories;
+
+        return $results;
+    }
+
+
+    public function createApprovalByRole(int $replacementRequestId, string $action, ?string $note)
+    {
+        return DB::transaction(function () use ($replacementRequestId, $action, $note) {
+
+            $userId     = Auth::id();
+            $isApproved = $action === 'approved';
+
+            // Single fetch
+            $request = $this->replacementRepository->findReplacementRequestId($replacementRequestId);
+
+            // Workflow
+            $workflowCurrent = $this->workflowService->getWorkflowByStepId($request->current_step_id, 1);
+            $workflowSteps   = $this->workflowService->getWorkflowByStep($workflowCurrent->step_order, 1);
+
+            $nextStepId = $workflowSteps['step_after']['id'] ?? $workflowSteps['current']['id'];
+
+            /** Record workflow approval */
+            $this->replacementRepository->createReplacementHistory([
+                'note'                   => $note,
+                'action_by'              => $userId,
+                'is_approved'            => $isApproved,
+                'workflow_step_id'       => $workflowSteps['current']['id'],
+                'replacement_request_id' => $replacementRequestId,
+            ]);
+
+            /** If step has next stage, record progress */
+            if (!empty($workflowSteps['step_after'])) {
+                $this->replacementRepository->createReplacementHistory([
+                    'note'                   => $note,
+                    'action_by'              => $userId,
+                    'is_approved'            => $isApproved,
+                    'workflow_step_id'       => $workflowSteps['step_after']['id'],
+                    'replacement_request_id' => $replacementRequestId,
+                ]);
+            }
+
+            /** Add note only if meaningful */
+            if (!empty(trim($note))) {
+                $this->replacementRepository->createReplacementNote([
+                    'replacement_request_id' => $replacementRequestId,
+                    'created_by'             => $userId,
+                    'description'            => $note
+                ]);
+            }
+
+            /** Determine new status */
+            $status = match (true) {
+                !$isApproved                         => 'rejected',
+                $workflowSteps['current']['is_final'] => 'completed',
+                default                              => 'in_progress',
+            };
+
+            /** Update main replacement request */
+            $this->replacementRepository->updateReplacementRequest($replacementRequestId, [
+                'current_step_id' => $nextStepId,
+                'status'          => $status
+            ]);
+
+            return [
+                "success"  => true,
+                "message"  => "Approval processed",
+                "status"   => $status,
+                "next_step_id" => $nextStepId
+            ];
+        });
+    }
+
+
     public function createReplacementRequest(array $data)
     {
         $defectList = $data['defect_list'];
@@ -226,11 +248,6 @@ class ReplacementService implements ReplacementServiceInterface
         }
     }
 
-    public function getDefectByGLNumber(string $glNumber)
-    {
-        $replacement = $this->replacementRepository->replacementGlNumber($glNumber);
-        return $replacement;
-    }
 
     /** Transfrom Replacement List */
     private function transform($e, $workflow = null)
