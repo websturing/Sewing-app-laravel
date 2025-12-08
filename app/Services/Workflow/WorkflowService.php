@@ -17,4 +17,39 @@ class WorkflowService implements WorkflowServiceInterface
     {
         return $this->workflowRepository->all();
     }
+
+    public function getWorkflowByStep(int $stepNumber)
+    {
+        return $this->workflowRepository->findByStep($stepNumber);
+    }
+    public function getWorkflowByStepId(int $stepId)
+    {
+        return $this->workflowRepository->findByStepId($stepId);
+    }
+
+    public function getWorkflowById(int $stepNumber)
+    {
+        $workflow = $this->workflowRepository->findById($stepNumber);
+
+        $steps = $workflow->steps->map(function ($e) {
+            return [
+                "id" => $e->id,
+                "name" => $e->name,
+                "role" => $e->role->name ?? '-',
+                "step" => $e->step_order,
+                "is_final" => (bool)$e->is_final
+            ];
+        });
+
+        return [
+            "id" => $workflow->id,
+            "name" => $workflow->name,
+            "steps" => $steps
+        ];
+    }
+
+    public function getWorkflowStepByRoleId(int $roleId)
+    {
+        return $this->workflowRepository->findStepByRoleId($roleId);
+    }
 }

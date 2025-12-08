@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('color', 255);
             $table->integer('pcs');
             $table->bigInteger('line_id');
+            $table->bigInteger('laying_planning_id');
+            $table->bigInteger('replacement_request_id');
             $table->string('description', 255);
             $table->timestamps();
         });

@@ -17,10 +17,12 @@ use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\LeaderController;
 use App\Http\Controllers\lineController;
 use App\Http\Controllers\lineDeviceController;
+use App\Http\Controllers\ReplacementRequestController;
 use App\Http\Controllers\StockInController;
 use App\Http\Controllers\StockInSummaryController;
 use App\Http\Controllers\StockInTicketController;
 use App\Http\Controllers\UserShiftAssignmentController;
+use App\Http\Controllers\WorkflowController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Models\Setting;
@@ -34,6 +36,14 @@ Route::prefix('auth')
         Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('/profile', [AuthController::class, 'profile'])->middleware('auth:sanctum');
     });
+
+Route::prefix('workflows')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/{id}', [WorkflowController::class, 'getWorkflowById']);
+        Route::get('/step/{id}', [WorkflowController::class, 'getWorkflowByStep']);
+    });
+
 
 Route::prefix('leaders')
     ->middleware(['api', 'auth:sanctum'])
@@ -63,6 +73,25 @@ Route::prefix('defect')
         Route::get('/', [DefectController::class, 'index']);
         Route::get('/summary/lines', [DefectController::class, 'summaryLines']);
         Route::get('/group/gl-number', [DefectController::class, 'getGroupGlNumber']);
+    });
+
+Route::prefix('replacement')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [DefectController::class, 'index']);
+        Route::get('/summary/lines', [DefectController::class, 'summaryLines']);
+        Route::get('/group/gl-number', [DefectController::class, 'getGroupGlNumber']);
+    });
+
+Route::prefix('replacement-request')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [ReplacementRequestController::class, 'index']);
+        Route::get('/pagination', [ReplacementRequestController::class, 'getReplacementListWithPagination']);
+        Route::get('/role/pagination', [ReplacementRequestController::class, 'getApprovalListPagination']);
+        Route::get('/group/gl-number', [ReplacementRequestController::class, 'getReplacementGroupGlNumber']);
+
+        Route::post('/', [ReplacementRequestController::class, 'createTicketReplacement']);
     });
 
 Route::prefix('stock-ins')
