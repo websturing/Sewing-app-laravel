@@ -9,8 +9,7 @@ mirror_to_github:
     - git remote rm github || true
     - git remote add github https://${GITHUB_TOKEN}@github.com/websturing/Sewing-app-laravel.git
     - git fetch --all
-    # Perubahan di sini: Menggunakan opsi -c untuk menonaktifkan kompresi
-    - git -c protocol.postBuffer=100M push --mirror --no-thin --no-follow-tags github
+    - git push --mirror github
   only:
     - branches
     - tags
