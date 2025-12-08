@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('replacement_request_note', function (Blueprint $table) {
+        Schema::create('replacement_histories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('replacement_request_id');
-            $table->unsignedBigInteger('created_by');
-            $table->text('description')->nullable();
+            $table->unsignedBigInteger('workflow_step_id');
+            $table->unsignedBigInteger('action_by');
+            $table->text('note');
+            $table->boolean('is_approved')->default(false);
             $table->timestamps();
 
             // FK
             $table->foreign('replacement_request_id')->references('id')->on('replacement_request');
-            $table->foreign('created_by')->references('id')->on('users');
+            $table->foreign('workflow_step_id')->references('id')->on('workflow_steps');
+            $table->foreign('action_by')->references('id')->on('users');
         });
     }
 
@@ -28,7 +31,8 @@ return new class extends Migration
      * Reverse the migrations.
      */
     public function down(): void
+
     {
-        Schema::dropIfExists('replacement_request_note');
+        Schema::dropIfExists('replacement_histories');
     }
 };

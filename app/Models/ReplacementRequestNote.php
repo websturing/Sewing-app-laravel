@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
-class WorkflowStep extends Model
+class ReplacementRequestNote extends Model
 {
-    protected $table = 'workflow_steps';
-
-    protected $casts = [
-        'is_final' => 'boolean'
+    protected $table = 'replacement_request_note';
+    protected $fillable = [
+        'replacement_request_id',
+        'created_by',
+        'description'
     ];
 
-    // Custom accessor untuk formatted date
     protected function formattedCreatedAt(): Attribute
     {
         return Attribute::make(
@@ -28,18 +28,8 @@ class WorkflowStep extends Model
         );
     }
 
-    function definition()
+    function createdBy()
     {
-        return $this->belongsTo(WorkflowDefinition::class, 'workflow_definition_id');
-    }
-
-    function role()
-    {
-        return $this->belongsTo(Role::class, 'role_id_responsible');
-    }
-
-    function replacementHistory()
-    {
-        return $this->hasMany(ReplacementRequestHistory::class, 'workflow_step_id');
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

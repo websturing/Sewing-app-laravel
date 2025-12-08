@@ -5,8 +5,11 @@ namespace App\Repositories\Replacement;
 use App\Models\Replacement;
 use App\Models\ReplacementRequest;
 use App\Models\ReplacementRequestDetail;
+use App\Models\ReplacementRequestHistory;
+use App\Models\ReplacementRequestNote;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReplacementRepository implements ReplacementRepositoryInterface
 {
@@ -37,7 +40,9 @@ class ReplacementRepository implements ReplacementRepositoryInterface
 
         $results = ReplacementRequest::with([
             'replacementDetail.line',
-            'requestedBy'
+            'requestedBy',
+            'notes',
+            'notes.createdBy'
         ])->whereHas('replacementDetail', function ($rd) use ($lines) {
             $rd->whereIn('line_id', $lines);
         });
@@ -87,24 +92,48 @@ class ReplacementRepository implements ReplacementRepositoryInterface
         return $results->paginate($perPage, ['*'], 'page', $page);
     }
 
+    public function findHistoriesByReplacementId($replacementId)
+    {
+        return ReplacementRequestHistory::where('replacement_request_id', $replacementId)
+            ->with(['workflowStep', 'createdBy'])
+            ->get();
+    }
 
+    public function findReplacementRequestId(int $id)
+    {
+        return ReplacementRequest::findOrFail($id);
+    }
 
-    public function create(array $replacementRequest, array $replacementDetail)
+    public function create(array $replacementRequest)
     {
 
-        $replacement = ReplacementRequest::create($replacementRequest);
+        return ReplacementRequest::create($replacementRequest);
+    }
 
-        foreach ($replacementDetail as $detail) {
-            ReplacementRequestDetail::create([
-                'gl_no' => $detail['gl_no'],
-                'size' => $detail['size'],
-                'color' => $detail['color'],
-                'pcs' => $detail['total_defect'],
-                'line_id' => $detail['line_id'],
-                'laying_planning_id' => $detail['laying_planning_id'],
-                'replacement_request_id' => $replacement->id,
-                "description" => ""
-            ]);
-        }
+    public function createReplacementDetail(array $data)
+    {
+        return ReplacementRequestDetail::create($data);
+    }
+    public function createReplacementNote(array $data)
+    {
+        return ReplacementRequestNote::create($data);
+    }
+
+    public function createReplacementHistory(array $data)
+    {
+        return ReplacementRequestHistory::create($data);
+    }
+
+    public function updateReplacementRequest(int $replacementRequestId, array $payload)
+    {
+        return DB::transaction(function () use ($replacementRequestId, $payload) {
+
+            $request = ReplacementRequest::findOrFail($replacementRequestId);
+
+            $request->fill($payload);
+            $request->save();
+
+            return $request->fresh();
+        });
     }
 }

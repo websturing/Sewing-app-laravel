@@ -8,7 +8,8 @@ use App\Services\Leaders\LeadersServiceInterface;
 use App\Services\Role\RoleServiceInterface;
 use App\Services\Workflow\WorkflowServiceInterface;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ReplacementService implements ReplacementServiceInterface
 {
@@ -16,6 +17,8 @@ class ReplacementService implements ReplacementServiceInterface
     protected $workflowService;
     protected $leaderService;
     protected $roleService;
+
+    const REPLACEMENT_ID = 1;
 
     public function __construct(
         ReplacementRepositoryInterface $replacementRepository,
@@ -29,6 +32,74 @@ class ReplacementService implements ReplacementServiceInterface
         $this->roleService = $roleService;
     }
 
+    public function createApprovalByRole(int $replacementRequestId, string $action, ?string $note)
+    {
+        return DB::transaction(function () use ($replacementRequestId, $action, $note) {
+
+            $userId     = Auth::id();
+            $isApproved = $action === 'approved';
+
+            // Single fetch
+            $request = $this->replacementRepository->findReplacementRequestId($replacementRequestId);
+
+            // Workflow
+            $workflowCurrent = $this->workflowService->getWorkflowByStepId($request->current_step_id, 1);
+            $workflowSteps   = $this->workflowService->getWorkflowByStep($workflowCurrent->step_order, 1);
+
+            $nextStepId = $workflowSteps['step_after']['id'] ?? $workflowSteps['current']['id'];
+
+            /** Record workflow approval */
+            $this->replacementRepository->createReplacementHistory([
+                'note'                   => $note,
+                'action_by'              => $userId,
+                'is_approved'            => $isApproved,
+                'workflow_step_id'       => $workflowSteps['current']['id'],
+                'replacement_request_id' => $replacementRequestId,
+            ]);
+
+            /** If step has next stage, record progress */
+            if (!empty($workflowSteps['step_after'])) {
+                $this->replacementRepository->createReplacementHistory([
+                    'note'                   => $note,
+                    'action_by'              => $userId,
+                    'is_approved'            => $isApproved,
+                    'workflow_step_id'       => $workflowSteps['step_after']['id'],
+                    'replacement_request_id' => $replacementRequestId,
+                ]);
+            }
+
+            /** Add note only if meaningful */
+            if (!empty(trim($note))) {
+                $this->replacementRepository->createReplacementNote([
+                    'replacement_request_id' => $replacementRequestId,
+                    'created_by'             => $userId,
+                    'description'            => $note
+                ]);
+            }
+
+            /** Determine new status */
+            $status = match (true) {
+                !$isApproved                         => 'rejected',
+                $workflowSteps['current']['is_final'] => 'completed',
+                default                              => 'in_progress',
+            };
+
+            /** Update main replacement request */
+            $this->replacementRepository->updateReplacementRequest($replacementRequestId, [
+                'current_step_id' => $nextStepId,
+                'status'          => $status
+            ]);
+
+            return [
+                "success"  => true,
+                "message"  => "Approval processed",
+                "status"   => $status,
+                "next_step_id" => $nextStepId
+            ];
+        });
+    }
+
+
     public function getAllReplacement()
     {
         return $this->replacementRepository->all();
@@ -39,10 +110,33 @@ class ReplacementService implements ReplacementServiceInterface
         return $this->replacementRepository->replacmentList();
     }
 
+    public function getHistoriesByReplacementId($replacementId)
+    {
+        $histories = $this->replacementRepository->findHistoriesByReplacementId($replacementId)
+            ->keyBy('workflow_step_id'); // index by step_id untuk O(1) lookup
+
+        $workflowSteps = $this->workflowService->getStepsByDefinitionId(1);
+
+        return $workflowSteps->map(function ($step) use ($histories) {
+            $history = $histories->get($step->id);
+
+            return [
+                "workflow_name" => $step->name,
+                "created_by" => $history ? $history->createdBy->name . '(' . $history->createdBy->email . ')' :  '-',
+                "step_order" => $step->step_order,
+                "note" => $history->note ?? '',
+                "is_final" => $step->is_final,
+                "role" => $step->role->name ?? '-',
+                "is_approved" => $history->is_approved ?? false,
+                "created_at" => $history->formatted_created_at ?? null,
+                "updated_at" => $history->formatted_update_at ?? null,
+            ];
+        });
+    }
+
     public function getReplacementListWithPagination(array $filters)
     {
         $assignment = $this->leaderService->getLineActive(Auth::id());
-
         $replacement = $this->replacementRepository
             ->replacmentListWithPagination($filters, $assignment);
 
@@ -52,7 +146,7 @@ class ReplacementService implements ReplacementServiceInterface
 
         return $replacement->through(function ($e) {
             $stepOrder = $this->workflowService->getWorkflowByStepId($e->current_step_id);
-            $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order);
+            $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order, 1);
             return $this->transform($e, $workflow);
         });
     }
@@ -65,7 +159,6 @@ class ReplacementService implements ReplacementServiceInterface
             $roles = $this->roleService->getAllRole()->pluck('id')->toArray();
         }
 
-
         $assignment = $this->leaderService->getLineActive(Auth::id());
 
         $replacement = $this->replacementRepository->replacementApprovalListWithPagination($filters, $assignment, $roles);
@@ -76,33 +169,61 @@ class ReplacementService implements ReplacementServiceInterface
 
         return $replacement->through(function ($e) {
             $stepOrder = $this->workflowService->getWorkflowByStepId($e->current_step_id);
-            $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order);
+            $workflow = $this->workflowService->getWorkflowByStep($stepOrder->step_order, 1);
             return $this->transform($e, $workflow);
         });
     }
 
     public function createReplacementRequest(array $data)
     {
+        $defectList = $data['defect_list'];
+        $notes = $data['note'];
+        $createdBy = Auth::id();
         $roles = Auth::user()->roles->pluck('id')->toArray();
-        $stepIds = [];
-        foreach ($roles as $role) {
-            $step  = $this->workflowService->getWorkflowStepByRoleId($role);
-            $stepIds[] = $step['step_after']['id'] ?? null;
-        }
-        $stepId = max($stepIds) + 1;
+        $workflow = $this->getWorkflowStepContextByRoles($roles);
 
 
-        $replacementRequest = [
+        $replacement = $this->replacementRepository->create([
             "workflow_definition_id" => 1,
-            "current_step_id" => $stepId,
-            "serial_number" => ReplacementSerialGenerator::generate($data[0]['gl_no']),
-            "created_by" => Auth::id(),
+            "current_step_id" => $workflow['current_step_id'],
+            "serial_number" => ReplacementSerialGenerator::generate($defectList[0]['gl_no']),
+            "created_by" => $createdBy,
             "status" => "in_progress"
-        ];
+        ]);
 
-        $replacementDetail = $data;
+        foreach ($defectList as $list) {
+            $list['pcs'] = $list['total_defect'];
+            $list['replacement_request_id'] = $replacement->id;
+            $this->replacementRepository->createReplacementDetail($list);
+        }
 
-        return $this->replacementRepository->create($replacementRequest, $replacementDetail);
+        $replacementNote = $this->replacementRepository->createReplacementNote([
+            "replacement_request_id" => $replacement->id,
+            "created_by" => $createdBy,
+            "description" => $notes
+        ]);
+
+
+        /** Histories */
+        $this->replacementRepository->createReplacementHistory([
+            "replacement_request_id" => $replacement->id,
+            "workflow_step_id" => $workflow['steps']['current']['id'],
+            "action_by" => $createdBy,
+            "note" => "",
+            "is_approved" => true,
+        ]);
+        /** if step before exist */
+        if (count($workflow['steps']['step_before'])  > 0) {
+            foreach ($workflow['steps']['step_before'] as $history) {
+                $this->replacementRepository->createReplacementHistory([
+                    "replacement_request_id" => $replacement->id,
+                    "workflow_step_id" => $history['id'],
+                    "action_by" => $createdBy,
+                    "note" => "",
+                    "is_approved" => true,
+                ]);
+            }
+        }
     }
 
     public function getDefectByGLNumber(string $glNumber)
@@ -123,6 +244,7 @@ class ReplacementService implements ReplacementServiceInterface
                     "laying_planning_id" => $d->first()->laying_planning_id,
                     "total_defect" => $d->sum('pcs'),
                     "total_size" => $d->count('size'),
+                    "sizes" => $d->pluck('size')->unique()->implode(" • "),
                     "size_list" => $d->map(fn($s) => [
                         "size" => $s->size,
                         "defect_qty" => $s->pcs
@@ -133,26 +255,38 @@ class ReplacementService implements ReplacementServiceInterface
         switch ($e->status) {
             case "in_progress":
                 $statusName = "In Progress";
-                $statusClass = "!bg-amber-100";
+                $statusClass = "bg-yellow-100";
                 $statusType = "warning";
                 break;
             case "rejected":
-                $statusName = "'Rejected";
-                $statusClass = "!bg-red-100";
+                $statusName = "Rejected";
+                $statusClass = "bg-red-100";
                 $statusType = "error";
                 break;
             case "completed":
-                $statusName = "'Completed";
-                $statusClass = "!bg-green-100";
+                $statusName = "Completed";
+                $statusClass = "bg-green-100";
                 $statusType = "success";
                 break;
         }
 
+        $notes  = $e->notes->map(function ($note) {
+            return [
+                "id" => $note->id,
+                "note" => $note->description,
+                "created_by" => $note->createdBy->name ? $note->createdBy->email : "-",
+                "created_at" => $note->formatted_created_at,
+                "updated_at" => $note->formatted_updated_at,
+            ];
+        });
+
         return [
+            "id" => $e->id,
             "serial_number" => $e->serial_number,
             "gl_no" => $e->replacementDetail->first()->gl_no,
             "line_names" => $e->replacementDetail->pluck('line.name')->unique(),
-            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(","),
+            "colors" => $e->replacementDetail->pluck('color')->unique()->implode(" • "),
+            "defect_sizes" => $e->replacementDetail->pluck('size')->unique()->implode(" • "),
             "defect_list" => $defectList,
             "defect_total" => $defectList->sum('total_defect'),
             "total_size" => $e->replacementDetail->count('total_size'),
@@ -160,11 +294,13 @@ class ReplacementService implements ReplacementServiceInterface
             "current_step" => $workflow['current']['step_order'] ?? 0,
             "status" => [
                 "name" => $statusName,
-                "type" => $statusType
+                "type" => $statusType,
+                "class" => $statusClass
             ],
-            "requested_by" => $e->requestedBy ? $e->requestedBy->name . '(' . $e->requestedBy->email . ')' : '-',
+            "requested_by" => $e->requestedBy ? $e->requestedBy->email : '-',
             "created_at" => Carbon::parse($e->created_at)->format("F d,Y H:i"),
             "updated_at" => Carbon::parse($e->updated_at)->format("F d,Y H:i"),
+            "notes" => $notes,
             "workflow" => $workflow ? [
                 "id" => $workflow['current']['workflow_definition_id'] ?? 0,
                 "color" => $workflow['current']['role']['color'] ?? '#000',
@@ -172,6 +308,28 @@ class ReplacementService implements ReplacementServiceInterface
                 "next" => $workflow['step_after']?->name,
                 "previous" => $workflow['step_before']?->name,
             ] : null,
+        ];
+    }
+
+    private function getWorkflowStepContextByRoles(array $roles)
+    {
+        $workFlowIds = [];
+        $steps = [];
+        foreach ($roles as $role) {
+            $step  = $this->workflowService->getWorkflowStepByRoleId($role);
+
+
+            $workFlowIds[] = $step ? $step['current']['id'] : null;
+        }
+        $maxStepId = max($workFlowIds);
+        $steps = $this->workflowService->getWorkflowStepContext($maxStepId);
+
+        /** Note 
+         * current_step_id itu untuk step selanjutnya dari role yang action function ini
+         */
+        return [
+            'current_step_id' => $step ? $steps['step_after']['id'] : 0,
+            'steps' => $steps,
         ];
     }
 }
