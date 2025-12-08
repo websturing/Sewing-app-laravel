@@ -9,7 +9,8 @@ mirror_to_github:
     - git remote rm github || true
     - git remote add github https://${GITHUB_TOKEN}@github.com/websturing/Sewing-app-laravel.git
     - git fetch --all
-    - git push --mirror github
+    - git push github --prune --all
+    - git push github --prune --tags
   only:
     - branches
     - tags
