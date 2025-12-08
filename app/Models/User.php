@@ -38,6 +38,11 @@ class User extends Authenticatable
     }
 
 
+    public function assignments()
+    {
+        return $this->hasMany(Leader::class, 'user_id');
+    }
+
     /**
      * The attributes that are mass assignable.
      *

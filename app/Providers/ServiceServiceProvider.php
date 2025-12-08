@@ -33,6 +33,7 @@ class ServiceServiceProvider extends ServiceProvider
 
         $this->app->bind(\App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface::class, \App\Services\CuttingGlnumber\CuttingGlnumberService::class);
         $this->app->bind(\App\Services\Defect\DefectServiceInterface::class, \App\Services\Defect\DefectService::class);
+        $this->app->bind(\App\Services\Leaders\LeadersServiceInterface::class, \App\Services\Leaders\LeadersService::class);
 
 
         $this->app->bind(PermissionServiceInterface::class, PermissionService::class);
