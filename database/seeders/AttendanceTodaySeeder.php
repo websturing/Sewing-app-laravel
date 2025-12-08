@@ -10,6 +10,8 @@ use App\Models\AttendanceLog;
 use App\Models\Employee;
 use App\Models\UserShiftAssignment;
 use Carbon\Carbon;
+use App\Models\Device;
+
 class AttendanceTodaySeeder extends Seeder
 {
     /**
@@ -23,6 +25,7 @@ class AttendanceTodaySeeder extends Seeder
         $employees = Employee::where('active', true)->with('user')->get();
         $logTypes = ['check_in', 'location', 'check_out'];
         $toleranceMinutes = 10;
+        $devices = Device::all();
 
         foreach ($employees as $employee) {
             $user = $employee->user;
@@ -100,7 +103,7 @@ class AttendanceTodaySeeder extends Seeder
                     'latitude' => $faker->latitude(),
                     'longitude' => $faker->longitude(),
                     'accuracy' => $faker->randomFloat(2, 1, 50),
-                    'device_id' => $employee->device_id,
+                    'device_id' => $faker->randomElement($devices->pluck('id')->toArray()),
                     'notes' => $faker->optional()->sentence(),
                 ]);
             }
@@ -108,5 +111,4 @@ class AttendanceTodaySeeder extends Seeder
 
         $this->command->info('✅ Attendance data for today has been refreshed with realistic status and timing.');
     }
-
 }

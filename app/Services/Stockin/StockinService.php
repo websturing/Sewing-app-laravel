@@ -14,6 +14,11 @@ class StockinService implements StockinServiceInterface
         $this->stockinRepository = $stockinRepository;
     }
 
+    public function getGroupBySizeAndColorBy(array $filters)
+    {
+        return $this->stockinRepository->groupColorAndSizeBy($filters);
+    }
+
     public function getByLineId(int $lineId)
     {
         return $this->stockinRepository->findByLineId($lineId);
@@ -211,5 +216,16 @@ class StockinService implements StockinServiceInterface
         } else {
             return $query->get();
         }
+    }
+
+    /** GROUP BY
+     * 
+     *  Get paginated list of GL Numbers grouped from StockIns.
+     * @param  $search, $perPage, $sortBy, $sortOrder  $filters
+     * 
+     */
+    public function getGroupByGlNumber($search, $perPage, $sortBy, $sortOrder, $page)
+    {
+        return $this->stockinRepository->groupByGlNumber($search, $perPage, $sortBy, $sortOrder, $page);
     }
 }

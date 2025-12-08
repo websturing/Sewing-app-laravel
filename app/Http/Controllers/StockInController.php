@@ -6,6 +6,7 @@ use App\Http\Requests\QueryFilterRequest;
 use App\Http\Requests\StockInByTicketNumberRequest;
 use App\Http\Requests\StockInRequest;
 use App\Http\Resources\StockInResource;
+use App\Models\StockinDefect;
 use App\Services\Stockin\StockinServiceInterface;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use Auth;
@@ -35,6 +36,13 @@ class StockInController extends Controller
             'message' => 'Succesfully Retrieved StockIns'
         ]);
     }
+
+    public function getGroupAndSizeBy(Request $request)
+    {
+
+        return  $this->stockIn->getGroupBySizeAndColorBy($request->all());
+    }
+
 
     public function lastTicketByLine($lineId)
     {
@@ -115,6 +123,13 @@ class StockInController extends Controller
             "container_scan_status" => "waiting"
         ];
         $stockInCreate = $this->stockIn->create($dataRequest);
+
+        $defectQty =  $validated['qty_defect'];
+        StockinDefect::insert([
+            'qty' => $defectQty,
+            'stockin_id' => $stockInCreate->id
+        ]);
+
         return StockInResource::make($stockInCreate)->additional([
             'status' => true,
             'message' => 'Successfully  Update Stock-in'

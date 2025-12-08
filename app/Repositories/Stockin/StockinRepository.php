@@ -4,6 +4,7 @@ namespace App\Repositories\Stockin;
 
 use App\Models\Stockin;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
@@ -51,7 +52,7 @@ class StockinRepository implements StockinRepositoryInterface
         return $this->model::query();
     }
 
-    public function groupByGlNumber($searchTerm, $perPage = 10)
+    public function groupByGlNumber($searchTerm, $perPage = 10, $sortBy = null, $sortOrder = 'desc', $page = 1)
     {
         $query = DB::table('stock_ins')
             ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
@@ -60,10 +61,22 @@ class StockinRepository implements StockinRepositoryInterface
                 DB::raw('COUNT(*) as total_bundle'),
                 DB::raw('COALESCE(SUM(pcs), 0) as total_pcs'),
                 DB::raw('MAX(stock_ins.updated_at) as last_updated'),
-                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names')
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
+                DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors'),
+                DB::raw('COUNT(DISTINCT stock_ins.size) as total_sizes')
             )
-            ->groupBy('stock_ins.gl_no')
-            ->orderByDesc('total_pcs');
+            ->groupBy('stock_ins.gl_no');
+
+        // Jika sortBy tidak diisi, pakai default order by total_pcs desc (seperti code lama)
+        if ($sortBy) {
+            $allowedSortColumns = ['gl_no', 'total_pcs', 'total_bundle', 'last_updated'];
+            $sortBy = in_array($sortBy, $allowedSortColumns) ? $sortBy : 'total_pcs';
+            $sortOrder = in_array(strtolower($sortOrder), ['asc', 'desc']) ? $sortOrder : 'desc';
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            // Default behavior - sama persis dengan code lama
+            $query->orderByDesc('total_pcs');
+        }
 
         if (!empty($searchTerm)) {
             $query->where(function ($q) use ($searchTerm) {
@@ -73,7 +86,12 @@ class StockinRepository implements StockinRepositoryInterface
         }
 
         // Paginate dengan Laravel Paginator
-        $paginator = $query->paginate($perPage);
+        $paginator = $query->paginate(
+            $perPage,
+            ['*'],
+            'page',
+            $page
+        );
 
         // Transform items
         $paginator->getCollection()->transform(function ($item) {
@@ -85,6 +103,8 @@ class StockinRepository implements StockinRepositoryInterface
                     ? Carbon::parse($item->last_updated)->isoFormat('MMMM D, YYYY HH:mm')
                     : null,
                 'line_names' => $item->line_names,
+                'total_colors' => $item->total_colors,
+                'total_sizes' => $item->total_sizes,
             ];
         });
 
@@ -146,6 +166,29 @@ class StockinRepository implements StockinRepositoryInterface
         })->values();
 
         return $grouped;
+    }
+
+
+    public function groupColorAndSizeBy($filters)
+    {
+
+        $query = Stockin::query();
+
+        foreach ($filters as $column => $value) {
+            if (is_array($value)) {
+                $query->whereIn($column, $value);
+            } else {
+                $query->where($column, $value);
+            }
+        }
+        return $query
+            ->select('color', 'size', DB::raw('COALESCE(SUM(pcs),0) as total_qty'))
+            ->groupBy('color', 'size')
+            ->get()
+            ->map(function ($item) {
+                $item->total_qty = (int)$item->total_qty; // atau (float) jika butuh decimal
+                return $item;
+            });
     }
 
 
@@ -245,5 +288,158 @@ class StockinRepository implements StockinRepositoryInterface
         }
 
         return $query;
+    }
+
+
+    /**
+     * MATRIX
+     * Get Matrix grouped stock data by GL Number .
+     *
+     * @param string|null $startDate
+     * @param string $endDate
+     * @param string $glNumber
+     * @return LengthAwarePaginator
+     */
+    public function matrixDateByGLNumber($glNo, $startDate = null, $endDate = null)
+    {
+
+        $now = Carbon::now('Asia/Jakarta');
+
+        // Get the last updated date for specific GL (or globally)
+        $lastDateQuery = DB::table('stock_ins');
+        if ($glNo) {
+            $lastDateQuery->where('gl_no', $glNo);
+        }
+
+        $lastDate = $lastDateQuery->max('updated_at')
+            ?? DB::table('stock_ins')->max('created_at')
+            ?? $now->toDateTimeString();
+
+        $lastDate = Carbon::parse($lastDate, 'Asia/Jakarta');
+        $sevenDaysAgo = $lastDate->copy()->subDays(7);
+
+        // ✅ If startDate & endDate are provided manually, skip auto-range logic
+        if (!$startDate || !$endDate) {
+            // Check if there’s data within the last 7 days
+            $hasRecentData = DB::table('stock_ins')
+                ->when($glNo, fn($q) => $q->where('gl_no', $glNo))
+                ->whereBetween('updated_at', [
+                    $now->copy()->subDays(7)->startOfDay(),
+                    $now->copy()->endOfDay(),
+                ])
+                ->exists();
+
+            if ($hasRecentData) {
+                $startDate = $now->copy()->subDays(7)->startOfDay();
+                $endDate = $now->copy()->endOfDay();
+            } else {
+                $startDate = $sevenDaysAgo->startOfDay();
+                $endDate = $lastDate->copy()->endOfDay();
+            }
+        } else {
+            // Convert provided strings to Carbon instances
+            $startDate = Carbon::parse($startDate)->startOfDay();
+            $endDate = Carbon::parse($endDate)->endOfDay();
+            $hasRecentData = true; // manual range, so treat as "has data"
+        }
+
+        // 🔍 Subquery defect per stockin_id
+        $defectSub = DB::table('stock_in_defects')
+            ->select('stockin_id', DB::raw('SUM(qty) as total_defect'))
+            ->groupBy('stockin_id');
+
+        // 🔍 Main Query
+        $query = DB::table('stock_ins')
+            ->leftJoinSub($defectSub, 'defects', 'stock_ins.id', '=', 'defects.stockin_id')
+            ->join('lines', 'stock_ins.line_id', '=', 'lines.id')
+            ->select(
+                'stock_ins.gl_no',
+                DB::raw('DATE(stock_ins.updated_at) as date'),
+                'stock_ins.color',
+                'stock_ins.size',
+                DB::raw('COUNT(*) as total_bundle'),
+                DB::raw('COALESCE(SUM(stock_ins.pcs - COALESCE(defects.total_defect, 0)), 0) as total_pcs'),
+                DB::raw('COALESCE(SUM(defects.total_defect), 0) as total_defect'),
+                DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
+                DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors')
+            )
+            ->when($glNo, fn($q) => $q->where('stock_ins.gl_no', $glNo))
+            ->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
+            ->groupBy('stock_ins.gl_no', DB::raw('DATE(stock_ins.updated_at)'), 'stock_ins.color', 'stock_ins.size')
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // 📊 Summary
+        $summary = collect($query)
+            ->groupBy('gl_no')
+            ->map(function ($itemsByGl) {
+                return [
+                    'gl_no' => $itemsByGl->first()->gl_no,
+                    'sizes' => $itemsByGl
+                        ->groupBy('size')
+                        ->map(function ($itemsBySize) {
+                            return [
+                                'size' => $itemsBySize->first()->size,
+                                'total_pcs' => $itemsBySize->sum('total_pcs'),
+                                'total_bundle' => $itemsBySize->sum('total_bundle'),
+                                'total_defect' => (int)$itemsBySize->sum('total_defect'),
+                                'total_colors' => $itemsBySize->pluck('color')->unique()->count(),
+                            ];
+                        })
+                        ->values(),
+                    'colors' => $itemsByGl
+                        ->groupBy('color')
+                        ->map(function ($itemsByColor) {
+
+                            // Gabungkan semua line_names dari semua size di color ini
+                            $lineNames = $itemsByColor
+                                ->pluck('line_names')
+                                ->flatMap(fn($names) => explode(', ', $names))
+                                ->unique()
+                                ->sort()
+                                ->values()
+                                ->implode(', ');
+
+                            $totalPcs = $itemsByColor->sum('total_pcs');
+                            $totalBundle = $itemsByColor->sum('total_bundle');
+                            $totalDefect = $itemsByColor->sum('total_defect');
+
+                            return [
+                                'color' => $itemsByColor->first()->color,
+                                'total_pcs' => $totalPcs,
+                                'total_bundle' => $totalBundle,
+                                'total_defect' => $totalDefect,
+                                'line_names' => $lineNames,
+                                'total_sizes' => $itemsByColor->pluck('size')->unique()->count(),
+                                'sizes' => $itemsByColor->map(function ($item) {
+                                    return [
+                                        'size' => $item->size,
+                                        'total_pcs' => (int)$item->total_pcs,
+                                        'total_bundle' => (int)$item->total_bundle,
+                                        'total_defect' => (int)$item->total_defect,
+                                        'line_names' => $item->line_names,
+                                    ];
+                                })->values(),
+                            ];
+                        })
+                        ->values(),
+                ];
+            })
+            ->values();
+
+        // 📦 Final Return
+        return [
+            'gl_no' => $glNo,
+            'hasRecentData' => $hasRecentData,
+            'startDate' => Carbon::parse($startDate)->format('Y-m-d'),
+            'endDate' => Carbon::parse($endDate)->format('Y-m-d'),
+            'count' => $query->count(),
+            'data' => $query,
+            'summary' => $summary->first() ?? (object)[
+                'gl_no' => $glNo,
+                'sizes' => [],
+                'colors' => [],
+            ],
+        ];
     }
 }

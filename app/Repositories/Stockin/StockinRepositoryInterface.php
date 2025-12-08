@@ -12,6 +12,20 @@ interface StockinRepositoryInterface
 
     public function groupByGlNumber(string $searchTerm);
     public function groupByGlNumberColor(string $searchTerm, $startDate, $endDate);
+    public function groupColorAndSizeBy(array $filters);
+    /**
+     * MATRIX
+     * Get Matrix grouped stock data by GL Number .
+     *
+     * @param string|null $startDate
+     * @param string $endDate
+     * @param string $glNumber
+     * @return LengthAwarePaginator
+     */
+    public function matrixDateByGLNumber($glNumber, $startDate, $endDate);
+
+
+
 
     public function findBySerialNumber(string $serialNumber): ?Stockin;
     public function findByLineId(int $lineId): ?Stockin;

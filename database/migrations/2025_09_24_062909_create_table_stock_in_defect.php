@@ -4,24 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+// Ganti anonymous class menjadi named class
+class CreateTableStockInDefect extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('table_stock_in_defect', function (Blueprint $table) {
+        Schema::create('stock_in_defects', function (Blueprint $table) {
             $table->id();
+            $table->integer('qty')->default(0);
+            $table->foreignId('stockin_id')->constrained('stock_ins')->onDelete('cascade');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('table_stock_in_defect');
+        Schema::dropIfExists('stock_in_defects'); // ← Perbaiki juga nama table di sini
     }
-};
+}

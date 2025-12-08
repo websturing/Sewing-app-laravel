@@ -2,8 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\DTOs\CuttingGLNumber\FilterDTO;
 use App\Http\Requests\AssignmentLineRequest;
+use App\Http\Requests\CuttingGLNumber\filterRequest;
+use App\Http\Requests\GLnumberFilterRequest;
+use App\Http\Requests\GLNumberMatrixDateRequest;
+use App\Http\Requests\GLnumberSyncCuttingSewingFilterRequest;
+use App\Http\Resources\GLNumberMatrixResource;
 use App\Http\Resources\GlNumberResource;
+use App\Http\Resources\GLNumberSyncCuttingResource;
 use App\Services\Cutting\CuttingIntegrationServiceInterface;
 use App\Services\Glnumber\GlnumberServiceInterface;
 use Illuminate\Http\Request;
@@ -15,12 +22,16 @@ class GlNumberController extends Controller
         private CuttingIntegrationServiceInterface $cuttingIntegrationService,
     ) {}
 
-    public function index()
+    public function index(GLnumberFilterRequest $filters)
     {
 
         $GlNumbers = $this->glNumberService
-            ->getPaginate(
-                request()->all()
+            ->glNumberByStockIns(
+                $searchTerm = $filters['search'],
+                $perPage = $filters['per_page'] ?? 10,
+                $sortBy = 'gl_no',
+                $sortOrder = 'ASC',
+                $page = $filters['page'] ?? 1
             );
 
         if (!$GlNumbers) {
@@ -56,5 +67,40 @@ class GlNumberController extends Controller
         }
 
         return successResponse('Succesfully Retrieved Cutting Summary', $summary);
+    }
+
+    public function matrixDate(GLNumberMatrixDateRequest $request)
+    {
+        $data = $request->validated();
+
+        $results = $this->glNumberService->getMatrixDate(
+            $data['gl_number'],
+            $data['start_date'] ?? null,
+            $data['end_date'] ?? null
+        );
+
+        return GLNumberMatrixResource::make($results)->additional([
+            "status" => true,
+            'message' => 'Succesfully Retrieved Data'
+        ]);
+    }
+
+
+    /**
+     * SYNC GL NUMBER CUTTING & SEWING
+     */
+
+    public function syncCuttingAndSewingSummaries(filterRequest $request)
+    {
+
+        $filters['gl_number'] =   $request['gl_number'] ?? null;
+        $filters['colors'] =   $request['colors'] ?? null;
+
+        $combineData = $this->glNumberService->syncCuttingAndSewingSummaries($filters);
+
+        return GLNumberSyncCuttingResource::make($combineData)->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Data'
+        ]);
     }
 }

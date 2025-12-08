@@ -14,21 +14,40 @@ class lineController extends Controller
         private LineServiceInterface $lineService,
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
 
+
         $lines = $this->lineService
-            ->getLinePaginate(
-                request()->all()
+            ->linesWithLastGlTransactions(
+                $request->all()
             );
 
         if (!$lines) {
             return errorResponse('List Line Not Found', 404);
         }
 
+
+
         return $collection = LineResource::collection($lines)->additional([
             'status' => true,
             'message' => 'Succesfully Retrieved Lines'
+        ]);
+    }
+
+    public function getById(Request $request, $lineId)
+    {
+        $filters = array_merge($request->all(), ['line_id' => $lineId]);
+
+        $line = $this->lineService->getById($filters);
+
+        if (!$line) {
+            return errorResponse('Line Not Found', 404);
+        }
+
+        return (new LineResource($line))->additional([
+            'status' => true,
+            'message' => 'Succesfully Retrieved Line'
         ]);
     }
 }

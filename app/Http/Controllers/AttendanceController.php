@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AttendanceDateRangeRequest;
+use App\Http\Resources\AttendanceGroupLineResource;
 use App\Http\Resources\AttendanceResource;
 use App\Services\Attendance\AttendanceServiceInterface;
 use Illuminate\Http\Request;
@@ -11,8 +12,7 @@ class AttendanceController extends Controller
 {
     public function __construct(
         private AttendanceServiceInterface $attendanceService
-    ) {
-    }
+    ) {}
 
     public function index()
     {
@@ -53,5 +53,23 @@ class AttendanceController extends Controller
     {
         $result = $this->attendanceService->getAttendanceShiftSummary();
         return successResponse($result);
+    }
+
+    /**
+     * Group
+     * Get Attendance By Line .
+     *
+     * @param integer $lineId
+     * @return LengthAwarePaginator
+     */
+
+    public function getByLineId(int $lineId)
+    {
+        $results = $this->attendanceService->getAttendanceByLineId($lineId);
+
+        return AttendanceGroupLineResource::collection($results)->additional([
+            "message" => "Attendance data grouped by line retrieved successfully",
+            "status" => true
+        ]);
     }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\AssignmentLineController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CuttingGlNumberController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RoleController;
@@ -35,6 +36,7 @@ Route::prefix('lines')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [lineController::class, 'index']);
+        Route::get('/{id}', [lineController::class, 'getById']);
     });
 
 Route::prefix('stock-ins')
@@ -43,6 +45,11 @@ Route::prefix('stock-ins')
         Route::get('/', [StockInController::class, 'index']);
         Route::get('/line/last-ticket/{id}', [StockInController::class, 'lastTicketByLine']);
         Route::get('/activity', [StockInController::class, 'activity']);
+
+        Route::get('/find-group-size', [StockInController::class, 'getGroupAndSizeBy']);
+
+
+
         Route::post('/', [StockInController::class, 'store']);
         Route::post('/ticket-number', [StockInController::class, 'storeByTicketNumber']);
         Route::post('/{id}', [StockInController::class, 'update']);
@@ -56,8 +63,7 @@ Route::prefix('stock-ins')
 
         Route::get('/summaries/group-line', [StockInSummaryController::class, 'stockInByGlLines']);
 
-
-
+        Route::get('/summaries/report/gl-number', [StockInSummaryController::class, 'reportByGLNumber'])->withoutMiddleware(['auth:sanctum']);
 
         Route::get('/summaries/pdf/gl-number', [StockInSummaryController::class, 'pdfGlNumber'])->withoutMiddleware(['auth:sanctum']);
         Route::get('/summaries/pdf/lines', [StockInSummaryController::class, 'pdfLines'])->withoutMiddleware(['auth:sanctum']);
@@ -86,14 +92,17 @@ Route::prefix('gls')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [GlNumberController::class, 'index']);
+        Route::get('/matrix-date', [GlNumberController::class, 'matrixDate']);
         Route::get('/number/{glNumber}', [GlNumberController::class, 'show']);
         Route::get('/cutting-summary', [GlNumberController::class, 'cuttingSummary']);
+        Route::get('/syncCuttingGlNumber', [GlNumberController::class, 'syncCuttingAndSewingSummaries']);
     });
 
 Route::prefix('assignment')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/lines', [AssignmentLineController::class, 'index']);
+        Route::get('/lines/{id}', [AssignmentLineController::class, 'getById']);
         Route::post('/line', [AssignmentLineController::class, 'store']);
     });
 
@@ -180,9 +189,13 @@ Route::prefix('attendance')
     ->middleware(['api', 'auth:sanctum'])
     ->group(function () {
         Route::get('/', [AttendanceController::class, 'index']);
+        Route::get('/group/line/{id}', [AttendanceController::class, 'getByLineId']);
         Route::get('/range-date', [AttendanceController::class, 'getAttendanceRangeDate']);
         Route::get('/today', [AttendanceController::class, 'getAttendanceToday']);
         Route::get('/shift/statistics', [AttendanceController::class, 'getAttendanceShiftStatistics']);
+
+
+
         Route::post('/', [EmployeeController::class, 'createEmployee']);
         Route::post('/{id}', [EmployeeController::class, 'updateEmployee']);
         Route::delete('/{id}', [EmployeeController::class, 'deleteEmployee']);
@@ -194,4 +207,17 @@ Route::prefix('application')
         Route::get('/meta', function () {
             return Setting::pluck('value', 'key');
         });
+    });
+
+
+/**
+ * CUTTING DATA
+ * Integration API
+ * Summaries DB Local Sewing
+ */
+
+Route::prefix('cutting')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/gl-number', [CuttingGlNumberController::class, 'index']);
     });

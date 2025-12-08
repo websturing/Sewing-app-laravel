@@ -23,4 +23,9 @@ interface StockinServiceInterface
     public function activity(array $filters);
 
     public function summary(array $filters);
+
+
+    /** GROUP BY */
+    public function getGroupByGlNumber($search, $perPage, $sortBy, $sortOrder, $page);
+    public function getGroupBySizeAndColorBy(array $filters);
 }

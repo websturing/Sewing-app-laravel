@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
 use Carbon\Carbon;
+
 class ShiftSeeder extends Seeder
 {
     /**
