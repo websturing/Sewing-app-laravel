@@ -5,6 +5,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\AssignmentLineController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CuttingGlNumberController;
+use App\Http\Controllers\DefectController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\RoleController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GlNumberController;
 use App\Http\Controllers\IntegrationController;
 use App\Http\Controllers\lineController;
+use App\Http\Controllers\lineDeviceController;
 use App\Http\Controllers\StockInController;
 use App\Http\Controllers\StockInSummaryController;
 use App\Http\Controllers\StockInTicketController;
@@ -37,6 +39,17 @@ Route::prefix('lines')
     ->group(function () {
         Route::get('/', [lineController::class, 'index']);
         Route::get('/{id}', [lineController::class, 'getById']);
+
+        // Line Devices
+        Route::get('/{id}/devices', [lineDeviceController::class, 'getLineDevices']);
+        Route::get('/{id}/history-glnumber', [lineDeviceController::class, 'getHistoryGlNumberByLine']);
+    });
+
+
+Route::prefix('defect')
+    ->middleware(['api', 'auth:sanctum'])
+    ->group(function () {
+        Route::get('/', [DefectController::class, 'index']);
     });
 
 Route::prefix('stock-ins')
@@ -96,6 +109,9 @@ Route::prefix('gls')
         Route::get('/number/{glNumber}', [GlNumberController::class, 'show']);
         Route::get('/cutting-summary', [GlNumberController::class, 'cuttingSummary']);
         Route::get('/syncCuttingGlNumber', [GlNumberController::class, 'syncCuttingAndSewingSummaries']);
+        Route::get('/list', [GlNumberController::class, 'getList']);
+
+        Route::get('/report/completion', [GlNumberController::class, 'getCompletionByGLNumber']);
     });
 
 Route::prefix('assignment')
@@ -208,6 +224,17 @@ Route::prefix('application')
             return Setting::pluck('value', 'key');
         });
     });
+
+/**
+ * REPORT PDF
+ */
+
+Route::prefix('pdf')
+    ->middleware(['api'])
+    ->group(function () {
+        Route::get('/completion-report', [GlNumberController::class, 'pdfCompletionReport']);
+    });
+
 
 
 /**

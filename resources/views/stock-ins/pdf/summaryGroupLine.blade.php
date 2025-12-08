@@ -27,7 +27,7 @@
             @endif
         </div>
 
-        <table>
+        <table id="table">
             <thead>
                 <tr>
                     <th>No</th>

@@ -8,6 +8,9 @@ interface GlnumberServiceInterface
     public function getPaginate(array $filters);
 
 
+    public function getCompletionGL(array $filters);
+
+
 
     /**
      * Get Matrix grouped stock data by GL Number .
@@ -45,4 +48,5 @@ interface GlnumberServiceInterface
 
     public function syncCuttingAndSewingSummaries(array $filters);
     public function findGlNumber(string $glNumber);
+    public function glNumberWithColor(?string $glNumber);
 }

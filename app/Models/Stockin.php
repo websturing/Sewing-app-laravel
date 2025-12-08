@@ -54,6 +54,8 @@ class Stockin extends Model
             ->select(
                 'stock_ins.gl_no',
                 'stock_ins.color',
+                DB::raw('MAX(stock_ins.updated_at) as updated_at'),
+                DB::raw('MIN(stock_ins.updated_at) as start_updated_at'),
                 'stock_ins.size',
                 DB::raw('COUNT(*) as total_bundle'),
                 DB::raw('COALESCE(SUM(stock_ins.pcs - COALESCE(defects.total_defect, 0)), 0) as total_pcs'),
@@ -61,8 +63,15 @@ class Stockin extends Model
                 DB::raw('GROUP_CONCAT(DISTINCT lines.name ORDER BY lines.name SEPARATOR ", ") as line_names'),
                 DB::raw('COUNT(DISTINCT stock_ins.color) as total_colors')
             )
-            ->when($glNo, fn($q) => $q->where('stock_ins.gl_no', $glNo))
-            ->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
+            ->when(
+                $startDate && $endDate,
+                fn($q) =>
+                $q->whereBetween('stock_ins.updated_at', [$startDate, $endDate])
+            )
+            ->when(
+                $glNo,
+                fn($q) => $q->where('stock_ins.gl_no', $glNo)
+            )
             ->groupBy('stock_ins.gl_no', 'stock_ins.color', 'stock_ins.size')
             ->orderBy('stock_ins.gl_no', 'asc');
 

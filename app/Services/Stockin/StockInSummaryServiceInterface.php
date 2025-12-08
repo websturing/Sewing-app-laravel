@@ -2,7 +2,7 @@
 
 namespace App\Services\Stockin;
 
-use App\Dto\StockInSummaryReportDTO;
+use App\DTOs\StockInSummaryReportDTO;
 
 interface StockInSummaryServiceInterface
 {

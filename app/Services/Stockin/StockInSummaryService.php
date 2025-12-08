@@ -2,7 +2,7 @@
 
 namespace App\Services\Stockin;
 
-use App\Dto\StockInSummaryReportDTO;
+use App\DTOs\StockInSummaryReportDTO;
 use App\Models\Stockin;
 use App\Repositories\Stockin\StockinRepositoryInterface;
 use App\Services\CuttingGlnumber\CuttingGlnumberServiceInterface;

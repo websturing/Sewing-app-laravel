@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Dto\StockInSummaryReportDTO;
+use App\DTOs\StockInSummaryReportDTO;
 use App\Http\Requests\StockInSummaryReportRequest;
 use App\Http\Resources\StockInSummaryGroupGlNumberResource;
 use App\Http\Resources\StockInSummaryResource;

@@ -59,4 +59,26 @@ class LineService implements LineServiceInterface
     {
         return $this->lineRepository->findById($filters);
     }
+
+
+    /**
+     * LINES GET BY Devices
+     *
+     * @param integer|null $lineId
+     */
+    public function getLineDevices($lineId)
+    {
+        return $this->lineRepository->lineDevices($lineId);
+    }
+
+
+    /**
+     * LINES GET BY Devices
+     *
+     * @param integer|null $lineId
+     */
+    public function getHistoryGlNumberByLine(int $lineId)
+    {
+        return $this->lineRepository->historyGlNumberByLine($lineId);
+    }
 }

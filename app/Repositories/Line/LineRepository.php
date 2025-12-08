@@ -3,6 +3,7 @@
 namespace App\Repositories\Line;
 
 use App\Models\Line;
+use App\Models\LineDevice;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -160,5 +161,23 @@ class LineRepository implements LineRepositoryInterface
             'line' => $line,
             'stockin_summary' => $grouped
         ];
+    }
+
+    /**
+     * LINES GET BY Devices
+     *
+     * @param integer|null $lineId
+     */
+    public function lineDevices($lineId)
+    {
+        return LineDevice::with('device')
+            ->where('line_id', $lineId)
+            ->get();
+    }
+
+    public function historyGlNumberByLine($lineId)
+    {
+        return Line::find($lineId)
+            ->HistoryGLNumberByStockIns();
     }
 }
