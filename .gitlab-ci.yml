@@ -1,9 +1,5 @@
-
-# ==========================
-#   🔁 MIRROR TO GITHUB
-# ==========================
 mirror_to_github:
-  stage: mirror
+  stage: deploy
   image: alpine:latest
   before_script:
     - apk add --no-cache git
@@ -13,14 +9,7 @@ mirror_to_github:
     - git remote rm github || true
     - git remote add github https://${GITHUB_TOKEN}@github.com/websturing/Sewing-app-laravel.git
     - git fetch --all
-
     - git push --mirror github
-
-    # push tags
-    #- git push github --tags
   only:
     - branches
     - tags
-
-
-
