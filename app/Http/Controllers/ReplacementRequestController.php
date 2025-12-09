@@ -101,7 +101,23 @@ class ReplacementRequestController extends Controller
 
     public function getTicketTrackingBySerial($serialNumber)
     {
-        return $this->replacementService->getTicketTrackingBySerial($serialNumber);
+
+          try {
+            $result =  $this->replacementService->getTicketTrackingBySerial($serialNumber);
+
+            return response()->json([
+                'status' => true,
+                'data' => $result,
+                'message' => 'Retrived Tracking Replacement Request Successfully'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to Retrived Tracking Replacement Request',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+       
     }
 
     public function createTicketReplacement(Request $request)
