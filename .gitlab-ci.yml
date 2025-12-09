@@ -18,7 +18,7 @@ mirror_to_github:
     - branches
     - tags
 
-mirror_to_github:
+mirror_to_github_ghimli:
   stage: deploy
   image: alpine:latest
   before_script:
@@ -31,9 +31,9 @@ mirror_to_github:
     - git fetch origin "+refs/tags/*:refs/tags/*" --prune
     - git remote rm github || true
     - git remote add github https://${GITHUB_GHIMLI_TOKEN}@github.com/ghimli-indonesia/sewing-app.git
-    # Push ini sekarang akan berhasil karena GITHUB_TOKEN memiliki cakupan 'workflow'
-    - git push github --all --prune
-    - git push github --tags --prune
+    # Tambahkan --force untuk mirror
+    - git push github --all --force --prune
+    - git push github --tags --force --prune
   only:
     - branches
     - tags
